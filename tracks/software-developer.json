@@ -1,0 +1,97 @@
+{
+  "id": "software-developer",
+  "title": "Software Developer",
+  "badge": "Application Engineering",
+  "color": "emerald",
+  "summary": "Tackle real production bugs, API regressions, asynchronous race conditions, and clean architectural refactoring.",
+  "skills_covered": [
+    "Debugging Production Stack Traces",
+    "API Contract & Backward Compatibility",
+    "Unit & Regression Test Writing",
+    "Code Review & Security Hardening"
+  ],
+  "industry_glossary": [
+    {
+      "term": "Regression",
+      "definition": "A software bug that causes an existing, previously functional feature to stop working following an update."
+    },
+    {
+      "term": "Race Condition",
+      "definition": "A bug where the timing or order of concurrent events leads to corrupted state or unexpected behavior."
+    },
+    {
+      "term": "Idempotency",
+      "definition": "An API design quality where making the same request multiple times produces the exact same outcome without duplicate actions."
+    },
+    {
+      "term": "Breaking Change",
+      "definition": "An API or schema modification that forces existing client applications or consumers to crash or fail unless updated."
+    },
+    {
+      "term": "Tech Debt",
+      "definition": "The implied cost of future rework caused by choosing an easy or quick solution now instead of a better approach."
+    }
+  ],
+  "readiness_quiz": [
+    {
+      "id": "sw-q1",
+      "question": "A production endpoint fails intermittently only during peak hours with 'Connection reset'. What is the best initial investigation step?",
+      "options": [
+        "A) Rewrite the entire backend framework",
+        "B) Correlate application error logs with connection pool usage and database query times during peak timestamps",
+        "C) Restart the server every 5 minutes",
+        "D) Delete the error logs"
+      ],
+      "correct_answer": "B",
+      "explanation": "Correlating timestamps between application logs and resource metrics allows you to confirm whether thread or connection starvation is causing the reset."
+    },
+    {
+      "id": "sw-q2",
+      "question": "Why should you write a failing regression test before fixing a bug?",
+      "options": [
+        "A) To reproduce the bug reproducibly and prove your upcoming patch actually fixes it without regressions in the future",
+        "B) Because unit test runners reject code without failing tests",
+        "C) To make the commit history look longer",
+        "D) It is an unnecessary step if the bug looks easy"
+      ],
+      "correct_answer": "A",
+      "explanation": "A reproduction test guarantees the bug is understood and ensures no future commit accidentally reintroduces the exact same issue."
+    },
+    {
+      "id": "sw-q3",
+      "question": "What is the primary risk of modifying a database schema by renaming a column in a live production service?",
+      "options": [
+        "A) Ongoing queries from currently running application instances will fail immediately before they restart with new code",
+        "B) Database storage size doubles instantly",
+        "C) Git cannot track SQL changes",
+        "D) Users cannot log in to GitHub"
+      ],
+      "correct_answer": "A",
+      "explanation": "Zero-downtime migrations require a multi-step rollout: add new column -> dual-write -> backfill -> read from new -> drop old."
+    },
+    {
+      "id": "sw-q4",
+      "question": "When reviewing a teammate's PR, what should be your main focus?",
+      "options": [
+        "A) Correctness, edge cases, error handling, readability, and security implications",
+        "B) Enforcing purely personal variable naming preferences",
+        "C) Approving without reading to keep sprint velocity fast",
+        "D) Checking how quickly they can type"
+      ],
+      "correct_answer": "A",
+      "explanation": "Constructive code reviews catch edge case failures, security flaws, and architectural inconsistencies before they hit staging/prod."
+    },
+    {
+      "id": "sw-q5",
+      "question": "What does an HTTP 422 Unprocessable Entity status indicate?",
+      "options": [
+        "A) The request payload was syntactically valid JSON, but contained semantic or validation errors (e.g., missing required fields)",
+        "B) The server hard drive is full",
+        "C) The user has not provided authentication credentials",
+        "D) The DNS server is unreachable"
+      ],
+      "correct_answer": "A",
+      "explanation": "HTTP 422 means the server understood the content type and syntax, but cannot process the contained instructions or data attributes."
+    }
+  ]
+}

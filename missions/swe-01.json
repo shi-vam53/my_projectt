@@ -1,0 +1,94 @@
+{
+  "id": "swe-01",
+  "track_id": "software-developer",
+  "type": "guided",
+  "difficulty": "Junior Software Engineer",
+  "estimated_time_mins": 35,
+  "title": "Bug Triage: Double-Charge on Stripe Webhook Retries",
+  "problem_brief": "Customers are complaining about being billed twice for their monthly subscription renewals. The Stripe webhook handler was recently refactored to support async processing. Investigate the pull request diff, unit test suite, and webhook server logs to identify the race condition/idempotency failure, write a mitigation plan, and design the fix.",
+  "metadata": {
+    "service": "billing-webhook-service",
+    "runtime": "Node.js / TypeScript",
+    "tier": "Tier-1 Financial"
+  },
+  "evidence_tabs": [
+    {
+      "id": "pr_diff",
+      "label": "Pull Request Diff",
+      "type": "code_diff",
+      "content": "```typescript\n// Before:\nasync function handleInvoicePaymentSucceeded(event: StripeEvent) {\n  const existing = await db.payments.findByStripeEventId(event.id);\n  if (existing) return { status: 'already_processed' };\n  await db.payments.insert({ eventId: event.id, status: 'completed' });\n  await sendReceiptEmail(event.customer);\n}\n\n// After (Refactored for 'performance'):\nasync function handleInvoicePaymentSucceeded(event: StripeEvent) {\n  // Run DB insert and email concurrently to speed up response\n  Promise.all([\n    db.payments.insert({ eventId: event.id, status: 'completed' }),\n    sendReceiptEmail(event.customer)\n  ]);\n  return { status: 'queued' };\n}\n```"
+    },
+    {
+      "id": "logs",
+      "label": "Webhook Logs",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "09:00:01.120Z", "level": "INFO", "message": "Received webhook evt_109283 (invoice.payment_succeeded)"},
+        {"timestamp": "09:00:01.125Z", "level": "INFO", "message": "Dispatched async handlers for evt_109283"},
+        {"timestamp": "09:00:01.140Z", "level": "INFO", "message": "Stripe timeout waiting for 200 OK (network blip)"},
+        {"timestamp": "09:00:01.350Z", "level": "INFO", "message": "Received retry webhook evt_109283 (invoice.payment_succeeded)"},
+        {"timestamp": "09:00:01.410Z", "level": "WARN", "message": "Second insert for evt_109283 executed without uniqueness check"}
+      ]
+    },
+    {
+      "id": "db_schema",
+      "label": "Database Schema",
+      "type": "markdown",
+      "content": "```sql\nCREATE TABLE payments (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  stripe_event_id VARCHAR(255),\n  status VARCHAR(50),\n  created_at TIMESTAMP DEFAULT NOW()\n  -- NOTE: UNIQUE constraint on stripe_event_id was dropped during v1.8 migration\n);\n```"
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "bug_analysis",
+      "label": "1. Root Cause & Race Condition Explanation",
+      "placeholder": "Explain how the refactor removed the idempotency guard and what happened on network retry...",
+      "guidance": "Explain the interaction between Stripe retries, concurrency, and DB uniqueness."
+    },
+    {
+      "id": "fix_implementation",
+      "label": "2. Proposed Code Fix & Idempotency Strategy",
+      "placeholder": "Provide the pseudocode or TypeScript solution ensuring strict idempotency...",
+      "guidance": "Mention database-level constraints as well as application logic."
+    },
+    {
+      "id": "testing_plan",
+      "label": "3. Regression Test Design",
+      "placeholder": "Describe the unit/integration test to guarantee double-delivery cannot reoccur...",
+      "guidance": "How will you simulate concurrent duplicate webhook deliveries?"
+    },
+    {
+      "id": "customer_remediation",
+      "label": "4. Customer Data Remediation Plan",
+      "placeholder": "How should the existing duplicate transactions in the database be audited and refunded?",
+      "guidance": "Ensure safety and auditability."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "idempotency_understanding",
+        "name": "Idempotency & Concurrency Mechanics",
+        "weight": 30,
+        "criteria": "Correctly diagnoses the missing pre-check, lack of DB unique constraint, and unhandled concurrent retry."
+      },
+      {
+        "id": "architectural_robustness",
+        "name": "Code Architecture & Safety",
+        "weight": 30,
+        "criteria": "Proposes adding a unique database constraint on stripe_event_id and an atomic upsert/transaction."
+      },
+      {
+        "id": "test_verification",
+        "name": "Regression Test Quality",
+        "weight": 20,
+        "criteria": "Designs an integration test dispatching two parallel webhooks with identical event IDs."
+      },
+      {
+        "id": "customer_data_safety",
+        "name": "Data Remediation & Refund Safety",
+        "weight": 20,
+        "criteria": "Proposes a read-only audit query to isolate duplicates before issuing refunds, preventing accidental mass refunds."
+      }
+    ]
+  }
+}

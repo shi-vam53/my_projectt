@@ -1,0 +1,101 @@
+{
+  "id": "data-analyst-01",
+  "track_id": "data-analyst",
+  "type": "guided",
+  "difficulty": "Junior Product Data Analyst",
+  "estimated_time_mins": 30,
+  "title": "Anomaly Investigation: 35% Mobile Checkout Drop",
+  "problem_brief": "Yesterday's daily executive briefing showed total checkout conversion dropped from 4.8% to 3.1% week-over-week. The VP of Growth believes user sentiment dropped following a pricing change. Dive into the segmented dataset, device breakdowns, and event instrumentation to test the hypothesis and uncover the true driver.",
+  "metadata": {
+    "domain": "E-Commerce Checkout Funnel",
+    "data_period": "Oct 12 - Oct 19, 2026",
+    "total_sessions": "450,000"
+  },
+  "evidence_tabs": [
+    {
+      "id": "funnel_summary",
+      "label": "Overall Funnel Metrics",
+      "type": "table",
+      "data": [
+        {"step": "1. Product View", "last_week": "450,000", "this_week": "452,000", "change": "+0.4%"},
+        {"step": "2. Add to Cart", "last_week": "135,000 (30.0%)", "this_week": "136,500 (30.2%)", "change": "+1.1%"},
+        {"step": "3. Initiate Checkout", "last_week": "67,500 (15.0%)", "this_week": "68,000 (15.0%)", "change": "+0.7%"},
+        {"step": "4. Complete Purchase", "last_week": "21,600 (4.8%)", "this_week": "14,012 (3.1%)", "change": "-35.1% ⚠️"}
+      ]
+    },
+    {
+      "id": "segmented_data",
+      "label": "Segmented by Platform & OS",
+      "type": "table",
+      "data": [
+        {"segment": "Desktop Chrome", "traffic_share": "45%", "conversion_last_week": "5.2%", "conversion_this_week": "5.3%", "status": "Normal"},
+        {"segment": "Desktop Safari", "traffic_share": "15%", "conversion_last_week": "4.9%", "conversion_this_week": "4.8%", "status": "Normal"},
+        {"segment": "Android App (v4.2)", "traffic_share": "20%", "conversion_last_week": "4.4%", "conversion_this_week": "4.3%", "status": "Normal"},
+        {"segment": "iOS App (v4.3 - Released Oct 14)", "traffic_share": "20%", "conversion_last_week": "4.6%", "conversion_this_week": "0.4%", "status": "CRITICAL DROP 🚨"}
+      ]
+    },
+    {
+      "id": "telemetry_logs",
+      "label": "Frontend Error Logs (iOS v4.3)",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "Oct 15 10:22:01", "level": "FATAL", "client": "iOS v4.3", "error": "ApplePayController: nil unwrapped optional on `shipping_contact_postal_code`"},
+        {"timestamp": "Oct 15 10:24:19", "level": "FATAL", "client": "iOS v4.3", "error": "Crash report: checkout sheet terminated unexpectedly on ApplePay button touch."}
+      ]
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "executive_summary",
+      "label": "1. Executive Summary (BLUF: Bottom Line Up Front)",
+      "placeholder": "Summarize the findings in 2-3 sentences for leadership...",
+      "guidance": "State clearly whether the VP's pricing hypothesis is supported or refuted."
+    },
+    {
+      "id": "data_analysis",
+      "label": "2. Segmented Analysis & Root Cause Evidence",
+      "placeholder": "Break down the numbers proving where the conversion drop originated...",
+      "guidance": "Contrast Desktop/Android vs iOS v4.3 Apple Pay crash data."
+    },
+    {
+      "id": "immediate_recommendations",
+      "label": "3. Immediate Actionable Recommendations",
+      "placeholder": "What should the mobile engineering and product teams do immediately?",
+      "guidance": "e.g., App Store emergency hotfix, fallback payment method, banner notice."
+    },
+    {
+      "id": "future_instrumentation",
+      "label": "4. Telemetry & Quality Guardrails",
+      "placeholder": "How should automated funnel alerts and release health monitoring be improved?",
+      "guidance": "Suggest release staging cohorts and anomaly threshold alerting."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "hypothesis_evaluation",
+        "name": "Hypothesis Refutation & Rigor",
+        "weight": 30,
+        "criteria": "Refutes the pricing change theory with data (pricing affected all platforms, but only iOS v4.3 experienced a drop)."
+      },
+      {
+        "id": "segmentation_depth",
+        "name": "Segmented Data Accuracy",
+        "weight": 30,
+        "criteria": "Directly quotes conversion rates across Desktop (stable at ~5%), Android (stable at ~4.3%), and iOS v4.3 (crashed to 0.4%)."
+      },
+      {
+        "id": "technical_acumen",
+        "name": "Technical Root Cause Identification",
+        "weight": 20,
+        "criteria": "Connects the drop to the ApplePay crash on postal code nil unwrapping in iOS release v4.3."
+      },
+      {
+        "id": "executive_clarity",
+        "name": "Communication & Actionability",
+        "weight": 20,
+        "criteria": "Presents clear, concise guidance for the mobile release engineering team and executive leadership."
+      }
+    ]
+  }
+}

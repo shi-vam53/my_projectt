@@ -1,0 +1,126 @@
+{
+  "id": "cloud-sre-01",
+  "track_id": "cloud-engineer",
+  "type": "guided",
+  "difficulty": "Junior SRE / Cloud Associate",
+  "estimated_time_mins": 30,
+  "title": "Incident 1402: Latency & 5xx Spike After Release v2.4.0",
+  "problem_brief": "At 14:15 UTC, the Payments API automated paging alert triggered. p99 response times spiked from 110ms to 4,850ms, and 504 Gateway Timeout errors rose from 0.01% to 8.7% of all checkout traffic. Investigate the timeline, telemetry, logs, release notes, and runbook. Determine the trigger, distinguish facts from assumptions, recommend a safe immediate action, define verification criteria, and propose one preventative improvement.",
+  "metadata": {
+    "service": "checkout-payments-api",
+    "cluster": "prod-us-east-1",
+    "tier": "Tier-1 Mission Critical"
+  },
+  "evidence_tabs": [
+    {
+      "id": "timeline",
+      "label": "Incident Timeline",
+      "type": "timeline",
+      "items": [
+        {"time": "14:05 UTC", "event": "CI/CD pipeline builds tag release-v2.4.0 (Author: commit 9fa812c)."},
+        {"time": "14:10 UTC", "event": "Rolling deployment of release-v2.4.0 completes across 12 pods in prod-us-east-1."},
+        {"time": "14:14 UTC", "event": "p99 latency metric crosses threshold of 500ms (reaches 1,200ms)."},
+        {"time": "14:15 UTC", "event": "PagerDuty Severity-1 alert fires: Payments API 5xx error rate > 5%."},
+        {"time": "14:18 UTC", "event": "On-call SRE acknowledges alert and opens incident war room."}
+      ]
+    },
+    {
+      "id": "metrics",
+      "label": "Telemetry & Metrics",
+      "type": "telemetry",
+      "summary": {
+        "p50_latency": "140ms (Baseline: 45ms)",
+        "p95_latency": "1,980ms (Baseline: 90ms)",
+        "p99_latency": "4,850ms (Baseline: 110ms)",
+        "error_rate": "8.7% (Baseline: 0.02%)",
+        "db_connection_pool_saturation": "98% (Max: 100 connections per pod)",
+        "fraud_check_service_health": "Healthy (response time 15ms)",
+        "redis_cache_hit_rate": "89% (Normal)"
+      }
+    },
+    {
+      "id": "logs",
+      "label": "Application Logs",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "14:12:04 UTC", "level": "INFO", "message": "Service checkout-payments-api v2.4.0 warm-up complete."},
+        {"timestamp": "14:13:21 UTC", "level": "WARN", "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."},
+        {"timestamp": "14:13:45 UTC", "level": "ERROR", "message": "POST /v1/checkout/charge failed - upstream timeout after 5000ms (client_id: u_88291)."},
+        {"timestamp": "14:14:10 UTC", "level": "ERROR", "message": "DB connection pool exhausted. Active: 100, Idle: 0, Waiting: 42. Thread blocked at com.payments.dao.AuditLogger.persistSyncAuditLog()"},
+        {"timestamp": "14:15:02 UTC", "level": "ERROR", "message": "HTTP 504 Gateway Timeout dispatched to ingress gateway. Latency: 5002ms."}
+      ]
+    },
+    {
+      "id": "release_notes",
+      "label": "Release Notes & Git Diff",
+      "type": "markdown",
+      "content": "### Release v2.4.0 (Commit: `9fa812c`)\n\n**Changelog:**\n1. Added synchronous regulatory audit logging on every payment transaction (`AuditLogger.persistSyncAuditLog`).\n2. Database connection pool max size kept unchanged at 100.\n3. Added query timeout of 10s to new `payment_audit_events` table.\n4. Note from Developer: *'Audit logs now write synchronously in the payment transaction to ensure zero audit event loss.'*"
+    },
+    {
+      "id": "runbook",
+      "label": "Service Runbook",
+      "type": "markdown",
+      "content": "### Payments API Operational Runbook\n\n**Standard Remediation Procedures:**\n1. **High 5xx Spike Post-Deployment**: If 5xx errors exceed 2% within 30 minutes of a new release, immediately execute safe rollback to previous stable tag (`release-v2.3.9`) via command:\n   `helm rollback payments-gateway 1`\n2. **Feature Flags**: The synchronous audit log toggle is controlled via Consul flag `ENABLE_SYNC_AUDIT_LOG=false`.\n3. **Prohibited Actions**: Do NOT restart database primaries during peak traffic without VP approval. Do NOT increase connection pools beyond database max connection limits (1200 global max)."
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "incident_timeline",
+      "label": "1. Incident Timeline & Impact Summary",
+      "placeholder": "Summarize what happened, timestamps, and customer impact...",
+      "guidance": "Include start time, peak impact, affected service, and user-facing symptoms."
+    },
+    {
+      "id": "hypothesis",
+      "label": "2. Root Cause Hypothesis (Facts vs Assumptions)",
+      "placeholder": "What caused the issue? Clearly state what is proven by evidence vs what is an unconfirmed assumption...",
+      "guidance": "Reference the log stack traces and release notes explicitly."
+    },
+    {
+      "id": "safe_mitigation_plan",
+      "label": "3. Immediate Safe Mitigation Plan",
+      "placeholder": "What immediate action should be taken right now? Mention safety, approvals, or rollback...",
+      "guidance": "Consult the Runbook for standard operating procedures."
+    },
+    {
+      "id": "verification_steps",
+      "label": "4. Verification & Health Confirmation",
+      "placeholder": "How will you confirm the service is healthy again before closing the incident?",
+      "guidance": "Define exact metrics and observation window."
+    },
+    {
+      "id": "follow_up_improvement",
+      "label": "5. Preventative Follow-up Action",
+      "placeholder": "What long-term architectural or process change will prevent this from recurring?",
+      "guidance": "Consider asynchronous queuing, connection pool tuning, or load testing."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "evidence_accuracy",
+        "name": "Evidence Accuracy",
+        "weight": 25,
+        "criteria": "Accurately references timestamps (14:10-14:15 UTC), release v2.4.0, and the specific HikariPool connection exhaustion error caused by persistSyncAuditLog()."
+      },
+      {
+        "id": "plausibility_and_distinction",
+        "name": "Plausibility & Fact/Assumption Clarity",
+        "weight": 25,
+        "criteria": "Clearly identifies that synchronous audit logging in the critical path saturated the DB connection pool. Explicitly marks whether the database CPU or disk I/O is an unverified assumption."
+      },
+      {
+        "id": "safety_and_constraints",
+        "name": "Safe Mitigation According to Runbook",
+        "weight": 25,
+        "criteria": "Recommends either an immediate rollback to v2.3.9 or flipping the Consul feature flag ENABLE_SYNC_AUDIT_LOG=false rather than dangerous untested hotfixes."
+      },
+      {
+        "id": "verification_and_followup",
+        "name": "Verification & Preventive Engineering",
+        "weight": 25,
+        "criteria": "Requires observing p99 latency < 150ms and 5xx error rate < 0.05% for 15+ minutes; suggests making audit logging asynchronous (e.g. via Kafka or background worker queue)."
+      }
+    ]
+  }
+}

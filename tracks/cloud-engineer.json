@@ -1,0 +1,97 @@
+{
+  "id": "cloud-engineer",
+  "title": "Cloud Engineer & SRE",
+  "badge": "Infrastructure & Reliability",
+  "color": "indigo",
+  "summary": "Master real-world infrastructure incidents, cloud telemetry, CI/CD regressions, and post-mortem investigations.",
+  "skills_covered": [
+    "Incident Triage & Mitigation",
+    "Telemetry & APM Analysis (Latency, Error Budgets)",
+    "Root Cause Analysis (RCA)",
+    "Runbook Execution & Safe Rollbacks"
+  ],
+  "industry_glossary": [
+    {
+      "term": "SLO (Service Level Objective)",
+      "definition": "A target percentage (e.g. 99.9% uptime) that a service team commits to maintaining."
+    },
+    {
+      "term": "p99 Latency",
+      "definition": "The 99th percentile response time—meaning 99% of requests are faster than this number, highlighting worst-case user experiences."
+    },
+    {
+      "term": "5xx HTTP Status Codes",
+      "definition": "Server-side error codes (500 Internal Error, 502 Bad Gateway, 504 Gateway Timeout) indicating system-level crashes or upstream timeouts."
+    },
+    {
+      "term": "Canary Release",
+      "definition": "Deploying a new software version to a tiny subset of traffic (e.g., 2%) to observe error rates before rolling out globally."
+    },
+    {
+      "term": "Connection Pool Exhaustion",
+      "definition": "When all available database or network connections are occupied, forcing incoming requests to queue and eventually time out."
+    }
+  ],
+  "readiness_quiz": [
+    {
+      "id": "ce-q1",
+      "question": "An alert fires showing p99 latency jumped from 150ms to 4,000ms right after a release. What is the safest first step?",
+      "options": [
+        "A) SSH into the production database and delete slow queries manually",
+        "B) Check recent deployment diffs, error logs, and assess whether a rollback or canary drain is warranted",
+        "C) Wait 30 minutes to see if traffic naturally subsides",
+        "D) Increase server CPU limits without checking why latency surged"
+      ],
+      "correct_answer": "B",
+      "explanation": "Checking release diffs and assessing rollback options stops ongoing user impact fastest, minimizing Mean Time to Recovery (MTTR)."
+    },
+    {
+      "id": "ce-q2",
+      "question": "What is the primary difference between a fact and an assumption in an incident report?",
+      "options": [
+        "A) A fact is supported by direct telemetry or log timestamps; an assumption is a hypothesis that needs verification",
+        "B) Facts are written by junior engineers; assumptions are written by senior engineers",
+        "C) Facts always blame third-party vendors",
+        "D) There is no difference in fast-paced incident calls"
+      ],
+      "correct_answer": "A",
+      "explanation": "Clear distinction between verified signals (logs, metrics) and unconfirmed hypotheses prevents teams from pursuing dead-end rabbit holes."
+    },
+    {
+      "id": "ce-q3",
+      "question": "Why is an immediate rollback usually preferred over a quick 'hotfix' patch during an active critical outage?",
+      "options": [
+        "A) Rollback returns the service to a known stable state without risking unvetted changes under emergency pressure",
+        "B) Hotfixes are illegal in modern DevOps",
+        "C) Rollbacks never require testing",
+        "D) Rollbacks erase the Git commit history permanently"
+      ],
+      "correct_answer": "A",
+      "explanation": "Writing and deploying code under outage pressure frequently introduces secondary bugs. Rolling back to a proven build is safer."
+    },
+    {
+      "id": "ce-q4",
+      "question": "What signal best confirms that a high-latency incident has truly resolved?",
+      "options": [
+        "A) The on-call engineer closes the Slack thread",
+        "B) Both error rates and p99/p95 latency metrics return to baseline levels for at least 15-30 minutes across all nodes",
+        "C) A single test curl request returns HTTP 200 OK",
+        "D) The CPU usage drops to 0%"
+      ],
+      "correct_answer": "B",
+      "explanation": "Sustained observation across all metric percentiles and instances confirms recovery, whereas a single HTTP 200 could be a fluke."
+    },
+    {
+      "id": "ce-q5",
+      "question": "What is the primary purpose of a post-incident review (post-mortem)?",
+      "options": [
+        "A) To identify which individual engineer made the mistake and penalize them",
+        "B) To conduct a blameless analysis, identify systemic weaknesses, and implement preventive guardrails",
+        "C) To convince customers that nothing went wrong",
+        "D) To document why writing tests is optional"
+      ],
+      "correct_answer": "B",
+      "explanation": "Blameless post-mortems focus on process and technical resilience so the entire organization learns from failures."
+    }
+  ]
+}

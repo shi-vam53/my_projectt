@@ -1,0 +1,97 @@
+{
+  "id": "data-analyst",
+  "title": "Data Analyst",
+  "badge": "Product & Business Analytics",
+  "color": "amber",
+  "summary": "Solve real stakeholder inquiries, conversion drops, cohort retention shifts, and synthetic data validation anomalies.",
+  "skills_covered": [
+    "Funnel Drop-off & Conversion Analysis",
+    "Cohort Retention & Segment Breakdown",
+    "Data Pipeline Anomaly Detection",
+    "Evidence-backed Executive Recommendations"
+  ],
+  "industry_glossary": [
+    {
+      "term": "Conversion Funnel",
+      "definition": "The step-by-step journey users take toward a goal (e.g., Homepage -> Product Page -> Cart -> Checkout)."
+    },
+    {
+      "term": "Cohort Analysis",
+      "definition": "Tracking a specific group of users who share a common characteristic (such as sign-up week) over a period of time."
+    },
+    {
+      "term": "Simpson's Paradox",
+      "definition": "A trend that appears in several groups of data but disappears or reverses when the groups are combined."
+    },
+    {
+      "term": "Tracking Event Drop",
+      "definition": "When an apparent business decline is actually caused by broken telemetry code failing to log events rather than real user behavior."
+    },
+    {
+      "term": "Statistical Significance",
+      "definition": "A mathematical determination that an observed difference is unlikely to have occurred solely by random chance."
+    }
+  ],
+  "readiness_quiz": [
+    {
+      "id": "da-q1",
+      "question": "A product manager reports that checkout conversions plunged 40% yesterday. What is your first validation step before alarming leadership?",
+      "options": [
+        "A) Verify if event logging instrumentation broke or if there was a frontend tracking bug deployed yesterday",
+        "B) Announce that the company's product has failed",
+        "C) Change the pricing model immediately",
+        "D) Delete the database records from yesterday"
+      ],
+      "correct_answer": "A",
+      "explanation": "Often sudden, massive drops in conversion metrics are telemetry instrumentation failures (missing tracking tags) rather than sudden changes in human user behavior."
+    },
+    {
+      "id": "da-q2",
+      "question": "Why is segmenting metrics by platform (iOS, Android, Web) or country essential when investigating a sudden anomaly?",
+      "options": [
+        "A) High-level aggregated metrics often mask that an issue is isolated to a single app version, OS build, or regional CDN",
+        "B) Because charts look better with more colors",
+        "C) Segmenting is only required for marketing teams",
+        "D) Aggregate data is never reliable"
+      ],
+      "correct_answer": "A",
+      "explanation": "Segmenting isolates the root cause quickly—for instance, revealing that only iOS v12.1 users are experiencing checkout errors while web is normal."
+    },
+    {
+      "id": "da-q3",
+      "question": "What is the difference between correlation and causation in data analytics?",
+      "options": [
+        "A) Correlation means two metrics move together; causation means one directly causes the other to change",
+        "B) Correlation applies only to revenue; causation applies only to latency",
+        "C) They are identical terms used interchangeably in data science",
+        "D) Causation is proven whenever a graph has an upward slope"
+      ],
+      "correct_answer": "A",
+      "explanation": "Two metrics can correlate purely by seasonal coincidence. Establishing causation requires controlled experiments (A/B testing) or clear causal mechanisms."
+    },
+    {
+      "id": "da-q4",
+      "question": "When presenting findings to an executive stakeholder, how should you structure your report?",
+      "options": [
+        "A) Executive Summary with key findings & recommended actions first, followed by supporting evidence and methodology",
+        "B) 100 pages of raw SQL queries without any conclusions",
+        "C) Blame the engineering team in paragraph one",
+        "D) Avoid providing any recommendations"
+      ],
+      "correct_answer": "A",
+      "explanation": "Executives need the bottom-line decision impact immediately (Bottom Line Up Front / BLUF), with clear evidence backing it up."
+    },
+    {
+      "id": "da-q5",
+      "question": "What does a high cohort retention curve flattening out above 0% indicate?",
+      "options": [
+        "A) The product has achieved healthy long-term product-market fit for that cohort",
+        "B) All users have churned completely",
+        "C) The database query has an infinite loop",
+        "D) The product needs to be shut down"
+      ],
+      "correct_answer": "A",
+      "explanation": "When retention curves flatten parallel to the x-axis, a loyal core group of users continues returning indefinitely, indicating product-market fit."
+    }
+  ]
+}
