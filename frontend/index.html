@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WorkSim | Practical Engineering Simulation Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Dark Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">WorkSim</span>
+            <span class="brand-subtitle">Work Simulation Platform</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Simulations</div>
+        <button class="nav-item active" id="nav-tracks" data-view="tracks">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Career Tracks</span>
+        </button>
+        <button class="nav-item" id="nav-workspace" data-view="workspace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+          <span>Mission Workspace</span>
+          <span class="nav-pill live-pill">Active</span>
+        </button>
+        <button class="nav-item" id="nav-readiness" data-action="open-quiz">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Readiness Check</span>
+          <span class="nav-pill">5 Qs</span>
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 1.5rem;">Assessment</div>
+        <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Rubric Dimensions</span>
+        </button>
+      </nav>
+
+      <!-- Active Track Card in Sidebar -->
+      <div class="sidebar-track-widget">
+        <div class="track-widget-header">
+          <span class="widget-label">Active Track</span>
+          <span class="status-indicator-dot"></span>
+        </div>
+        <div class="track-widget-content">
+          <div class="widget-track-title" id="sidebar-active-track-name">Cloud Engineer & SRE</div>
+          <div class="widget-track-mission" id="sidebar-active-mission-name">Incident 1402 (Guided)</div>
+        </div>
+        <button class="btn btn-sidebar-outline" id="sidebar-quick-switch-btn">Switch Role Track</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sandbox-status">
+          <span class="status-dot"></span>
+          <span>Simulation Engine v1.0.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Header Bar -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="breadcrumbs">
+            <span class="breadcrumb-item" id="bc-root">WorkSim</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item" id="bc-track">Cloud Engineer</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item current" id="bc-mission">Incident 1402</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Draft Auto-save status -->
+          <div class="autosave-status" id="autosave-indicator" title="Draft auto-saves automatically to local storage">
+            <span class="autosave-dot"></span>
+            <span class="autosave-text" id="autosave-text">Draft saved locally</span>
+          </div>
+
+          <!-- Quick Track Selector Dropdown -->
+          <div class="header-track-selector">
+            <label for="track-select-dropdown" class="sr-only">Select Track</label>
+            <select id="track-select-dropdown" class="track-dropdown">
+              <option value="cloud-engineer">Cloud Engineer & SRE</option>
+              <option value="software-developer">Software Developer</option>
+              <option value="data-analyst">Data Analyst</option>
+            </select>
+          </div>
+
+          <!-- Quiz Button -->
+          <button class="btn btn-outline btn-sm" id="header-quiz-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Readiness Check (5 Qs)
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Scrollable Content -->
+      <main class="content-container">
+
+        <!-- VIEW 1: Career Track Selector View -->
+        <section class="view-section" id="view-tracks" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge">Career Track Catalog</div>
+            <h1 class="view-title">Choose Your Practical Engineering Simulation</h1>
+            <p class="view-description">
+              Step into real production incidents, broken webhooks, and analytics anomalies. Test your role readiness with a 5-question pre-check, then triage evidence and submit structured mitigations.
+            </p>
+          </div>
+
+          <div class="tracks-grid" id="tracks-cards-container">
+            <!-- Track cards will be rendered dynamically by JavaScript -->
+          </div>
+
+          <!-- Track Glossary & Learning Objectives Section -->
+          <div class="glossary-section card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">Industry Glossary & Production Terminology</h2>
+                <p class="card-subtitle">Foundational vocabulary used across our real-world mission scenarios.</p>
+              </div>
+              <span class="badge badge-indigo">Role Primer</span>
+            </div>
+            <div class="glossary-grid" id="glossary-items-container">
+              <!-- Glossary items rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: Interactive Mission Workspace View -->
+        <section class="view-section" id="view-workspace">
+          <!-- Mission Header Banner -->
+          <div class="mission-banner card">
+            <div class="mission-banner-top">
+              <div class="mission-tags">
+                <span class="badge badge-track" id="mission-track-badge">Cloud Engineer & SRE</span>
+                <span class="badge badge-difficulty" id="mission-difficulty-badge">Junior SRE / Cloud Associate</span>
+                <span class="badge badge-time" id="mission-time-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span id="mission-time-text">30 mins</span>
+                </span>
+                <span class="badge badge-tier" id="mission-tier-badge">Tier-1 Mission Critical</span>
+              </div>
+
+              <div class="mission-actions">
+                <button class="btn btn-ghost btn-sm" id="btn-prefill-good" title="Prefill exemplary answer to test rubric grading">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                  </svg>
+                  Prefill Model Response
+                </button>
+                <button class="btn btn-ghost btn-sm btn-danger-hover" id="btn-clear-submission">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  Clear Form
+                </button>
+              </div>
+            </div>
+
+            <h1 class="mission-title" id="mission-title">Incident 1402: Latency & 5xx Spike After Release v2.4.0</h1>
+
+            <div class="problem-brief-box">
+              <div class="brief-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+              <div class="brief-content">
+                <div class="brief-title">Problem Brief</div>
+                <p class="brief-text" id="mission-problem-brief">
+                  At 14:15 UTC, the Payments API automated paging alert triggered. p99 response times spiked from 110ms to 4,850ms, and 504 Gateway Timeout errors rose from 0.01% to 8.7% of all checkout traffic. Investigate the timeline, telemetry, logs, release notes, and runbook. Determine the trigger, distinguish facts from assumptions, recommend a safe immediate action, define verification criteria, and propose one preventative improvement.
+                </p>
+              </div>
+            </div>
+
+            <!-- Service context metadata bar -->
+            <div class="mission-meta-bar" id="mission-meta-bar">
+              <div class="meta-item">
+                <span class="meta-label">Target Service:</span>
+                <span class="meta-value" id="meta-service">checkout-payments-api</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Cluster:</span>
+                <span class="meta-value" id="meta-cluster">prod-us-east-1</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Simulation Type:</span>
+                <span class="meta-value" id="meta-type">Guided Incident Response</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Two-Column Workspace Layout -->
+          <div class="workspace-grid">
+            <!-- Left Column: Interactive Evidence Workbench -->
+            <div class="workspace-col evidence-col">
+              <div class="card evidence-card">
+                <div class="evidence-tabs-header">
+                  <div class="tabs-nav" id="evidence-tabs-nav" role="tablist">
+                    <!-- Tab buttons rendered dynamically -->
+                  </div>
+                </div>
+
+                <div class="evidence-tab-body" id="evidence-tab-body">
+                  <!-- Tab content dynamically populated -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Structured Submission Form -->
+            <div class="workspace-col submission-col">
+              <div class="card submission-card">
+                <div class="submission-header">
+                  <div class="submission-title-group">
+                    <h2 class="submission-card-title">Structured Mitigation Submission</h2>
+                    <p class="submission-card-subtitle">Document evidence, isolate root cause, and specify verified remediations.</p>
+                  </div>
+                  <div class="submission-autosave-badge" id="form-autosave-status">
+                    <span class="dot"></span>
+                    <span class="text">Auto-saving enabled</span>
+                  </div>
+                </div>
+
+                <form id="mission-submission-form" class="submission-form" novalidate>
+                  <div class="form-fields-container" id="form-fields-container">
+                    <!-- 5 Submission Fields rendered dynamically -->
+                  </div>
+
+                  <div class="submission-footer">
+                    <div class="footer-left">
+                      <button type="button" class="btn btn-outline" id="btn-save-draft">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                          <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Local Draft
+                      </button>
+                    </div>
+                    <div class="footer-right">
+                      <button type="submit" class="btn btn-primary btn-submit" id="btn-submit-rubric">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Submit for Rubric Evaluation
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL 1: 5-Question Readiness Check Modal -->
+  <div class="modal-backdrop" id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title" style="display: none;">
+    <div class="modal-dialog modal-quiz">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-indigo" id="quiz-role-badge">Role Readiness Check</span>
+          <h2 class="modal-title" id="quiz-modal-title">Cloud Engineer & SRE Assessment</h2>
+        </div>
+        <div class="modal-header-right">
+          <div class="quiz-score-badge" id="quiz-score-indicator">Score: 0 / 5</div>
+          <button class="btn-close-modal" id="quiz-close-btn" aria-label="Close Quiz">&times;</button>
+        </div>
+      </div>
+
+      <!-- Quiz Progress Bar -->
+      <div class="quiz-progress-bar-container">
+        <div class="quiz-progress-bar" id="quiz-progress-bar" style="width: 20%;"></div>
+      </div>
+
+      <div class="modal-body quiz-body" id="quiz-modal-body">
+        <!-- Interactive Question Container -->
+        <div class="quiz-question-container" id="quiz-question-container">
+          <div class="question-header">
+            <span class="question-number" id="quiz-question-num">Question 1 of 5</span>
+            <span class="question-guidance">Select the safest, industry-standard engineering action</span>
+          </div>
+
+          <h3 class="question-prompt" id="quiz-question-prompt">
+            When latency spikes immediately after a deployment, what should be your immediate first instinct?
+          </h3>
+
+          <div class="quiz-options-list" id="quiz-options-list">
+            <!-- Options A, B, C, D generated dynamically -->
+          </div>
+
+          <!-- Immediate Feedback / Explanation Card -->
+          <div class="quiz-explanation-box" id="quiz-explanation-box" style="display: none;">
+            <div class="explanation-status" id="quiz-feedback-status">
+              <!-- Correct / Incorrect badge -->
+            </div>
+            <div class="explanation-text" id="quiz-feedback-explanation">
+              <!-- Explanation text -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Completed Summary View (hidden until quiz finished) -->
+        <div class="quiz-completed-container" id="quiz-completed-container" style="display: none;">
+          <div class="completed-hero">
+            <div class="completed-trophy-icon" id="completed-icon">🎯</div>
+            <h3 class="completed-title" id="completed-title">Assessment Completed!</h3>
+            <p class="completed-score-message" id="completed-score-text">You scored 5 out of 5 (100%).</p>
+            <div class="completed-badge" id="completed-badge">Ready for Production Incidents</div>
+          </div>
+
+          <div class="completed-recap" id="completed-recap-list">
+            <!-- Recap of answered questions with tags -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer quiz-footer">
+        <div class="quiz-footer-left">
+          <button class="btn btn-ghost" id="quiz-prev-btn" style="display: none;">Previous Question</button>
+        </div>
+        <div class="quiz-footer-right">
+          <button class="btn btn-outline" id="quiz-retake-btn" style="display: none;">Retake Quiz</button>
+          <button class="btn btn-primary" id="quiz-next-btn">Next Question</button>
+          <button class="btn btn-primary btn-success" id="quiz-proceed-mission-btn" style="display: none;">
+            Proceed to Mission Workspace &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Rubric Evaluation Modal -->
+  <div class="modal-backdrop" id="rubric-modal" role="dialog" aria-modal="true" aria-labelledby="rubric-modal-title" style="display: none;">
+    <div class="modal-dialog modal-rubric">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-emerald">Simulation Evaluation</span>
+          <h2 class="modal-title" id="rubric-modal-title">Engineering Rubric Assessment</h2>
+        </div>
+        <button class="btn-close-modal" id="rubric-close-btn" aria-label="Close Evaluation">&times;</button>
+      </div>
+
+      <div class="modal-body rubric-body">
+        <!-- Overall Score Card -->
+        <div class="rubric-hero-card">
+          <div class="score-circle-container">
+            <div class="score-number" id="rubric-total-score">92</div>
+            <div class="score-max">/ 100</div>
+          </div>
+          <div class="score-hero-info">
+            <div class="score-status-pill" id="rubric-status-pill">Production Ready (Meets Expectations)</div>
+            <h3 class="score-hero-title" id="rubric-hero-title">Strong Operational Triage & Remediation</h3>
+            <p class="score-hero-summary" id="rubric-hero-summary">
+              Your submission demonstrates grounded evidence citation, clear distinction between factual HikariPool metrics and unverified assumptions, and adherence to safe runbook rollback procedures.
+            </p>
+          </div>
+        </div>
+
+        <!-- 4 Rubric Dimensions Breakdown -->
+        <div class="rubric-dimensions-section">
+          <h3 class="section-title">Dimensional Scoring Breakdown</h3>
+          <div class="dimensions-list" id="rubric-dimensions-container">
+            <!-- 4 Dimensions rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Qualitative Coaching & Actionable Recommendations -->
+        <div class="coaching-feedback-card card">
+          <div class="coaching-header">
+            <div class="coaching-icon">💡</div>
+            <h4 class="coaching-title">Senior Staff Engineer Coaching Feedback</h4>
+          </div>
+          <div class="coaching-content" id="rubric-coaching-content">
+            <!-- Dynamic coaching advice -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer rubric-footer">
+        <div class="footer-left">
+          <button class="btn btn-outline" id="rubric-export-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export Report (Markdown)
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-outline" id="rubric-revise-btn">Revise Submission</button>
+          <button class="btn btn-primary" id="rubric-done-btn">Acknowledge & Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
