@@ -1890,9 +1890,36 @@ function handleSubmitRubric() {
     return;
   }
 
-  // Evaluate answers against mission rubric
-  const evalResult = evaluateSubmission(mission, answers);
-  displayRubricResults(mission, evalResult);
+  showToast('Evaluating submission against rubric...', 'info');
+
+  // Attempt backend evaluation and persistent storage in SQLite
+  fetch('/api/submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mission_id: mission.id, answers: answers })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Backend HTTP ' + res.status);
+    return res.json();
+  })
+  .then(backendResult => {
+    const evalResult = {
+      totalScore: backendResult.overall_score || backendResult.score,
+      statusPill: backendResult.approval_status === 'approved' ? 'Meets Production Standards' : (backendResult.approval_status === 'exemplary' ? 'Exceeds Expectations' : 'Needs Revision'),
+      heroTitle: backendResult.approval_message || 'Rubric Evaluation Complete',
+      heroSummary: backendResult.evaluation_note || 'Submission evaluated and persisted to database.',
+      dimensions: backendResult.dimensions,
+      submittedAt: backendResult.created_at || new Date().toISOString(),
+      backendSubmissionId: backendResult.submission_id
+    };
+    displayRubricResults(mission, evalResult);
+    showToast('Evaluated & Persisted to WorkSim Database', 'success');
+  })
+  .catch(err => {
+    console.warn('Backend unavailable or network error; using client evaluation:', err);
+    const evalResult = evaluateSubmission(mission, answers);
+    displayRubricResults(mission, evalResult);
+  });
 }
 
 function evaluateSubmission(mission, answers) {

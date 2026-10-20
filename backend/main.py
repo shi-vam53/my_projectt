@@ -21,6 +21,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from .rubric import evaluate_submission
@@ -349,6 +350,10 @@ def create_app(
         if submission is None:
             raise HTTPException(status_code=404, detail=f"Submission '{submission_id}' was not found")
         return submission
+
+    frontend_dir = root / "frontend"
+    if frontend_dir.exists():
+        application.mount("/", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 
     return application
 
