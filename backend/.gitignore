@@ -1,0 +1,7 @@
+# Local SQLite database and test artifacts
+*.sqlite
+*.sqlite3
+*.db
+.pytest_cache/
+__pycache__/
+*.py[cod]
