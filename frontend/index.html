@@ -54,6 +54,14 @@
           <span>Readiness Check</span>
           <span class="nav-pill">5 Qs</span>
         </button>
+        <button class="nav-item" id="nav-role-guide" data-action="open-role-guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>Role Handbook</span>
+          <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">PDF</span>
+        </button>
 
         <div class="nav-section-label" style="margin-top: 1.5rem;">Assessment</div>
         <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide">
@@ -116,6 +124,15 @@
               <option value="data-analyst">Data Analyst</option>
             </select>
           </div>
+
+          <!-- Role Knowledge Handbook Button -->
+          <button class="btn btn-outline btn-sm" id="header-role-guide-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            Role Handbook (PDF)
+          </button>
 
           <!-- Quiz Button -->
           <button class="btn btn-outline btn-sm" id="header-quiz-btn">
@@ -434,6 +451,39 @@
         <div class="footer-right">
           <button class="btn btn-outline" id="rubric-revise-btn">Revise Submission</button>
           <button class="btn btn-primary" id="rubric-done-btn">Acknowledge & Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ROLE KNOWLEDGE HANDBOOK (PDF / GUIDE) MODAL -->
+  <div class="modal-backdrop" id="role-guide-modal" style="display: none;">
+    <div class="modal-dialog role-guide-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="role-guide-modal-title">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-emerald" id="role-guide-badge">Role Knowledge Handbook</span>
+          <h2 class="modal-title" id="role-guide-modal-title">Role Industry Guide</h2>
+        </div>
+        <button class="btn-close-modal" id="role-guide-close-btn" aria-label="Close Handbook">&times;</button>
+      </div>
+
+      <div class="modal-body role-guide-body" id="role-guide-content">
+        <!-- Content dynamically injected from active track -->
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button class="btn btn-outline" id="role-guide-print-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print / Save as PDF
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-primary" id="role-guide-done-btn">Back to Workspace</button>
         </div>
       </div>
     </div>

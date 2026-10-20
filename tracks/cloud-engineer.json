@@ -32,6 +32,18 @@
       "definition": "When all available database or network connections are occupied, forcing incoming requests to queue and eventually time out."
     }
   ],
+  "common_tools": [
+    {"name": "Kubernetes & Helm", "category": "Orchestration & Deployments", "description": "Used to deploy containerized services, manage rolling releases, and execute instantaneous rollbacks during incidents."},
+    {"name": "Prometheus & Grafana", "category": "Telemetry & Dashboards", "description": "Aggregates time-series performance metrics, tracks p95/p99 percentiles, and alerts when error thresholds breach SLOs."},
+    {"name": "Datadog & OpenTelemetry", "category": "Distributed APM Tracing", "description": "Provides end-to-end distributed tracing across microservices, isolating connection bottlenecks and thread starvation."},
+    {"name": "PagerDuty", "category": "Incident Escalation", "description": "Automates on-call paging, Sev-1 incident mobilization, and incident war room communication."}
+  ],
+  "standard_workflows": [
+    {"phase": "1. Incident Detection & Paging", "summary": "Alert fires via PagerDuty; on-call engineer acknowledges within 5 minutes and verifies scope of customer impact."},
+    {"phase": "2. Safe Mitigation (Stop the Bleed)", "summary": "Prioritize rapid service recovery over debugging. Revert bad commits via Helm rollback or disable risky toggles via feature flags."},
+    {"phase": "3. Verification & Soak Period", "summary": "Monitor p99 latency and 5xx error rate for at least 15-30 minutes to confirm stabilization across all pods."},
+    {"phase": "4. Blameless Post-Mortem", "summary": "Draft a timeline, identify systemic technical vulnerabilities, and schedule preventive engineering tasks to eliminate recurrence."}
+  ],
   "readiness_quiz": [
     {
       "id": "ce-q1",

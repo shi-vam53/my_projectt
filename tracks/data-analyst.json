@@ -32,6 +32,18 @@
       "definition": "A mathematical determination that an observed difference is unlikely to have occurred solely by random chance."
     }
   ],
+  "common_tools": [
+    {"name": "SQL (Postgres, BigQuery, Snowflake)", "category": "Data Extraction & Modeling", "description": "Writing performant analytical queries, window functions, and funnel step aggregations."},
+    {"name": "Python & Pandas / Polars", "category": "Data Wrangling & Statistical Testing", "description": "Cleaning synthetic datasets, calculating variance, and running hypothesis tests."},
+    {"name": "Tableau / Looker / Metabase", "category": "Business Intelligence & Dashboards", "description": "Constructing executive dashboards, cohort heatmaps, and funnel drop-off visualizers."},
+    {"name": "Segment / Amplitude / Mixpanel", "category": "Product Event Analytics", "description": "Tracking user event journeys, identifying drop-off steps, and verifying client-side event instrumentation."}
+  ],
+  "standard_workflows": [
+    {"phase": "1. Telemetry Verification", "summary": "Verify event instrumentation health to rule out client logging bugs before accepting business drop-off claims."},
+    {"phase": "2. Multi-Dimensional Segmentation", "summary": "Slice data across platform, app version, geography, and user tier to isolate anomalies to specific cohorts."},
+    {"phase": "3. Hypothesis Validation", "summary": "Test stakeholder assumptions against statistical evidence and eliminate spurious correlations."},
+    {"phase": "4. Executive Communication (BLUF)", "summary": "Deliver bottom-line findings with clear operational recommendations and preventative instrumentation steps."}
+  ],
   "readiness_quiz": [
     {
       "id": "da-q1",

@@ -32,6 +32,18 @@
       "definition": "The implied cost of future rework caused by choosing an easy or quick solution now instead of a better approach."
     }
   ],
+  "common_tools": [
+    {"name": "Git & GitHub/GitLab", "category": "Version Control & Review", "description": "Branching, Pull Requests, code review discussions, and commit history audits."},
+    {"name": "Postman / Bruno", "category": "API Testing", "description": "Validates REST/GraphQL contracts, edge case payloads, and HTTP status codes."},
+    {"name": "Jest / PyTest / Vitest", "category": "Automated Testing", "description": "Unit and integration test runners to enforce regression prevention and test-driven fixes."},
+    {"name": "Docker & Docker Compose", "category": "Local Dev Environments", "description": "Isolates application dependencies, databases, and message brokers locally for reliable testing."}
+  ],
+  "standard_workflows": [
+    {"phase": "1. Bug Reproduction", "summary": "Write a minimal failing automated test that reliably triggers the reported bug before changing production code."},
+    {"phase": "2. Safe Code Refactor & Fix", "summary": "Implement the fix ensuring atomic database operations, strict idempotency, and backwards-compatible APIs."},
+    {"phase": "3. Peer Code Review", "summary": "Open a pull request explaining the context, trade-offs, test verification evidence, and security review checklist."},
+    {"phase": "4. Staging Verification & CI Run", "summary": "Verify all integration tests, linting, and security static analysis pass cleanly in the CI pipeline."}
+  ],
   "readiness_quiz": [
     {
       "id": "sw-q1",

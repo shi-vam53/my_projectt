@@ -716,6 +716,7 @@ function initApp() {
   bindHeaderControls();
   bindQuizModal();
   bindRubricModal();
+  bindRoleGuideModal();
   bindFormEvents();
 
   // Render initial track selector and active mission
@@ -731,6 +732,7 @@ function bindNavigation() {
   const navTracks = document.getElementById('nav-tracks');
   const navWorkspace = document.getElementById('nav-workspace');
   const navReadiness = document.getElementById('nav-readiness');
+  const navRoleGuide = document.getElementById('nav-role-guide');
   const navRubricGuide = document.getElementById('nav-rubric-guide');
   const sidebarQuickSwitch = document.getElementById('sidebar-quick-switch-btn');
   const bcRoot = document.getElementById('bc-root');
@@ -743,6 +745,12 @@ function bindNavigation() {
   navReadiness.addEventListener('click', () => {
     openReadinessQuiz(state.activeTrackId);
   });
+
+  if (navRoleGuide) {
+    navRoleGuide.addEventListener('click', () => {
+      openRoleGuideModal(state.activeTrackId);
+    });
+  }
 
   navRubricGuide.addEventListener('click', () => {
     openRubricModal(true); // Open in guide / preview mode
@@ -772,6 +780,7 @@ function switchView(viewName) {
 function bindHeaderControls() {
   const trackDropdown = document.getElementById('track-select-dropdown');
   const headerQuizBtn = document.getElementById('header-quiz-btn');
+  const headerRoleGuideBtn = document.getElementById('header-role-guide-btn');
 
   trackDropdown.value = state.activeTrackId;
   trackDropdown.addEventListener('change', (e) => {
@@ -781,6 +790,12 @@ function bindHeaderControls() {
   headerQuizBtn.addEventListener('click', () => {
     openReadinessQuiz(state.activeTrackId);
   });
+
+  if (headerRoleGuideBtn) {
+    headerRoleGuideBtn.addEventListener('click', () => {
+      openRoleGuideModal(state.activeTrackId);
+    });
+  }
 }
 
 function selectTrack(trackId) {
@@ -2051,18 +2066,20 @@ function displayRubricResults(mission, evalResult) {
   evalResult.dimensions.forEach(dim => {
     const card = document.createElement('div');
     card.className = 'dimension-card';
-    const percent = Math.round((dim.score / dim.weight) * 100);
+    const pointsEarned = dim.score <= dim.weight ? dim.score : Math.round((dim.score / 100) * dim.weight * 10) / 10;
+    const percent = dim.score <= dim.weight ? Math.round((dim.score / dim.weight) * 100) : Math.round(dim.score);
+    const feedbackText = dim.feedback || (dim.strengths && dim.strengths.length ? dim.strengths.join(' ') : '') || (dim.areas_for_improvement && dim.areas_for_improvement.length ? dim.areas_for_improvement.join(' ') : '') || 'Meets core evaluation criteria.';
 
     card.innerHTML = `
       <div class="dimension-top">
         <span class="dimension-name">${escapeHtml(dim.name)}</span>
-        <span class="dimension-score">${dim.score} / ${dim.weight} pts</span>
+        <span class="dimension-score">${pointsEarned} / ${dim.weight} pts (${percent}%)</span>
       </div>
       <div class="dimension-bar-track">
-        <div class="dimension-bar-fill" style="width: ${percent}%;"></div>
+        <div class="dimension-bar-fill" style="width: ${Math.min(100, Math.max(0, percent))}%;"></div>
       </div>
       <div class="dimension-criteria"><strong>Evaluation Standard:</strong> ${escapeHtml(dim.criteria)}</div>
-      <div class="dimension-feedback"><strong>Coaching Note:</strong> ${escapeHtml(dim.feedback)}</div>
+      <div class="dimension-feedback"><strong>Coaching Note:</strong> ${escapeHtml(feedbackText)}</div>
     `;
 
     container.appendChild(card);
@@ -2177,4 +2194,144 @@ function showToast(message, type = 'info') {
     toast.style.transition = 'all 0.2s ease';
     setTimeout(() => toast.remove(), 200);
   }, 3200);
+}
+
+// ============================================================================
+// 9. ROLE KNOWLEDGE HANDBOOK (PDF / GUIDE) MODAL
+// ============================================================================
+
+function bindRoleGuideModal() {
+  const modal = document.getElementById('role-guide-modal');
+  const closeBtn = document.getElementById('role-guide-close-btn');
+  const doneBtn = document.getElementById('role-guide-done-btn');
+  const printBtn = document.getElementById('role-guide-print-btn');
+
+  if (closeBtn) closeBtn.addEventListener('click', closeRoleGuideModal);
+  if (doneBtn) doneBtn.addEventListener('click', closeRoleGuideModal);
+  if (printBtn) {
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeRoleGuideModal();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.style.display !== 'none') {
+      closeRoleGuideModal();
+    }
+  });
+}
+
+function closeRoleGuideModal() {
+  const modal = document.getElementById('role-guide-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function openRoleGuideModal(trackId) {
+  trackId = trackId || state.activeTrackId || 'cloud-engineer';
+  let track = TRACKS_DATA[trackId] || {};
+
+  try {
+    const res = await fetch(`/api/tracks/${trackId}`);
+    if (res.ok) {
+      const liveTrack = await res.json();
+      track = Object.assign({}, track, liveTrack);
+    }
+  } catch (err) {
+    console.warn('API track fetch fallback:', err);
+  }
+
+  const modal = document.getElementById('role-guide-modal');
+  const badge = document.getElementById('role-guide-badge');
+  const title = document.getElementById('role-guide-modal-title');
+  const content = document.getElementById('role-guide-content');
+
+  if (badge) badge.textContent = `${track.title || 'Role'} Knowledge Handbook`;
+  if (title) title.textContent = `${track.title || 'Role'} - Operational Primer & Tools`;
+
+  let html = `
+    <div class="handbook-hero">
+      <div class="handbook-hero-title">${escapeHtml(track.title || '')} Industry Primer</div>
+      <p class="handbook-hero-desc">${escapeHtml(track.summary || '')}</p>
+      <div class="handbook-tags">
+        ${(track.skills_covered || []).map(s => `<span class="tag-pill">${escapeHtml(s)}</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- Section 1: Industry Terminology & Language -->
+    <div class="handbook-section">
+      <div class="handbook-section-header">
+        <span class="section-icon">📖</span>
+        <h3>1. Essential Industry Language & Core Terms</h3>
+      </div>
+      <p class="section-subtext">Terms and metrics every junior practitioner is expected to understand on day one:</p>
+      <div class="glossary-grid">
+        ${(track.industry_glossary || []).map(item => `
+          <div class="glossary-card">
+            <div class="glossary-term">${escapeHtml(item.term)}</div>
+            <div class="glossary-def">${escapeHtml(item.definition)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Section 2: Common Industry Tooling & Production Stack -->
+    <div class="handbook-section">
+      <div class="handbook-section-header">
+        <span class="section-icon">🛠️</span>
+        <h3>2. Standard Production Tools & Ecosystem</h3>
+      </div>
+      <p class="section-subtext">The industry-standard software tools and frameworks used in this role:</p>
+      <div class="tools-grid">
+        ${(track.common_tools || []).map(tool => `
+          <div class="tool-card">
+            <div class="tool-top">
+              <span class="tool-name">${escapeHtml(tool.name)}</span>
+              <span class="tool-category">${escapeHtml(tool.category)}</span>
+            </div>
+            <div class="tool-desc">${escapeHtml(tool.description)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Section 3: Standard Workplace Workflows & Protocols -->
+    <div class="handbook-section">
+      <div class="handbook-section-header">
+        <span class="section-icon">🔄</span>
+        <h3>3. Standard Workplace Workflows & Protocols</h3>
+      </div>
+      <p class="section-subtext">How professional engineering teams operate and resolve tasks systematically:</p>
+      <div class="workflows-list">
+        ${(track.standard_workflows || []).map((wf, idx) => `
+          <div class="workflow-step">
+            <div class="workflow-step-badge">${idx + 1}</div>
+            <div class="workflow-step-content">
+              <div class="workflow-step-title">${escapeHtml(wf.phase)}</div>
+              <div class="workflow-step-summary">${escapeHtml(wf.summary)}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Section 4: 5-Question Readiness Check Link -->
+    <div class="handbook-action-box card">
+      <div class="action-box-left">
+        <h4>Ready to test your comprehension?</h4>
+        <p>Take the 5-question readiness check to reinforce these concepts before beginning practical missions.</p>
+      </div>
+      <button class="btn btn-primary" onclick="closeRoleGuideModal(); openReadinessQuiz('${track.id}');">
+        Take 5-Question Check
+      </button>
+    </div>
+  `;
+
+  if (content) content.innerHTML = html;
+  if (modal) modal.style.display = 'flex';
 }
