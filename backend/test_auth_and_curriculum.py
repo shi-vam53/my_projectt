@@ -150,3 +150,13 @@ def test_problems_listing_and_submission(client):
     sub_data = submit_res.json()
     assert sub_data["passed"] is True
     assert sub_data["status"] == "completed"
+
+
+def test_google_sheet_info_endpoint(client):
+    res = client.get("/api/admin/google-sheet")
+    assert res.status_code == 200
+    data = res.json()
+    assert "sheet_id" in data
+    assert "web_view_link" in data
+    assert "total_users" in data
+    assert data["sheet_id"] == "1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0"
