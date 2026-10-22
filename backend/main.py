@@ -1,39 +1,88 @@
-"""WorkSim REST API.
+"""Praxis REST API.
 
 Run from the repository root with:
     uvicorn backend.main:app --reload
 
-Mission and track JSON remain the source of truth. Evaluation results are
-persisted in SQLite (override the path with WORKSIM_DB_PATH).
+Mission and track JSON remain the source of truth. Evaluation results and user
+accounts are persisted in SQLite (override the path with WORKSIM_DB_PATH).
 """
 
 from __future__ import annotations
 
 from copy import deepcopy
 from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
 import re
+import secrets
 import sqlite3
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
+from .generate_handbook import build_handbook_pdf
+from .problems import ROLES, QUIZ_QUESTIONS, PROBLEMS, evaluate_problem_submission
 from .rubric import evaluate_submission
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATABASE_PATH = Path(__file__).resolve().parent / "worksim.sqlite3"
+HANDBOOK_PATH = PROJECT_ROOT / "frontend" / "assets" / "Praxis_Industry_Foundations_Handbook.pdf"
 _ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$")
 
 
+def _hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
+    if salt is None:
+        salt = secrets.token_hex(16)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000)
+    return key.hex(), salt
+
+
+def _verify_password(password: str, stored_hash: str, salt: str) -> bool:
+    key = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000)
+    return secrets.compare_digest(key.hex(), stored_hash)
+
+
+def _now_utc() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+# ==============================================================================
+# PYDANTIC SCHEMAS
+# ==============================================================================
+
+class RegisterRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=50)
+    password: str = Field(min_length=6, max_length=100)
+    full_name: str = Field(min_length=2, max_length=100)
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=1, max_length=50)
+    password: str = Field(min_length=1, max_length=100)
+
+
+class SelectRoleRequest(BaseModel):
+    role: str = Field(min_length=1, max_length=50)
+
+
+class QuizSubmitRequest(BaseModel):
+    answers: dict[str, str] = Field(description="Dictionary of question_id -> selected_option_id")
+
+
+class ProblemSubmitRequest(BaseModel):
+    solution: str = Field(min_length=10, max_length=30000)
+
+
 class SubmissionRequest(BaseModel):
-    """Validated request shape for a learner submission."""
+    """Validated request shape for a learner mission submission."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -64,6 +113,10 @@ class ReviewRequest(BaseModel):
     notes: str = Field(default="", max_length=10000, description="Reviewer comments and coaching notes")
 
 
+# ==============================================================================
+# DATA CATALOG & STORE
+# ==============================================================================
+
 class DataCatalog:
     """Reads tracks and missions from the repository's JSON data directories."""
 
@@ -90,8 +143,6 @@ class DataCatalog:
 
     def list_tracks(self) -> list[dict[str, Any]]:
         tracks = self._all(self.tracks_dir)
-        # The collection endpoint is a lightweight card/index view. The full
-        # glossary and readiness quiz are returned by GET /api/tracks/{track_id}.
         return [
             {key: value for key, value in track.items() if key not in {"industry_glossary", "readiness_quiz"}}
             for track in tracks
@@ -124,7 +175,7 @@ class DataCatalog:
 
 
 class SubmissionStore:
-    """Small SQLite repository for candidate answers and evaluation results."""
+    """SQLite repository for candidate answers, users, and progress results."""
 
     def __init__(self, database_path: str | Path) -> None:
         self.database_path = Path(database_path).expanduser().resolve()
@@ -153,6 +204,232 @@ class SubmissionStore:
             )
             connection.execute(
                 "CREATE INDEX IF NOT EXISTS idx_submissions_mission_id ON submissions(mission_id)"
+            )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS users (
+                    user_id TEXT PRIMARY KEY,
+                    username TEXT UNIQUE NOT NULL,
+                    full_name TEXT NOT NULL,
+                    password_hash TEXT NOT NULL,
+                    password_salt TEXT NOT NULL,
+                    role TEXT,
+                    role_locked INTEGER DEFAULT 0,
+                    quiz_passed INTEGER DEFAULT 0,
+                    quiz_score INTEGER DEFAULT 0,
+                    created_at TEXT NOT NULL
+                )
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS sessions (
+                    token TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                )
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS user_progress (
+                    user_id TEXT NOT NULL,
+                    problem_id TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    solution TEXT NOT NULL,
+                    score INTEGER NOT NULL,
+                    feedback TEXT,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY (user_id, problem_id)
+                )
+                """
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def create_user(self, username: str, password: str, full_name: str) -> tuple[dict[str, Any], str]:
+        uname = username.strip().casefold()
+        if not uname or len(uname) < 3:
+            raise ValueError("Username must be at least 3 characters")
+        if len(password) < 6:
+            raise ValueError("Password must be at least 6 characters")
+
+        user_id = str(uuid4())
+        pwd_hash, pwd_salt = _hash_password(password)
+        now = _now_utc()
+
+        connection = self._connect()
+        try:
+            connection.execute(
+                """
+                INSERT INTO users (user_id, username, full_name, password_hash, password_salt, role, role_locked, quiz_passed, quiz_score, created_at)
+                VALUES (?, ?, ?, ?, ?, NULL, 0, 0, 0, ?)
+                """,
+                (user_id, uname, full_name.strip(), pwd_hash, pwd_salt, now),
+            )
+            token = secrets.token_hex(24)
+            connection.execute(
+                "INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)",
+                (token, user_id, now),
+            )
+            connection.commit()
+        except sqlite3.IntegrityError:
+            raise ValueError(f"Username '{uname}' is already registered.")
+        finally:
+            connection.close()
+
+        user = {
+            "user_id": user_id,
+            "username": uname,
+            "full_name": full_name.strip(),
+            "role": None,
+            "role_locked": False,
+            "quiz_passed": False,
+            "quiz_score": 0,
+            "created_at": now,
+        }
+        return user, token
+
+    def authenticate_user(self, username: str, password: str) -> tuple[dict[str, Any], str]:
+        uname = username.strip().casefold()
+        connection = self._connect()
+        try:
+            row = connection.execute(
+                "SELECT * FROM users WHERE username = ?",
+                (uname,),
+            ).fetchone()
+            if row is None:
+                raise ValueError("Invalid username or password.")
+
+            if not _verify_password(password, row["password_hash"], row["password_salt"]):
+                raise ValueError("Invalid username or password.")
+
+            token = secrets.token_hex(24)
+            connection.execute(
+                "INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)",
+                (token, row["user_id"], _now_utc()),
+            )
+            connection.commit()
+
+            user = {
+                "user_id": row["user_id"],
+                "username": row["username"],
+                "full_name": row["full_name"],
+                "role": row["role"],
+                "role_locked": bool(row["role_locked"]),
+                "quiz_passed": bool(row["quiz_passed"]),
+                "quiz_score": row["quiz_score"],
+                "created_at": row["created_at"],
+            }
+            return user, token
+        finally:
+            connection.close()
+
+    def get_user_by_token(self, token: str) -> dict[str, Any] | None:
+        if not token:
+            return None
+        connection = self._connect()
+        try:
+            row = connection.execute(
+                """
+                SELECT u.* FROM users u
+                JOIN sessions s ON u.user_id = s.user_id
+                WHERE s.token = ?
+                """,
+                (token,),
+            ).fetchone()
+            if row is None:
+                return None
+            return {
+                "user_id": row["user_id"],
+                "username": row["username"],
+                "full_name": row["full_name"],
+                "role": row["role"],
+                "role_locked": bool(row["role_locked"]),
+                "quiz_passed": bool(row["quiz_passed"]),
+                "quiz_score": row["quiz_score"],
+                "created_at": row["created_at"],
+            }
+        finally:
+            connection.close()
+
+    def lock_user_role(self, user_id: str, role: str) -> dict[str, Any]:
+        connection = self._connect()
+        try:
+            row = connection.execute(
+                "SELECT * FROM users WHERE user_id = ?",
+                (user_id,),
+            ).fetchone()
+            if row is None:
+                raise ValueError("User not found.")
+            if row["role_locked"]:
+                raise PermissionError("Role is permanently locked and cannot be modified.")
+
+            connection.execute(
+                "UPDATE users SET role = ?, role_locked = 1 WHERE user_id = ?",
+                (role, user_id),
+            )
+            connection.commit()
+
+            updated = connection.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
+            return {
+                "user_id": updated["user_id"],
+                "username": updated["username"],
+                "full_name": updated["full_name"],
+                "role": updated["role"],
+                "role_locked": bool(updated["role_locked"]),
+                "quiz_passed": bool(updated["quiz_passed"]),
+                "quiz_score": updated["quiz_score"],
+                "created_at": updated["created_at"],
+            }
+        finally:
+            connection.close()
+
+    def update_user_quiz(self, user_id: str, passed: bool, score: int) -> None:
+        connection = self._connect()
+        try:
+            connection.execute(
+                "UPDATE users SET quiz_passed = ?, quiz_score = ? WHERE user_id = ?",
+                (1 if passed else 0, score, user_id),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def get_user_progress(self, user_id: str) -> dict[str, dict[str, Any]]:
+        connection = self._connect()
+        try:
+            rows = connection.execute(
+                "SELECT problem_id, status, score, updated_at FROM user_progress WHERE user_id = ?",
+                (user_id,),
+            ).fetchall()
+            return {
+                row["problem_id"]: {
+                    "status": row["status"],
+                    "score": row["score"],
+                    "updated_at": row["updated_at"],
+                }
+                for row in rows
+            }
+        finally:
+            connection.close()
+
+    def save_problem_progress(self, user_id: str, problem_id: str, status: str, solution: str, score: int, feedback: str) -> None:
+        connection = self._connect()
+        try:
+            connection.execute(
+                """
+                INSERT INTO user_progress (user_id, problem_id, status, solution, score, feedback, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id, problem_id) DO UPDATE SET
+                    status = excluded.status,
+                    solution = excluded.solution,
+                    score = excluded.score,
+                    feedback = excluded.feedback,
+                    updated_at = excluded.updated_at
+                """,
+                (user_id, problem_id, status, solution, score, feedback, _now_utc()),
             )
             connection.commit()
         finally:
@@ -228,7 +505,6 @@ class SubmissionStore:
 
 
 def _submission_fields(mission: dict[str, Any]) -> list[str]:
-    """Return required learner-answer IDs from either supported mission schema."""
     fields = mission.get("submission_fields")
     if isinstance(fields, list):
         return [str(field["id"]) for field in fields if isinstance(field, dict) and field.get("id")]
@@ -251,7 +527,6 @@ def _has_answer_content(value: Any) -> bool:
 
 
 def _mission_submission_template(mission: dict[str, Any]) -> dict[str, Any]:
-    """Provide a canonical template while preserving the source mission schema."""
     existing = mission.get("submission_template")
     if isinstance(existing, dict):
         return existing
@@ -268,36 +543,42 @@ def _mission_submission_template(mission: dict[str, Any]) -> dict[str, Any]:
 def _mission_summary(mission: dict[str, Any]) -> dict[str, Any]:
     summary_keys = (
         "id",
-        "track_id",
-        "type",
-        "difficulty",
-        "estimated_time_mins",
         "title",
-        "problem_brief",
-        "metadata",
-        "context",
+        "role",
+        "track_id",
+        "difficulty",
+        "estimated_time",
+        "scenario",
+        "key_skills",
+        "deliverables",
     )
     return {key: mission[key] for key in summary_keys if key in mission}
 
 
-def _now_utc() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-
+# ==============================================================================
+# FASTAPI APP FACTORY
+# ==============================================================================
 
 def create_app(
     project_root: str | Path | None = None,
     database_path: str | Path | None = None,
 ) -> FastAPI:
-    """Build an API instance; dependency injection keeps endpoint tests isolated."""
     root = Path(project_root).resolve() if project_root is not None else PROJECT_ROOT
     db_path = database_path or os.environ.get("WORKSIM_DB_PATH") or DEFAULT_DATABASE_PATH
     catalog = DataCatalog(root)
     store = SubmissionStore(db_path)
 
+    # Ensure 12-page handbook PDF exists
+    if not HANDBOOK_PATH.is_file():
+        try:
+            build_handbook_pdf(HANDBOOK_PATH)
+        except Exception:
+            pass
+
     application = FastAPI(
         title="Praxis API",
         version="1.0.0",
-        description="Career-track and practical-mission API with transparent rubric scoring.",
+        description="Praxis Workplace Simulation & Engineering Problem Bank API.",
     )
     application.state.catalog = catalog
     application.state.submission_store = store
@@ -312,8 +593,6 @@ def create_app(
         response.headers["X-XSS-Protection"] = "1; mode=block"
         return response
 
-    # Suitable for the companion local frontend; no cookies or credentials are
-    # enabled, so wildcard origins do not expose credentialed browser requests.
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -321,10 +600,233 @@ def create_app(
         allow_headers=["*"],
     )
 
+    def _resolve_user(authorization: str | None) -> dict[str, Any] | None:
+        if not authorization or not authorization.startswith("Bearer "):
+            return None
+        token = authorization[7:].strip()
+        return store.get_user_by_token(token)
+
+    def _require_user(authorization: str | None) -> dict[str, Any]:
+        user = _resolve_user(authorization)
+        if not user:
+            raise HTTPException(status_code=401, detail="Authentication token required.")
+        return user
+
+    # --------------------------------------------------------------------------
+    # HEALTH & ROLES
+    # --------------------------------------------------------------------------
     @application.get("/health", tags=["health"])
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @application.get("/api/roles", tags=["roles"])
+    def list_roles() -> list[dict[str, Any]]:
+        return ROLES
+
+    # --------------------------------------------------------------------------
+    # AUTHENTICATION & ROLE LOCKING
+    # --------------------------------------------------------------------------
+    @application.post("/api/auth/register", status_code=201, tags=["auth"])
+    def register(payload: RegisterRequest) -> dict[str, Any]:
+        try:
+            user, token = store.create_user(payload.username, payload.password, payload.full_name)
+            return {"user": user, "token": token}
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    @application.post("/api/auth/login", tags=["auth"])
+    def login(payload: LoginRequest) -> dict[str, Any]:
+        try:
+            user, token = store.authenticate_user(payload.username, payload.password)
+            return {"user": user, "token": token}
+        except ValueError as exc:
+            raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+    @application.get("/api/auth/me", tags=["auth"])
+    def get_me(authorization: str | None = Header(default=None)) -> dict[str, Any]:
+        user = _require_user(authorization)
+        return {"user": user}
+
+    @application.post("/api/auth/select-role", tags=["auth"])
+    def select_role(
+        payload: SelectRoleRequest,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        user = _require_user(authorization)
+        valid_role_ids = {r["id"] for r in ROLES}
+        if payload.role not in valid_role_ids:
+            raise HTTPException(status_code=400, detail=f"Invalid role. Choose from {sorted(valid_role_ids)}")
+
+        try:
+            updated_user = store.lock_user_role(user["user_id"], payload.role)
+            return {"user": updated_user, "message": "Role locked successfully and cannot be modified."}
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    # --------------------------------------------------------------------------
+    # 12-PAGE PDF HANDBOOK
+    # --------------------------------------------------------------------------
+    @application.get("/api/handbook/download", tags=["handbook"])
+    def download_handbook():
+        if not HANDBOOK_PATH.is_file():
+            build_handbook_pdf(HANDBOOK_PATH)
+        return FileResponse(
+            HANDBOOK_PATH,
+            media_type="application/pdf",
+            filename="Praxis_Industry_Foundations_Handbook.pdf",
+        )
+
+    @application.get("/api/handbook/pdf", tags=["handbook"])
+    def view_handbook():
+        if not HANDBOOK_PATH.is_file():
+            build_handbook_pdf(HANDBOOK_PATH)
+        return FileResponse(
+            HANDBOOK_PATH,
+            media_type="application/pdf",
+        )
+
+    # --------------------------------------------------------------------------
+    # 5-QUESTION READINESS QUIZ
+    # --------------------------------------------------------------------------
+    @application.get("/api/quiz/questions", tags=["quiz"])
+    def get_quiz_questions() -> list[dict[str, Any]]:
+        # Return questions without revealing correct answer
+        return [
+            {
+                "id": q["id"],
+                "question": q["question"],
+                "options": q["options"],
+            }
+            for q in QUIZ_QUESTIONS
+        ]
+
+    @application.post("/api/quiz/submit", tags=["quiz"])
+    def submit_quiz(
+        payload: QuizSubmitRequest,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        user = _require_user(authorization)
+        user_answers = payload.answers
+        results = []
+        score = 0
+
+        for q in QUIZ_QUESTIONS:
+            qid = q["id"]
+            selected = user_answers.get(qid, "").casefold()
+            correct = q["correct"].casefold()
+            is_correct = (selected == correct)
+            if is_correct:
+                score += 1
+            results.append({
+                "id": qid,
+                "selected": selected,
+                "correct": correct,
+                "is_correct": is_correct,
+                "explanation": q["explanation"],
+            })
+
+        passed = (score >= 4)
+        store.update_user_quiz(user["user_id"], passed=passed, score=score)
+
+        return {
+            "score": score,
+            "total": len(QUIZ_QUESTIONS),
+            "percentage": int((score / len(QUIZ_QUESTIONS)) * 100),
+            "passed": passed,
+            "results": results,
+            "message": "Congratulations! You passed the Readiness Assessment." if passed else "Score was below 80%. Review the handbook and try again.",
+        }
+
+    # --------------------------------------------------------------------------
+    # 40 PRODUCTION PROBLEMS
+    # --------------------------------------------------------------------------
+    @application.get("/api/problems", tags=["problems"])
+    def list_problems(
+        authorization: str | None = Header(default=None),
+    ) -> list[dict[str, Any]]:
+        user = _resolve_user(authorization)
+        user_progress = store.get_user_progress(user["user_id"]) if user else {}
+
+        items = []
+        for prob in PROBLEMS:
+            prog = user_progress.get(prob["id"], {})
+            item = {
+                "id": prob["id"],
+                "phase": prob["phase"],
+                "difficulty": prob["difficulty"],
+                "title": prob["title"],
+                "category": prob["category"],
+                "scenario": prob["scenario"],
+                "task": prob["task"],
+                "help_statement": prob["help_statement"],
+                "starter_template": prob["starter_template"],
+                "status": prog.get("status", "pending"),
+                "score": prog.get("score", 0),
+            }
+            items.append(item)
+        return items
+
+    @application.get("/api/problems/{problem_id}", tags=["problems"])
+    def get_problem(
+        problem_id: str,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        match = next((p for p in PROBLEMS if p["id"] == problem_id), None)
+        if match is None:
+            raise HTTPException(status_code=404, detail=f"Problem '{problem_id}' was not found")
+
+        user = _resolve_user(authorization)
+        user_progress = store.get_user_progress(user["user_id"]) if user else {}
+        prog = user_progress.get(problem_id, {})
+
+        return {
+            "id": match["id"],
+            "phase": match["phase"],
+            "difficulty": match["difficulty"],
+            "title": match["title"],
+            "category": match["category"],
+            "scenario": match["scenario"],
+            "task": match["task"],
+            "help_statement": match["help_statement"],
+            "starter_template": match["starter_template"],
+            "status": prog.get("status", "pending"),
+            "score": prog.get("score", 0),
+        }
+
+    @application.post("/api/problems/{problem_id}/submit", tags=["problems"])
+    def submit_problem(
+        problem_id: str,
+        payload: ProblemSubmitRequest,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        user = _require_user(authorization)
+        match = next((p for p in PROBLEMS if p["id"] == problem_id), None)
+        if match is None:
+            raise HTTPException(status_code=404, detail=f"Problem '{problem_id}' was not found")
+
+        evaluation = evaluate_problem_submission(match, payload.solution)
+        store.save_problem_progress(
+            user_id=user["user_id"],
+            problem_id=problem_id,
+            status=evaluation["status"],
+            solution=payload.solution,
+            score=evaluation["score"],
+            feedback=evaluation["feedback"],
+        )
+
+        return {
+            "problem_id": problem_id,
+            "status": evaluation["status"],
+            "score": evaluation["score"],
+            "passed": evaluation["passed"],
+            "feedback": evaluation["feedback"],
+        }
+
+    # --------------------------------------------------------------------------
+    # LEGACY MISSION SIMULATION ENDPOINTS
+    # --------------------------------------------------------------------------
     @application.get("/api/tracks", tags=["tracks"])
     def list_tracks() -> list[dict[str, Any]]:
         return catalog.list_tracks()
@@ -349,7 +851,7 @@ def create_app(
             missions = [
                 mission
                 for mission in missions
-                if str(mission.get("type", "")).casefold() == requested_type
+                if str(mission.get("type") or mission.get("mission_type") or mission.get("difficulty") or "").casefold() == requested_type
             ]
         return [_mission_summary(mission) for mission in missions]
 
@@ -368,15 +870,9 @@ def create_app(
         if mission is None:
             raise HTTPException(status_code=404, detail=f"Mission '{payload.mission_id}' was not found")
 
-        # Validate answer field keys and lengths
-        for key, value in payload.answers.items():
-            if not re.fullmatch(r"^[A-Za-z0-9_-]{1,100}$", str(key)):
-                raise HTTPException(status_code=422, detail=f"Invalid field ID format: '{key}'")
-            if isinstance(value, str) and len(value) > 30000:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Answer for '{key}' exceeds maximum allowed length (30,000 characters)",
-                )
+        for key, val in payload.answers.items():
+            if isinstance(val, str) and len(val) > 30000:
+                raise HTTPException(status_code=422, detail=f"Field '{key}' exceeds maximum allowed length of 30,000 characters.")
 
         required_fields = _submission_fields(mission)
         missing_fields = [field_id for field_id in required_fields if field_id not in payload.answers]

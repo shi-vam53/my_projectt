@@ -735,6 +735,11 @@ function initApp() {
   bindProfileControls();
   bindFormEvents();
 
+  // Curriculum & Auth controls
+  bindAuthControls();
+  bindHandbookAndQuizControls();
+  checkAuthAndSession();
+
   loadMissionsCatalog();
   renderTracksView();
   renderMissionWorkspace(state.activeMissionId);
@@ -753,10 +758,10 @@ function bindNavigation() {
   const sidebarQuickSwitch = document.getElementById('sidebar-quick-switch-btn');
   const bcRoot = document.getElementById('bc-root');
 
-  navTracks.addEventListener('click', () => switchView('tracks'));
-  navWorkspace.addEventListener('click', () => switchView('workspace'));
-  bcRoot.addEventListener('click', () => switchView('tracks'));
-  sidebarQuickSwitch.addEventListener('click', () => switchView('tracks'));
+  if (navTracks) navTracks.addEventListener('click', () => switchView('tracks'));
+  if (navWorkspace) navWorkspace.addEventListener('click', () => switchView('workspace'));
+  if (bcRoot) bcRoot.addEventListener('click', () => switchView('tracks'));
+  if (sidebarQuickSwitch) sidebarQuickSwitch.addEventListener('click', () => switchView('tracks'));
 
   const navCatalog = document.getElementById('nav-catalog');
   if (navCatalog) navCatalog.addEventListener('click', () => switchView('catalog'));
@@ -767,9 +772,26 @@ function bindNavigation() {
   const navProfile = document.getElementById('nav-profile');
   if (navProfile) navProfile.addEventListener('click', () => switchView('profile'));
 
-  navReadiness.addEventListener('click', () => {
-    openReadinessQuiz(state.activeTrackId);
+  const navHandbook = document.getElementById('nav-handbook');
+  if (navHandbook) navHandbook.addEventListener('click', () => switchView('handbook'));
+
+  const navQuiz = document.getElementById('nav-quiz');
+  if (navQuiz) navQuiz.addEventListener('click', () => {
+    switchView('quiz');
+    loadQuizQuestions();
   });
+
+  const navProblems = document.getElementById('nav-problems');
+  if (navProblems) navProblems.addEventListener('click', () => {
+    switchView('problems');
+    loadProblemsBank();
+  });
+
+  if (navReadiness) {
+    navReadiness.addEventListener('click', () => {
+      openReadinessQuiz(state.activeTrackId);
+    });
+  }
 
   if (navRoleGuide) {
     navRoleGuide.addEventListener('click', () => {
@@ -777,9 +799,11 @@ function bindNavigation() {
     });
   }
 
-  navRubricGuide.addEventListener('click', () => {
-    openRubricModal(true); // Open in guide / preview mode
-  });
+  if (navRubricGuide) {
+    navRubricGuide.addEventListener('click', () => {
+      openRubricModal(true); // Open in guide / preview mode
+    });
+  }
 }
 
 function switchView(viewName) {
@@ -789,14 +813,20 @@ function switchView(viewName) {
     workspace: document.getElementById('view-workspace'),
     catalog: document.getElementById('view-catalog'),
     admin: document.getElementById('view-admin'),
-    profile: document.getElementById('view-profile')
+    profile: document.getElementById('view-profile'),
+    handbook: document.getElementById('view-handbook'),
+    quiz: document.getElementById('view-quiz'),
+    problems: document.getElementById('view-problems')
   };
   const navs = {
     tracks: document.getElementById('nav-tracks'),
     workspace: document.getElementById('nav-workspace'),
     catalog: document.getElementById('nav-catalog'),
     admin: document.getElementById('nav-admin'),
-    profile: document.getElementById('nav-profile')
+    profile: document.getElementById('nav-profile'),
+    handbook: document.getElementById('nav-handbook'),
+    quiz: document.getElementById('nav-quiz'),
+    problems: document.getElementById('nav-problems')
   };
 
   Object.keys(views).forEach(key => {
@@ -811,6 +841,8 @@ function switchView(viewName) {
   if (viewName === 'admin') renderAdminView();
   if (viewName === 'profile') renderProfileView();
   if (viewName === 'tracks') renderTracksView();
+  if (viewName === 'quiz') loadQuizQuestions();
+  if (viewName === 'problems') loadProblemsBank();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -2836,4 +2868,655 @@ function exportLearnerTranscript() {
   a.click();
   URL.revokeObjectURL(url);
   showToast('Verified transcript exported as Markdown.', 'success');
+}
+
+// ============================================================================
+// CURRICULUM, AUTH & PROBLEM BANK CONTROLLER
+// ============================================================================
+
+state.token = localStorage.getItem('praxis_token') || null;
+state.user = null;
+state.rolesList = [];
+state.selectedRoleForOnboarding = null;
+state.quizQuestions = [];
+state.quizUserAnswers = {};
+state.problemsList = [];
+state.activeProblemId = 'prob-01';
+state.problemsFilter = 'all';
+
+async function checkAuthAndSession() {
+  const token = localStorage.getItem('praxis_token');
+  if (!token) {
+    showAuthOverlay(true);
+    return;
+  }
+  state.token = token;
+  try {
+    const res = await fetch('/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      state.user = data.user;
+      showAuthOverlay(false);
+      updateUserHeaderUI();
+
+      if (!state.user.role_locked) {
+        openRoleOnboardingModal();
+      } else {
+        closeRoleOnboardingModal();
+        if (!state.user.quiz_passed) {
+          switchView('handbook');
+        } else {
+          switchView('problems');
+        }
+      }
+    } else {
+      localStorage.removeItem('praxis_token');
+      state.token = null;
+      state.user = null;
+      showAuthOverlay(true);
+    }
+  } catch (err) {
+    console.error('Session check failed:', err);
+    showAuthOverlay(true);
+  }
+}
+
+function showAuthOverlay(visible) {
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) overlay.style.display = visible ? 'flex' : 'none';
+}
+
+function updateUserHeaderUI() {
+  const avatar = document.getElementById('header-user-avatar');
+  const name = document.getElementById('header-user-name');
+  const role = document.getElementById('header-user-role');
+  const sidebarTrack = document.getElementById('sidebar-active-track-name');
+
+  if (state.user) {
+    const initials = (state.user.full_name || state.user.username || 'U')
+      .split(' ')
+      .map(w => w[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+    if (avatar) avatar.textContent = initials;
+    if (name) name.textContent = state.user.full_name || state.user.username;
+
+    const roleName = getRoleDisplayName(state.user.role);
+    if (role) role.textContent = state.user.role_locked ? `🔒 ${roleName}` : 'Unassigned';
+    if (sidebarTrack) sidebarTrack.textContent = roleName;
+  } else {
+    if (avatar) avatar.textContent = 'G';
+    if (name) name.textContent = 'Guest';
+    if (role) role.textContent = 'Sign In Required';
+  }
+}
+
+function getRoleDisplayName(roleId) {
+  const map = {
+    'cloud-sre': 'Cloud & Platform SRE',
+    'backend-eng': 'Backend & API Engineer',
+    'data-ai': 'Data & AI Systems Engineer',
+    'fullstack-prod': 'Full-Stack Product Engineer'
+  };
+  return map[roleId] || roleId || 'Cloud & Platform SRE';
+}
+
+function bindAuthControls() {
+  const tabSignin = document.getElementById('auth-tab-signin');
+  const tabSignup = document.getElementById('auth-tab-signup');
+  const fullnameField = document.getElementById('auth-fullname-field');
+  const submitBtn = document.getElementById('auth-submit-btn');
+  const title = document.getElementById('auth-header-title');
+  const desc = document.getElementById('auth-header-desc');
+  const authForm = document.getElementById('auth-form');
+  const signoutBtn = document.getElementById('header-signout-btn');
+  let isSignup = false;
+
+  if (tabSignin && tabSignup) {
+    tabSignin.addEventListener('click', () => {
+      isSignup = false;
+      tabSignin.classList.add('active');
+      tabSignup.classList.remove('active');
+      if (fullnameField) fullnameField.style.display = 'none';
+      if (submitBtn) submitBtn.textContent = 'Sign In to Praxis';
+      if (title) title.textContent = 'Sign In to Praxis';
+      if (desc) desc.textContent = 'Enter your credentials to access your workplace simulation dashboard.';
+    });
+
+    tabSignup.addEventListener('click', () => {
+      isSignup = true;
+      tabSignup.classList.add('active');
+      tabSignin.classList.remove('active');
+      if (fullnameField) fullnameField.style.display = 'flex';
+      if (submitBtn) submitBtn.textContent = 'Create Free Account';
+      if (title) title.textContent = 'Create Praxis Account';
+      if (desc) desc.textContent = 'Create your account to unlock industry handbooks and production problems.';
+    });
+  }
+
+  if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usernameInput = document.getElementById('auth-username');
+      const passwordInput = document.getElementById('auth-password');
+      const fullnameInput = document.getElementById('auth-fullname');
+      const errorMsg = document.getElementById('auth-error-msg');
+
+      if (errorMsg) errorMsg.style.display = 'none';
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      const full_name = fullnameInput ? fullnameInput.value.trim() : username;
+
+      const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
+      const payload = isSignup ? { username, password, full_name } : { username, password };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem('praxis_token', data.token);
+          state.token = data.token;
+          state.user = data.user;
+          showAuthOverlay(false);
+          updateUserHeaderUI();
+          showToast(`Welcome, ${state.user.full_name || state.user.username}!`, 'success');
+
+          if (!state.user.role_locked) {
+            openRoleOnboardingModal();
+          } else {
+            closeRoleOnboardingModal();
+            if (!state.user.quiz_passed) {
+              switchView('handbook');
+            } else {
+              switchView('problems');
+            }
+          }
+        } else {
+          const err = await res.json();
+          if (errorMsg) {
+            errorMsg.textContent = err.detail || 'Authentication failed.';
+            errorMsg.style.display = 'block';
+          }
+        }
+      } catch (err) {
+        if (errorMsg) {
+          errorMsg.textContent = 'Network error. Please try again.';
+          errorMsg.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  if (signoutBtn) {
+    signoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('praxis_token');
+      state.token = null;
+      state.user = null;
+      updateUserHeaderUI();
+      showAuthOverlay(true);
+      showToast('Signed out successfully.', 'info');
+    });
+  }
+
+  const confirmRoleBtn = document.getElementById('confirm-role-lock-btn');
+  if (confirmRoleBtn) {
+    confirmRoleBtn.addEventListener('click', confirmRoleLock);
+  }
+}
+
+async function openRoleOnboardingModal() {
+  const overlay = document.getElementById('role-onboard-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+
+  try {
+    const res = await fetch('/api/roles');
+    if (res.ok) {
+      state.rolesList = await res.json();
+      renderRoleSelectionGrid();
+    }
+  } catch (err) {
+    console.error('Failed to load roles:', err);
+  }
+}
+
+function closeRoleOnboardingModal() {
+  const overlay = document.getElementById('role-onboard-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function renderRoleSelectionGrid() {
+  const grid = document.getElementById('role-selection-grid');
+  if (!grid) return;
+
+  grid.innerHTML = state.rolesList.map(r => `
+    <div class="role-select-item ${state.selectedRoleForOnboarding === r.id ? 'selected' : ''}" data-role-id="${r.id}">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div class="role-item-title">${escapeHtml(r.title)}</div>
+        <span class="role-item-badge">${escapeHtml(r.badge)}</span>
+      </div>
+      <div class="role-item-desc">${escapeHtml(r.description)}</div>
+      <div class="role-item-skills">
+        ${(r.core_skills || []).map(s => `<span class="role-skill-pill">${escapeHtml(s)}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.role-select-item').forEach(card => {
+    card.addEventListener('click', () => {
+      state.selectedRoleForOnboarding = card.dataset.roleId;
+      renderRoleSelectionGrid();
+      const btn = document.getElementById('confirm-role-lock-btn');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = `Confirm & Lock Role: ${getRoleDisplayName(state.selectedRoleForOnboarding)}`;
+      }
+    });
+  });
+}
+
+async function confirmRoleLock() {
+  if (!state.selectedRoleForOnboarding || !state.token) return;
+  const btn = document.getElementById('confirm-role-lock-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Locking Track...';
+  }
+
+  try {
+    const res = await fetch('/api/auth/select-role', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+      },
+      body: JSON.stringify({ role: state.selectedRoleForOnboarding })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      state.user = data.user;
+      closeRoleOnboardingModal();
+      updateUserHeaderUI();
+      showToast(`Track permanently locked to ${getRoleDisplayName(state.user.role)}.`, 'success');
+      switchView('handbook');
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Role locking failed.', 'error');
+    }
+  } catch (err) {
+    showToast('Network error while locking role.', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ----------------------------------------------------------------------------
+// HANDBOOK & QUIZ CONTROLLER
+// ----------------------------------------------------------------------------
+
+function bindHandbookAndQuizControls() {
+  const proceedToQuizBtn = document.getElementById('proceed-to-quiz-btn');
+  if (proceedToQuizBtn) {
+    proceedToQuizBtn.addEventListener('click', () => {
+      switchView('quiz');
+      loadQuizQuestions();
+    });
+  }
+
+  const submitQuizBtn = document.getElementById('submit-readiness-quiz-btn');
+  if (submitQuizBtn) {
+    submitQuizBtn.addEventListener('click', submitReadinessQuiz);
+  }
+
+  const unlockProblemsBtn = document.getElementById('quiz-unlock-problems-btn');
+  if (unlockProblemsBtn) {
+    unlockProblemsBtn.addEventListener('click', () => {
+      switchView('problems');
+      loadProblemsBank();
+    });
+  }
+
+  const filterBtns = document.querySelectorAll('.prob-filter-btn');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.problemsFilter = btn.dataset.filter;
+      renderProblemsList(state.problemsFilter);
+    });
+  });
+}
+
+async function loadQuizQuestions() {
+  const container = document.getElementById('quiz-questions-list');
+  if (!container) return;
+  container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #64748b;">Loading assessment questions...</div>`;
+
+  try {
+    const res = await fetch('/api/quiz/questions');
+    if (res.ok) {
+      state.quizQuestions = await res.json();
+      renderQuizQuestions();
+    }
+  } catch (err) {
+    container.innerHTML = `<div style="color: #ef4444; padding: 1rem;">Failed to load questions. Please check connection.</div>`;
+  }
+}
+
+function renderQuizQuestions() {
+  const container = document.getElementById('quiz-questions-list');
+  if (!container) return;
+
+  container.innerHTML = state.quizQuestions.map((q, idx) => `
+    <div class="quiz-question-box" id="quiz-box-${q.id}">
+      <div class="quiz-q-num">Question 0${idx + 1} of 05</div>
+      <div class="quiz-q-text">${escapeHtml(q.question)}</div>
+      <div class="quiz-options-list">
+        ${q.options.map(opt => `
+          <label class="quiz-option-row">
+            <input type="radio" name="quiz-${q.id}" value="${opt.id}" ${state.quizUserAnswers[q.id] === opt.id ? 'checked' : ''}>
+            <span class="quiz-option-text">${escapeHtml(opt.text)}</span>
+          </label>
+        `).join('')}
+      </div>
+      <div class="quiz-explanation-box" id="quiz-exp-${q.id}"></div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const qid = e.target.name.replace('quiz-', '');
+      state.quizUserAnswers[qid] = e.target.value;
+    });
+  });
+}
+
+async function submitReadinessQuiz() {
+  if (!state.token) {
+    showToast('Please sign in first.', 'error');
+    return;
+  }
+  const answeredCount = Object.keys(state.quizUserAnswers).length;
+  if (answeredCount < state.quizQuestions.length) {
+    showToast(`Please answer all ${state.quizQuestions.length} questions before submitting.`, 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('submit-readiness-quiz-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Evaluating...';
+  }
+
+  try {
+    const res = await fetch('/api/quiz/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+      },
+      body: JSON.stringify({ answers: state.quizUserAnswers })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      renderQuizResults(data);
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Evaluation failed.', 'error');
+    }
+  } catch (err) {
+    showToast('Network error during quiz evaluation.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Readiness Assessment';
+    }
+  }
+}
+
+function renderQuizResults(data) {
+  const banner = document.getElementById('quiz-results-banner');
+  const scoreDisp = document.getElementById('quiz-score-display');
+  const msgDisp = document.getElementById('quiz-status-message');
+  const unlockBtn = document.getElementById('quiz-unlock-problems-btn');
+
+  if (banner) banner.style.display = 'block';
+  if (scoreDisp) {
+    scoreDisp.textContent = `Score: ${data.score} / ${data.total} (${data.percentage}%)`;
+    scoreDisp.style.color = data.passed ? '#16a34a' : '#dc2626';
+  }
+  if (msgDisp) msgDisp.textContent = data.message;
+  if (unlockBtn) unlockBtn.style.display = data.passed ? 'inline-flex' : 'none';
+
+  data.results.forEach(r => {
+    const expBox = document.getElementById(`quiz-exp-${r.id}`);
+    if (expBox) {
+      expBox.style.display = 'block';
+      expBox.style.background = r.is_correct ? '#f0fdf4' : '#fef2f2';
+      expBox.style.borderColor = r.is_correct ? '#bbf7d0' : '#fecaca';
+      expBox.style.color = r.is_correct ? '#166534' : '#b91c1c';
+      expBox.innerHTML = `<strong>${r.is_correct ? '✓ Correct:' : '✗ Incorrect:'}</strong> ${escapeHtml(r.explanation)}`;
+    }
+  });
+
+  if (data.passed) {
+    showToast('Readiness Assessment Passed! Production Problems Unlocked.', 'success');
+    if (state.user) state.user.quiz_passed = true;
+    const sidebarPill = document.getElementById('quiz-sidebar-pill');
+    if (sidebarPill) {
+      sidebarPill.textContent = 'Passed (5/5)';
+      sidebarPill.style.background = 'rgba(16, 185, 129, 0.2)';
+      sidebarPill.style.color = '#10b981';
+    }
+  } else {
+    showToast('Score under 80%. Review explanations and retry.', 'warning');
+  }
+}
+
+// ----------------------------------------------------------------------------
+// 40 PROBLEMS CONTROLLER
+// ----------------------------------------------------------------------------
+
+async function loadProblemsBank() {
+  try {
+    const headers = state.token ? { 'Authorization': `Bearer ${state.token}` } : {};
+    const res = await fetch('/api/problems', { headers });
+    if (res.ok) {
+      state.problemsList = await res.json();
+      renderProblemsList(state.problemsFilter);
+      if (state.problemsList.length > 0) {
+        renderProblemDetail(state.activeProblemId || state.problemsList[0].id);
+      }
+      updateProblemsSolvedCounter();
+    }
+  } catch (err) {
+    console.error('Failed to load problems:', err);
+  }
+}
+
+function updateProblemsSolvedCounter() {
+  const solved = state.problemsList.filter(p => p.status === 'completed').length;
+  const total = state.problemsList.length;
+  const countPill = document.getElementById('problems-count-pill');
+  const badge = document.getElementById('prob-solved-count-badge');
+  if (countPill) countPill.textContent = `${solved}/${total}`;
+  if (badge) badge.textContent = `${solved} / ${total} Solved`;
+}
+
+function renderProblemsList(filter = 'all') {
+  const container = document.getElementById('problems-scroll-container');
+  if (!container) return;
+
+  let filtered = state.problemsList;
+  if (filter === 'basic') filtered = state.problemsList.filter(p => p.phase === 1);
+  if (filter === 'inter') filtered = state.problemsList.filter(p => p.phase === 2);
+
+  container.innerHTML = filtered.map(p => `
+    <div class="prob-list-item ${state.activeProblemId === p.id ? 'active' : ''}" data-problem-id="${p.id}">
+      <div class="prob-item-top">
+        <span class="prob-item-id">${p.id.toUpperCase()}</span>
+        <span class="prob-item-badge ${p.status === 'completed' ? 'prob-badge-done' : (p.phase === 1 ? 'prob-badge-basic' : 'prob-badge-inter')}">
+          ${p.status === 'completed' ? '✓ Completed' : (p.phase === 1 ? 'Basic • Help' : 'Inter • No Help')}
+        </span>
+      </div>
+      <div class="prob-item-title">${escapeHtml(p.title)}</div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.prob-list-item').forEach(item => {
+    item.addEventListener('click', () => {
+      state.activeProblemId = item.dataset.problemId;
+      renderProblemsList(state.problemsFilter);
+      renderProblemDetail(state.activeProblemId);
+    });
+  });
+}
+
+function renderProblemDetail(problemId) {
+  const container = document.getElementById('problem-detail-container');
+  if (!container) return;
+
+  const problem = state.problemsList.find(p => p.id === problemId);
+  if (!problem) return;
+
+  container.innerHTML = `
+    <div class="problem-header-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="badge ${problem.phase === 1 ? 'badge-indigo' : 'badge-amber'}">${problem.phase === 1 ? 'Phase 1: Basic' : 'Phase 2: Intermediate'}</span>
+          <span class="badge badge-indigo">${escapeHtml(problem.category)}</span>
+        </div>
+        <span class="badge ${problem.status === 'completed' ? 'badge-emerald' : 'badge-outline'}">${problem.status === 'completed' ? '✓ Solved (' + (problem.score || 100) + '/100)' : 'Unsolved'}</span>
+      </div>
+
+      <h1 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-top: 0.25rem;">${escapeHtml(problem.title)}</h1>
+
+      <div>
+        <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.04em;">Production Incident & Scenario</h3>
+        <p style="font-size: 0.925rem; color: #1e293b; line-height: 1.5; margin-top: 0.25rem;">${escapeHtml(problem.scenario)}</p>
+      </div>
+
+      <div style="margin-top: 0.25rem;">
+        <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.04em;">Your Engineering Deliverable</h3>
+        <p style="font-size: 0.925rem; color: #1e293b; line-height: 1.5; margin-top: 0.25rem;">${escapeHtml(problem.task)}</p>
+      </div>
+    </div>
+
+    <!-- Help / Reference Box -->
+    ${problem.phase === 1 ? `
+      <div class="problem-help-box">
+        <div style="display: flex; align-items: center; gap: 6px; font-weight: 800; margin-bottom: 0.25rem;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          SOP & Syntax Reference Statement
+        </div>
+        <div>${escapeHtml(problem.help_statement || '')}</div>
+      </div>
+    ` : `
+      <div class="problem-help-box no-help">
+        <div style="display: flex; align-items: center; gap: 6px; font-weight: 800; margin-bottom: 0.25rem;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Intermediate Standalone Challenge
+        </div>
+        <div>No reference statement provided for Phase 2 problems. Apply independent systems reasoning, log triage, and production architecture principles.</div>
+      </div>
+    `}
+
+    <!-- Solution Editor -->
+    <div class="problem-editor-container">
+      <div class="problem-editor-header">
+        <span>Production Solution & Code Editor</span>
+        <button class="btn btn-ghost btn-sm" id="btn-reset-prob-template" style="color: #94a3b8; font-size: 0.72rem;">Reset Template</button>
+      </div>
+      <textarea class="problem-code-textarea" id="problem-solution-input" placeholder="Write your production diagnosis, code fix, or configuration update here...">${escapeHtml(problem.starter_template || '')}</textarea>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn btn-primary" id="btn-submit-problem">Run & Submit Solution</button>
+      </div>
+    </div>
+
+    <!-- Live Evaluation Result Card -->
+    <div class="problem-eval-card" id="problem-eval-result"></div>
+  `;
+
+  document.getElementById('btn-reset-prob-template').addEventListener('click', () => {
+    document.getElementById('problem-solution-input').value = problem.starter_template || '';
+  });
+
+  document.getElementById('btn-submit-problem').addEventListener('click', () => {
+    submitProblemSolution(problem.id);
+  });
+}
+
+async function submitProblemSolution(problemId) {
+  if (!state.token) {
+    showToast('Please sign in to submit solutions.', 'error');
+    return;
+  }
+
+  const input = document.getElementById('problem-solution-input');
+  if (!input || !input.value.trim()) {
+    showToast('Please write your solution before submitting.', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('btn-submit-problem');
+  btn.disabled = true;
+  btn.textContent = 'Evaluating against rubric...';
+
+  try {
+    const res = await fetch(`/api/problems/${problemId}/submit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+      },
+      body: JSON.stringify({ solution: input.value.trim() })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const evalCard = document.getElementById('problem-eval-result');
+      if (evalCard) {
+        evalCard.style.display = 'flex';
+        evalCard.style.background = data.passed ? '#f0fdf4' : '#fffbeb';
+        evalCard.style.borderColor = data.passed ? '#bbf7d0' : '#fde68a';
+        evalCard.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: ${data.passed ? '#166534' : '#92400e'}; font-size: 1rem;">
+              ${data.passed ? '✓ Solution Accepted' : '⚠ Revisions Recommended'}
+            </strong>
+            <span class="badge ${data.passed ? 'badge-emerald' : 'badge-amber'}">${data.score} / 100</span>
+          </div>
+          <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(data.feedback)}</p>
+        `;
+      }
+
+      const prob = state.problemsList.find(p => p.id === problemId);
+      if (prob) {
+        prob.status = data.status;
+        prob.score = data.score;
+      }
+      renderProblemsList(state.problemsFilter);
+      updateProblemsSolvedCounter();
+      showToast(data.passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', data.passed ? 'success' : 'info');
+    } else {
+      const err = await res.json();
+      showToast(err.detail || 'Evaluation failed.', 'error');
+    }
+  } catch (err) {
+    showToast('Network error during solution submission.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run & Submit Solution';
+  }
 }
