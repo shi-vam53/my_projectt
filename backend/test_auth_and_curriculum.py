@@ -150,3 +150,17 @@ def test_problems_listing_and_submission(client):
     sub_data = submit_res.json()
     assert sub_data["passed"] is True
     assert sub_data["status"] == "completed"
+
+
+def test_admin_users_csv_export_matches_google_sheet_columns(client):
+    client.post(
+        "/api/auth/register",
+        json={"username": "sheetuser", "password": "password123", "full_name": "Sheet Sync User"},
+    )
+    res = client.get("/api/admin/users/csv")
+    assert res.status_code == 200
+    assert "text/csv" in res.headers.get("content-type", "")
+    content = res.text
+    assert "User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform" in content
+    assert "sheetuser,Sheet Sync User" in content
+

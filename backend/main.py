@@ -289,6 +289,7 @@ class SubmissionStore:
             "quiz_score": 0,
             "created_at": now,
         }
+        self.sync_users_to_ledger()
         return user, token
 
     def authenticate_user(self, username: str, password: str) -> tuple[dict[str, Any], str]:
@@ -373,7 +374,7 @@ class SubmissionStore:
             connection.commit()
 
             updated = connection.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
-            return {
+            res = {
                 "user_id": updated["user_id"],
                 "username": updated["username"],
                 "full_name": updated["full_name"],
@@ -383,6 +384,8 @@ class SubmissionStore:
                 "quiz_score": updated["quiz_score"],
                 "created_at": updated["created_at"],
             }
+            self.sync_users_to_ledger()
+            return res
         finally:
             connection.close()
 
@@ -394,8 +397,44 @@ class SubmissionStore:
                 (1 if passed else 0, score, user_id),
             )
             connection.commit()
+            self.sync_users_to_ledger()
         finally:
             connection.close()
+
+    def export_users_csv(self) -> str:
+        connection = self._connect()
+        try:
+            rows = connection.execute(
+                "SELECT user_id, username, full_name, role, role_locked, quiz_passed, quiz_score, created_at FROM users ORDER BY created_at ASC"
+            ).fetchall()
+        finally:
+            connection.close()
+
+        role_display = {
+            "cloud-sre": "Cloud & Platform SRE",
+            "backend-eng": "Backend & API Systems Engineer",
+            "data-ai": "Data & AI Systems Engineer",
+            "fullstack-prod": "Full-Stack Product Engineer",
+        }
+
+        lines = [
+            "User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform"
+        ]
+        for r in rows:
+            track = role_display.get(r["role"], r["role"] or "Pending Selection")
+            locked = "Yes (Permanent)" if r["role_locked"] else "No"
+            quiz_status = "Passed (5/5)" if r["quiz_passed"] else "Incomplete"
+            quiz_score = f"{r['quiz_score']}/5" if r["quiz_passed"] else "0/5"
+            lines.append(
+                f"{r['user_id']},{r['username']},{r['full_name']},{track},{locked},{quiz_status},{quiz_score},{r['created_at']},Praxis Workplace Simulation"
+            )
+        return "\r\n".join(lines)
+
+    def sync_users_to_ledger(self) -> Path:
+        ledger_file = self.database_path.parent / "registered_users_ledger.csv"
+        csv_content = self.export_users_csv()
+        ledger_file.write_text(csv_content, encoding="utf-8")
+        return ledger_file
 
     def get_user_progress(self, user_id: str) -> dict[str, dict[str, Any]]:
         connection = self._connect()
@@ -622,6 +661,16 @@ def create_app(
     @application.get("/api/roles", tags=["roles"])
     def list_roles() -> list[dict[str, Any]]:
         return ROLES
+
+    @application.get("/api/admin/users/csv", tags=["admin"])
+    def get_registered_users_csv():
+        from fastapi.responses import Response
+        csv_text = store.export_users_csv()
+        return Response(
+            content=csv_text,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=Praxis_Registered_Users_Master_Ledger.csv"},
+        )
 
     # --------------------------------------------------------------------------
     # AUTHENTICATION & ROLE LOCKING
