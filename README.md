@@ -27,20 +27,28 @@ This project is built collaboratively by multiple AI agents in parallel:
 ```
 ├── SPEC.md                    # Canonical system specification & schema contract
 ├── tracks/                    # Track guides, glossaries, and 5-question readiness checks
-│   ├── cloud-engineer.json
-│   ├── software-developer.json
-│   └── data-analyst.json
+│   ├── cloud-engineer.json    # Infrastructure, SRE tools, and incident triage
+│   ├── software-developer.json# Application engineering, idempotency, testing
+│   └── data-analyst.json      # Product analytics, cohort retention, experimentation
 ├── missions/                  # Fictional workplace missions with synthetic evidence
-│   ├── cloud-sre-01.json      # Latency & 5xx incident simulation
-│   ├── swe-01.json            # Software bug & payload regression simulation
-│   └── data-analyst-01.json   # Funnel conversion drop simulation
-├── frontend/                  # Web UI (Agent 2 - Frontend Developer)
-│   ├── index.html
-│   ├── styles.css
-│   └── app.js
-└── backend/                   # API & Rubric Evaluation (Agent 3 - Backend Developer)
-    ├── main.py
-    └── requirements.txt
+│   ├── cloud-sre-01.json      # Sev-1 Latency & 5xx incident simulation (Guided)
+│   ├── cloud-sre-02.json      # K8s CrashLoopBackOff & OOMKilled leak (Guided)
+│   ├── cloud-sre-03.json      # DNS Resolution cascade & CoreDNS throttling (Independent)
+│   ├── swe-01.json            # Stripe webhook idempotency race condition (Guided)
+│   ├── swe-02.json            # EventEmitter leak & unhandled rejection (Guided)
+│   ├── swe-03.json            # SQL Injection & filter bypass triage (Independent)
+│   ├── data-analyst-01.json   # 35% Mobile checkout drop anomaly (Guided)
+│   ├── data-analyst-02.json   # Cohort retention degradation post-redesign (Guided)
+│   └── data-analyst-03.json   # Sample Ratio Mismatch (SRM) A/B test audit (Independent)
+├── frontend/                  # Web UI (Vanilla JS, CSS variables, zero-build)
+│   ├── index.html             # Multi-view dashboard (Catalog, Workspace, Admin, Profile)
+│   ├── styles.css             # Dark sidebar, bright cards, print styles
+│   └── app.js                 # Client state machine, catalog filtering, API connector
+└── backend/                   # API & Rubric Evaluation (FastAPI + SQLite)
+    ├── main.py                # REST API endpoints & static file hosting
+    ├── rubric.py              # Multi-dimensional heuristic rubric evaluator
+    ├── test_api.py            # Automated test suite (5/5 passing)
+    └── requirements.txt       # Dependencies
 ```
 
 ---

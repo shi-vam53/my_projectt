@@ -1,0 +1,115 @@
+{
+  "id": "cloud-sre-02",
+  "track_id": "cloud-engineer",
+  "type": "guided",
+  "difficulty": "Junior SRE / Cloud Associate",
+  "estimated_time_mins": 25,
+  "title": "Incident 1488: CrashLoopBackOff & OOMKilled Flapping in Billing Service",
+  "problem_brief": "Kubernetes pods for billing-gateway are flapping in CrashLoopBackOff with Exit Code 137 (OOMKilled). Memory utilization climbs linearly from 120MB to the 1024MB container limit every 8 minutes before the Linux kernel terminates the process. Review the pod events, memory profile heap snapshot, Helm memory resources diff, and application cache logs. Identify the memory leak trigger, prescribe immediate resource relief, and outline permanent leak remediation.",
+  "metadata": {
+    "service": "billing-gateway",
+    "cluster": "prod-k8s-us-west-2",
+    "tier": "Tier-1 Payment Infrastructure"
+  },
+  "hints": [
+    {"checkpoint": "1. Pod Exit Code", "hint": "Exit Code 137 indicates SIGKILL sent by Linux kernel cgroup OOM (Out of Memory) killer."},
+    {"checkpoint": "2. Cache Invalidation", "hint": "Look at the application cache log: unbounded in-memory map without TTL or LRU eviction."},
+    {"checkpoint": "3. Safe Mitigation", "hint": "Scale memory limits temporarily while rolling back the unbounded in-memory cache release."}
+  ],
+  "evidence_tabs": [
+    {
+      "id": "k8s_events",
+      "label": "Kubernetes Pod Events",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "10:02:11 UTC", "level": "WARN", "message": "Killing container billing-gateway: container exceeded memory limit 1024Mi."},
+        {"timestamp": "10:02:12 UTC", "level": "ERROR", "message": "Pod billing-gateway-7b94d terminated with exit code 137 (OOMKilled)."},
+        {"timestamp": "10:02:20 UTC", "level": "INFO", "message": "Restarting container in pod billing-gateway-7b94d. RestartCount: 6."},
+        {"timestamp": "10:02:25 UTC", "level": "WARN", "message": "Back-off 5m0s restarting failed container billing-gateway in pod billing-gateway-7b94d (CrashLoopBackOff)."}
+      ]
+    },
+    {
+      "id": "heap_profile",
+      "label": "Memory Telemetry & Heap Profile",
+      "type": "telemetry",
+      "summary": {
+        "memory_growth_rate": "+112 MB per minute under steady 250 rps traffic",
+        "gc_pause_duration": "p99 420ms (Excessive STW pauses before crash)",
+        "retained_heap_allocations": "com.billing.cache.CustomerInvoiceMetadataCache holds 842MB (82% of heap)",
+        "object_count": "1,420,000 uncollected InvoiceMetadata objects retained indefinitely"
+      }
+    },
+    {
+      "id": "git_diff",
+      "label": "Recent PR Diff & Changelog",
+      "type": "markdown",
+      "content": "```java\n// PR #412: 'Fast in-memory cache for repeated invoice metadata lookups'\npublic class CustomerInvoiceMetadataCache {\n    // BUG: ConcurrentHashMap has no maximum size or TTL eviction!\n    private static final Map<String, InvoiceMetadata> CACHE = new ConcurrentHashMap<>();\n    \n    public static void put(String id, InvoiceMetadata meta) {\n        CACHE.put(id, meta);\n    }\n}\n```"
+    },
+    {
+      "id": "runbook",
+      "label": "Kubernetes OOM Runbook",
+      "type": "markdown",
+      "content": "### Kubernetes Pod OOM Runbook\n1. **Emergency Relief**: If critical customer traffic is dropping, patch Deployment memory limit from `1024Mi` to `2048Mi` and set replicas from 4 to 8 to distribute load.\n2. **Rollback SOP**: Revert commit `pr-412` or set deployment environment variable `DISABLE_LOCAL_INVOICE_CACHE=true`.\n3. **Prohibited**: Do NOT disable Kubernetes resource limits entirely in production."
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "incident_timeline",
+      "label": "1. Incident Timeline & Pod Impact Summary",
+      "placeholder": "Summarize pod restart events, Exit Code 137, and customer payment impact...",
+      "guidance": "Cite exact restart counts, memory saturation rates, and pod states."
+    },
+    {
+      "id": "hypothesis",
+      "label": "2. Root Cause Hypothesis (Facts vs Assumptions)",
+      "placeholder": "What caused the steady heap expansion? Distinguish proven facts from assumptions...",
+      "guidance": "Reference the ConcurrentHashMap without TTL and heap dump allocations."
+    },
+    {
+      "id": "safe_mitigation_plan",
+      "label": "3. Immediate Safe Mitigation Plan",
+      "placeholder": "How will you stop CrashLoopBackOff immediately while remaining within safe cluster limits?",
+      "guidance": "Follow the OOM runbook procedures."
+    },
+    {
+      "id": "verification_steps",
+      "label": "4. Verification & Health Confirmation",
+      "placeholder": "How will you verify memory stabilization post-mitigation?",
+      "guidance": "Specify Prometheus memory metrics, restart counts, and soak period."
+    },
+    {
+      "id": "follow_up_improvement",
+      "label": "5. Preventative Follow-up Action",
+      "placeholder": "What long-term caching architecture or linting rules will prevent memory leaks?",
+      "guidance": "Consider Caffeine/Guava cache with strict maximumWeight and weakKeys or Redis TTL."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "evidence_accuracy",
+        "name": "Evidence Accuracy",
+        "weight": 25,
+        "criteria": "Correctly diagnoses Exit Code 137 as kernel OOMKilled, cites CustomerInvoiceMetadataCache holding 82% of heap, and pod CrashLoopBackOff events."
+      },
+      {
+        "id": "plausibility_and_distinction",
+        "name": "Plausibility & Fact/Assumption Clarity",
+        "weight": 25,
+        "criteria": "Isolates the unbounded ConcurrentHashMap leak introduced in PR #412. Separates verified heap metrics from cluster node memory assumptions."
+      },
+      {
+        "id": "safety_and_constraints",
+        "name": "Safe Mitigation Plan",
+        "weight": 25,
+        "criteria": "Applies runbook mitigation: temporary memory limit increase, horizontal pod scaling, or DISABLE_LOCAL_INVOICE_CACHE=true flag."
+      },
+      {
+        "id": "verification_and_followup",
+        "name": "Verification & Preventive Engineering",
+        "weight": 25,
+        "criteria": "Confirms 0 pod restarts and flat memory slope for 30+ minutes; mandates bounded LRU cache with eviction policies and CI heap regression profiling."
+      }
+    ]
+  }
+}

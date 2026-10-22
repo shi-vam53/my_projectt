@@ -41,6 +41,15 @@ class SubmissionRequest(BaseModel):
     answers: dict[str, Any] = Field(min_length=1, description="Answer values keyed by submission field ID")
 
 
+class ReviewRequest(BaseModel):
+    """Request shape for a human reviewer in the admin/reviewer portal."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    status: str = Field(min_length=1, description="Review status: 'approved' or 'needs_revision'")
+    notes: str = Field(default="", description="Reviewer comments and coaching notes")
+
+
 class DataCatalog:
     """Reads tracks and missions from the repository's JSON data directories."""
 
@@ -167,6 +176,41 @@ class SubmissionStore:
         if row is None:
             return None
         return json.loads(row["result_json"])
+
+    def list_all(self, limit: int = 50, mission_id: str | None = None) -> list[dict[str, Any]]:
+        connection = self._connect()
+        try:
+            if mission_id:
+                rows = connection.execute(
+                    "SELECT result_json FROM submissions WHERE mission_id = ? ORDER BY created_at DESC LIMIT ?",
+                    (mission_id, limit),
+                ).fetchall()
+            else:
+                rows = connection.execute(
+                    "SELECT result_json FROM submissions ORDER BY created_at DESC LIMIT ?",
+                    (limit,),
+                ).fetchall()
+        finally:
+            connection.close()
+        return [json.loads(row["result_json"]) for row in rows]
+
+    def update_review(self, submission_id: str, reviewer_status: str, reviewer_notes: str) -> dict[str, Any] | None:
+        sub = self.get(submission_id)
+        if sub is None:
+            return None
+        sub["reviewer_status"] = reviewer_status
+        sub["reviewer_notes"] = reviewer_notes
+        sub["reviewed_at"] = _now_utc()
+        connection = self._connect()
+        try:
+            connection.execute(
+                "UPDATE submissions SET result_json = ? WHERE submission_id = ?",
+                (json.dumps(sub, ensure_ascii=False), submission_id),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+        return sub
 
 
 def _submission_fields(mission: dict[str, Any]) -> list[str]:
@@ -344,12 +388,23 @@ def create_app(
         store.save(result)
         return result
 
+    @application.get("/api/submissions", tags=["submissions"])
+    def list_submissions(limit: int = 50, mission_id: str | None = None) -> list[dict[str, Any]]:
+        return store.list_all(limit=limit, mission_id=mission_id)
+
     @application.get("/api/submissions/{submission_id}", tags=["submissions"])
     def get_submission(submission_id: str) -> dict[str, Any]:
         submission = store.get(submission_id)
         if submission is None:
             raise HTTPException(status_code=404, detail=f"Submission '{submission_id}' was not found")
         return submission
+
+    @application.patch("/api/submissions/{submission_id}/review", tags=["submissions"])
+    def review_submission(submission_id: str, payload: ReviewRequest) -> dict[str, Any]:
+        updated = store.update_review(submission_id, payload.status, payload.notes)
+        if updated is None:
+            raise HTTPException(status_code=404, detail=f"Submission '{submission_id}' was not found")
+        return updated
 
     frontend_dir = root / "frontend"
     if frontend_dir.exists():

@@ -1,0 +1,90 @@
+{
+  "id": "data-analyst-03",
+  "track_id": "data-analyst",
+  "type": "independent",
+  "difficulty": "Mid-Level Product Data Analyst",
+  "estimated_time_mins": 35,
+  "title": "Experimentation Audit: Sample Ratio Mismatch (SRM) in Checkout A/B Test",
+  "problem_brief": "The Growth team is celebrating an A/B test of the checkout flow showing Variant B has a +14.2% lift in average order value (AOV) with p < 0.01. However, looking at the sample allocation count shows Control received 54,200 users while Variant B received only 45,800 users (54.2% vs 45.8%), despite configuring a 50/50 split. Perform a Chi-Square goodness-of-fit test for Sample Ratio Mismatch (SRM), investigate the redirect loop telemetry, and advise leadership on whether to ship.",
+  "metadata": {
+    "domain": "Conversion Rate Optimization (CRO)",
+    "total_sample": "100,000 visitors",
+    "experiment_duration": "14 days"
+  },
+  "evidence_tabs": [
+    {
+      "id": "sample_counts",
+      "label": "Observed vs Expected Sample Counts",
+      "type": "table",
+      "data": [
+        {"variant": "Control (A)", "observed_users": "54,200 (54.2%)", "expected_users": "50,000 (50.0%)", "deviation": "+4,200 users"},
+        {"variant": "Variant B (Single Page)", "observed_users": "45,800 (45.8%)", "expected_users": "50,000 (50.0%)", "deviation": "-4,200 users"},
+        {"variant": "Chi-Square Metric", "observed_users": "Chi^2 = 70.56", "expected_users": "p-value < 0.0000001", "deviation": "EXTREME SRM DETECTED 🚨"}
+      ]
+    },
+    {
+      "id": "cdn_redirects",
+      "label": "CDN Edge Redirect Logs (Variant B)",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "Day 4 14:10:02", "level": "WARN", "message": "Edge worker redirecting user to /checkout/variant-b"},
+        {"timestamp": "Day 4 14:10:03", "level": "ERROR", "message": "Safari iOS: 302 redirect loop detected (3 redirects). Safari dropped session cookie and fell back to Control"},
+        {"timestamp": "Day 4 14:10:05", "level": "INFO", "message": "High-value desktop Chrome users successfully entered Variant B; mobile Safari users dropped back to Control"}
+      ]
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "executive_summary",
+      "label": "1. Executive Summary & SRM Verdict",
+      "placeholder": "State clearly whether Variant B's +14.2% lift is valid or an invalid artifact of selection bias...",
+      "guidance": "Explain why an experiment with p < 0.00001 SRM is fundamentally compromised."
+    },
+    {
+      "id": "data_analysis",
+      "label": "2. Chi-Square Goodness of Fit & Survivorship Bias Analysis",
+      "placeholder": "Calculate and explain the Chi-Square metric and how mobile Safari users were systematically filtered...",
+      "guidance": "Demonstrate that Variant B only measured affluent desktop users while mobile dropped out."
+    },
+    {
+      "id": "immediate_recommendations",
+      "label": "3. Immediate Decision for Leadership",
+      "placeholder": "Should leadership launch Variant B or declare the test invalid and abort?",
+      "guidance": "Explain the business cost of deploying an unrepresentative variant."
+    },
+    {
+      "id": "future_instrumentation",
+      "label": "4. Experimentation Integrity Guardrails",
+      "placeholder": "What automated SRM checks and edge-worker routing tests should be added to future A/B tests?",
+      "guidance": "Propose daily automated SRM alerting and server-side feature flagging."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "srm_statistical_rigor",
+        "name": "Statistical Understanding of SRM",
+        "weight": 30,
+        "criteria": "Identifies Chi^2 = 70.56 (p < 0.0001) as severe Sample Ratio Mismatch proving experimental randomization failed."
+      },
+      {
+        "id": "survivorship_bias_diagnosis",
+        "name": "Survivorship Bias & Root Cause Identification",
+        "weight": 30,
+        "criteria": "Explains how the Safari redirect loop filtered out mobile traffic, creating artificial selection bias that inflated AOV in Variant B."
+      },
+      {
+        "id": "executive_recommendation",
+        "name": "Executive Guidance & Decision Integrity",
+        "weight": 20,
+        "criteria": "Firmly recommends DO NOT SHIP Variant B, halting premature celebration and saving the company from unexpected conversion drops."
+      },
+      {
+        "id": "platform_guardrails",
+        "name": "Automated Experimentation Guardrails",
+        "weight": 20,
+        "criteria": "Proposes automated daily Chi-Square SRM checks in the experimentation dashboard that auto-pause compromised experiments."
+      }
+    ]
+  }
+}

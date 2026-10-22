@@ -38,12 +38,29 @@
           </svg>
           <span>Career Tracks</span>
         </button>
+        <button class="nav-item" id="nav-catalog" data-view="catalog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Mission Catalog</span>
+          <span class="nav-pill" id="catalog-count-pill">9 Missions</span>
+        </button>
         <button class="nav-item" id="nav-workspace" data-view="workspace">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
           </svg>
           <span>Mission Workspace</span>
           <span class="nav-pill live-pill">Active</span>
+        </button>
+        <button class="nav-item" id="nav-role-guide" data-action="open-role-guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>Role Handbook</span>
+          <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">PDF</span>
         </button>
         <button class="nav-item" id="nav-readiness" data-action="open-quiz">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -54,16 +71,26 @@
           <span>Readiness Check</span>
           <span class="nav-pill">5 Qs</span>
         </button>
-        <button class="nav-item" id="nav-role-guide" data-action="open-role-guide">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          </svg>
-          <span>Role Handbook</span>
-          <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">PDF</span>
-        </button>
 
-        <div class="nav-section-label" style="margin-top: 1.5rem;">Assessment</div>
+        <div class="nav-section-label" style="margin-top: 1.5rem;">Assessment & Governance</div>
+        <button class="nav-item" id="nav-admin" data-view="admin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Reviewer Portal</span>
+          <span class="nav-pill" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">Review</span>
+        </button>
+        <button class="nav-item" id="nav-profile" data-view="profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="5"></circle>
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+          </svg>
+          <span>Learner Progress</span>
+          <span class="nav-pill" id="nav-streak-pill">Active</span>
+        </button>
         <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
@@ -310,6 +337,205 @@
             </div>
           </div>
         </section>
+
+        <!-- VIEW 3: Mission Catalog View (Guided vs Independent Sequence) -->
+        <section class="view-section" id="view-catalog" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge">Simulation Curriculum</div>
+            <h1 class="view-title">Mission Learning Sequence: Guided & Independent Practice</h1>
+            <p class="view-description">
+              Follow our sequential curriculum: first <strong>20 guided missions</strong> with checkpoints, hints, and standard operating procedures, followed by <strong>independent missions</strong> featuring raw workplace evidence without hand-holding.
+            </p>
+          </div>
+
+          <!-- Catalog Filter Toolbar -->
+          <div class="catalog-toolbar card">
+            <div class="toolbar-filters">
+              <div class="filter-group">
+                <span class="filter-label">Track:</span>
+                <div class="pill-group" id="catalog-track-pills">
+                  <button class="pill-btn active" data-track="all">All Tracks</button>
+                  <button class="pill-btn" data-track="cloud-engineer">Cloud Engineer & SRE</button>
+                  <button class="pill-btn" data-track="software-developer">Software Developer</button>
+                  <button class="pill-btn" data-track="data-analyst">Data Analyst</button>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <span class="filter-label">Sequence:</span>
+                <div class="pill-group" id="catalog-sequence-pills">
+                  <button class="pill-btn active" data-seq="all">All Types</button>
+                  <button class="pill-btn" data-seq="guided">Guided (With Hints)</button>
+                  <button class="pill-btn" data-seq="independent">Independent (Raw Briefs)</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="toolbar-search">
+              <input type="text" id="catalog-search-input" class="search-field" placeholder="Search by title, service, bug or symptom...">
+            </div>
+          </div>
+
+          <!-- Mission Cards Grid -->
+          <div class="catalog-grid" id="catalog-missions-grid">
+            <!-- Dynamic mission cards will be rendered here -->
+          </div>
+        </section>
+
+        <!-- VIEW 4: Reviewer / Admin Portal View -->
+        <section class="view-section" id="view-admin" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge badge-amber">Staff Reviewer Portal</div>
+            <h1 class="view-title">Assessment & Human-in-the-Loop Review Dashboard</h1>
+            <p class="view-description">
+              Inspect candidate incident investigations, review deterministic rubric scores, calibrate alternative defensible solutions, and issue official Staff Engineer approvals.
+            </p>
+          </div>
+
+          <!-- Admin Metric Cards -->
+          <div class="admin-metrics-row">
+            <div class="metric-card card">
+              <div class="metric-icon bg-indigo">📋</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-total-subs">0</div>
+                <div class="metric-label">Total Submissions</div>
+              </div>
+            </div>
+            <div class="metric-card card">
+              <div class="metric-icon bg-emerald">✓</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-approved-rate">0%</div>
+                <div class="metric-label">Production Ready Rate</div>
+              </div>
+            </div>
+            <div class="metric-card card">
+              <div class="metric-icon bg-amber">⏳</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-pending-count">0</div>
+                <div class="metric-label">Pending Review</div>
+              </div>
+            </div>
+            <div class="metric-card card">
+              <div class="metric-icon bg-purple">🎯</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-avg-score">--</div>
+                <div class="metric-label">Average Rubric Score</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submissions Table Card -->
+          <div class="admin-table-card card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">Candidate Submissions Ledger</h2>
+                <p class="card-subtitle">Real-time submissions evaluated and persisted to WorkSim SQLite database.</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="admin-refresh-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                Refresh
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table" id="admin-submissions-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Mission / Incident</th>
+                    <th>Track</th>
+                    <th>Rubric Score</th>
+                    <th>Automated Verdict</th>
+                    <th>Reviewer Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-submissions-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: Learner Progress & Transcript View -->
+        <section class="view-section" id="view-profile" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge badge-emerald">Learner Dashboard</div>
+            <h1 class="view-title">Practical Engineering Competency Profile</h1>
+            <p class="view-description">
+              Verified record of realistic workplace simulations triaged, investigated, and remediated by this learner.
+            </p>
+          </div>
+
+          <div class="profile-layout">
+            <div class="profile-left-col">
+              <!-- Learner Identity Card -->
+              <div class="profile-card card">
+                <div class="profile-avatar">👨‍💻</div>
+                <h2 class="profile-name">Learner Practitioner</h2>
+                <div class="profile-role-badge">Fresher / Candidate</div>
+                <p class="profile-tagline">Simulating real work problems across Cloud, Backend, and Analytics.</p>
+
+                <div class="profile-stats-grid">
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-completed">0</div>
+                    <div class="pstat-label">Missions Completed</div>
+                  </div>
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-avg-score">--</div>
+                    <div class="pstat-label">Avg Rubric Score</div>
+                  </div>
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-quizzes">0/3</div>
+                    <div class="pstat-label">Readiness Pre-Checks</div>
+                  </div>
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-readiness">In Training</div>
+                    <div class="pstat-label">Industry Readiness</div>
+                  </div>
+                </div>
+
+                <div class="profile-actions">
+                  <button class="btn btn-outline btn-block" id="btn-export-transcript">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export Verified Transcript (Markdown)
+                  </button>
+                  <button class="btn btn-sidebar-outline btn-block" id="btn-reset-progress">
+                    Clear Local Progress
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-right-col">
+              <!-- Competency Skills Card -->
+              <div class="skills-card card">
+                <h3 class="card-title">Demonstrated Workplace Competencies</h3>
+                <p class="card-subtitle">Validated through multi-dimensional rubric evaluations:</p>
+
+                <div class="competencies-checklist" id="profile-competencies-list">
+                  <!-- Dynamic competencies checklist -->
+                </div>
+              </div>
+
+              <!-- Completed Missions History -->
+              <div class="history-card card">
+                <h3 class="card-title">Completed Simulation History</h3>
+                <div class="history-list" id="profile-history-list">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   </div>
@@ -484,6 +710,33 @@
         </div>
         <div class="footer-right">
           <button class="btn btn-primary" id="role-guide-done-btn">Back to Workspace</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. HUMAN REVIEWER CALIBRATION MODAL -->
+  <div class="modal-backdrop" id="reviewer-modal" style="display: none;">
+    <div class="modal-dialog role-guide-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="reviewer-modal-title">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-amber" id="reviewer-modal-badge">Staff Reviewer Assessment</span>
+          <h2 class="modal-title" id="reviewer-modal-title">Candidate Submission Inspection</h2>
+        </div>
+        <button class="btn-close-modal" id="reviewer-modal-close-btn" aria-label="Close Inspection">&times;</button>
+      </div>
+
+      <div class="modal-body reviewer-body" id="reviewer-modal-content">
+        <!-- Candidate answers & rubric scores loaded dynamically -->
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left">
+          <span class="text-muted" id="reviewer-modal-ts" style="font-size: 0.85rem;">Submitted: ...</span>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-outline" id="reviewer-action-revise">Request Revisions</button>
+          <button class="btn btn-primary" id="reviewer-action-approve">Issue Staff Approval</button>
         </div>
       </div>
     </div>

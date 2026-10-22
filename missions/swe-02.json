@@ -1,0 +1,90 @@
+{
+  "id": "swe-02",
+  "track_id": "software-developer",
+  "type": "guided",
+  "difficulty": "Junior Software Engineer",
+  "estimated_time_mins": 30,
+  "title": "Bug 2204: EventEmitter Memory Leak & Unhandled Rejection in Notification Worker",
+  "problem_brief": "The notification microservice terminates with `MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added`. When Redis socket reconnects, unhandled promise rejections trigger process crash. Review the socket connection pool, unit test suite, and listener lifecycle. Fix the dangling listener leak, handle rejection safely, and design an automated leak test.",
+  "metadata": {
+    "service": "notifications-worker",
+    "runtime": "Node.js 20 LTS / TypeScript",
+    "tier": "Tier-2 Messaging"
+  },
+  "hints": [
+    {"checkpoint": "1. Listener Cleanup", "hint": "Every time `acquireClient()` runs, an `error` listener is added with `.on('error')` instead of `.once('error')` and is never removed upon release."},
+    {"checkpoint": "2. Unhandled Rejection", "hint": "Redis reconnect attempts return a rejected promise that lacked a `.catch()` or try/catch boundary, triggering process.exit(1)."}
+  ],
+  "evidence_tabs": [
+    {
+      "id": "stack_trace",
+      "label": "Process Error Logs & Stack Trace",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "04:12:01.201Z", "level": "WARN", "message": "(node:4102) MaxListenersExceededWarning: 11 error listeners added to [RedisSocket]. Use emitter.setMaxListeners() to increase limit"},
+        {"timestamp": "04:12:03.411Z", "level": "ERROR", "message": "UnhandledPromiseRejection: Error: Socket closed abruptly at RedisSocket.onClose (/app/node_modules/@redis/client/dist/lib/client/socket.js:142)"},
+        {"timestamp": "04:12:03.412Z", "level": "FATAL", "message": "Process exited with code 1 due to unhandled promise rejection in strict mode."}
+      ]
+    },
+    {
+      "id": "code_snippet",
+      "label": "Connection Pool Source Code",
+      "type": "markdown",
+      "content": "```typescript\nexport class NotificationSocketPool {\n  async acquireClient() {\n    const client = this.getAvailableSocket();\n    \n    // BUG: Adds new listener every single time client is acquired from pool!\n    client.on('error', (err) => {\n      logger.error('Socket error in pool', { error: err.message });\n      throw err; // BUG: Throws unhandled exception inside event callback!\n    });\n    \n    return client;\n  }\n  \n  releaseClient(client) {\n    // BUG: Missing client.removeListener('error', ...)\n    this.idleSockets.push(client);\n  }\n}\n```"
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "bug_analysis",
+      "label": "1. Root Cause & Event Emitter Leak Mechanics",
+      "placeholder": "Explain how acquireClient() accumulated listeners on pooled sockets...",
+      "guidance": "Explain why re-using pooled instances without listener cleanup causes memory exhaustion."
+    },
+    {
+      "id": "fix_implementation",
+      "label": "2. Proposed TypeScript Fix & Cleanup Lifecycle",
+      "placeholder": "Provide the refactored code demonstrating proper listener removal upon socket release...",
+      "guidance": "Show how removeListener / once and bounded error handling is implemented."
+    },
+    {
+      "id": "testing_plan",
+      "label": "3. Automated Memory Leak Unit Test",
+      "placeholder": "How will you write a test verifying listenerCount('error') remains constant over 1,000 acquires?",
+      "guidance": "Specify assertions using emitter.listenerCount()."
+    },
+    {
+      "id": "process_safety",
+      "label": "4. Unhandled Rejection Global Safeguard",
+      "placeholder": "How should process.on('unhandledRejection') be configured for graceful shutdown?",
+      "guidance": "Discuss graceful connection draining before termination."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "leak_mechanics",
+        "name": "Leak Mechanics & Concurrency Understanding",
+        "weight": 30,
+        "criteria": "Accurately diagnoses repeated client.on('error') registration on shared pooled socket instances without releaseClient() cleanup."
+      },
+      {
+        "id": "code_quality_and_safety",
+        "name": "Code Architecture & Safe Error Handling",
+        "weight": 30,
+        "criteria": "Provides a clean fix removing listeners in releaseClient() or binding a single permanent pool-level error handler."
+      },
+      {
+        "id": "test_verification",
+        "name": "Automated Unit Test Rigor",
+        "weight": 20,
+        "criteria": "Designs an assertion checking client.listenerCount('error') === 1 after multiple acquire/release iterations."
+      },
+      {
+        "id": "runtime_resilience",
+        "name": "Process Resilience & Graceful Shutdown",
+        "weight": 20,
+        "criteria": "Implements clean error boundaries preventing socket disconnects from bringing down the entire Node.js worker process."
+      }
+    ]
+  }
+}

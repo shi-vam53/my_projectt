@@ -1,0 +1,98 @@
+{
+  "id": "data-analyst-02",
+  "track_id": "data-analyst",
+  "type": "guided",
+  "difficulty": "Junior Product Data Analyst",
+  "estimated_time_mins": 30,
+  "title": "Cohort Retention Degradation Post-Onboarding Redesign",
+  "problem_brief": "Two weeks ago, the Growth team replaced the minimalist 1-step sign-up flow with an interactive 6-step gamified onboarding tutorial. While initial sign-ups rose 4%, Day 7 (D7) cohort retention plummeted from 42% to 26%. Analyze the segmented cohort retention curves, step-by-step tutorial abandonment rates, and time-to-first-value telemetry. Identify where users churn, test the friction hypothesis, and deliver executive recommendations.",
+  "metadata": {
+    "domain": "Mobile SaaS Onboarding",
+    "cohort_size": "85,000 new signups",
+    "period": "Oct 2026 Cohorts"
+  },
+  "hints": [
+    {"checkpoint": "1. Time to First Value", "hint": "Look at the median time required to reach the main product dashboard: jumped from 45 seconds to 410 seconds."},
+    {"checkpoint": "2. Step Drop-off", "hint": "Step 4 (Mandatory Team Invites) has a 48% immediate drop-off rate among solo freelancers."}
+  ],
+  "evidence_tabs": [
+    {
+      "id": "cohort_retention",
+      "label": "Cohort Retention Matrix",
+      "type": "table",
+      "data": [
+        {"cohort": "Week of Sep 28 (Old 1-Step Flow)", "d1_retention": "68%", "d3_retention": "54%", "d7_retention": "42%", "d14_retention": "36%"},
+        {"cohort": "Week of Oct 05 (Old 1-Step Flow)", "d1_retention": "69%", "d3_retention": "53%", "d7_retention": "41%", "d14_retention": "35%"},
+        {"cohort": "Week of Oct 12 (New 6-Step Flow)", "d1_retention": "51%", "d3_retention": "36%", "d7_retention": "26%", "d14_retention": "19% 🚨"},
+        {"cohort": "Week of Oct 19 (New 6-Step Flow)", "d1_retention": "49%", "d3_retention": "34%", "d7_retention": "25%", "d14_retention": "18% 🚨"}
+      ]
+    },
+    {
+      "id": "funnel_steps",
+      "label": "Onboarding Tutorial Funnel Steps",
+      "type": "table",
+      "data": [
+        {"step": "Step 1: Account Creation", "completion_rate": "100%", "drop_off": "0%"},
+        {"step": "Step 2: Role Selection", "completion_rate": "94%", "drop_off": "-6%"},
+        {"step": "Step 3: Industry Survey", "completion_rate": "88%", "drop_off": "-6%"},
+        {"step": "Step 4: Mandatory Colleague Invites", "completion_rate": "46%", "drop_off": "-48% ⚠️ (Massive Friction Point)"},
+        {"step": "Step 5: Interactive Tour", "completion_rate": "38%", "drop_off": "-8%"},
+        {"step": "Step 6: Dashboard Reached", "completion_rate": "35%", "drop_off": "-3%"}
+      ]
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "executive_summary",
+      "label": "1. Executive Summary (BLUF: Bottom Line Up Front)",
+      "placeholder": "Summarize the key retention finding in 2-3 concise sentences for the Product Lead...",
+      "guidance": "Quantify the D7 drop from 41% to 25% and name the primary friction driver."
+    },
+    {
+      "id": "data_analysis",
+      "label": "2. Step-by-Step Funnel & Friction Analysis",
+      "placeholder": "Break down the tutorial drop-off numbers and explain why Step 4 alienated users...",
+      "guidance": "Contrast the solo user experience against enterprise teams."
+    },
+    {
+      "id": "immediate_recommendations",
+      "label": "3. Immediate Product Optimization Recommendations",
+      "placeholder": "What immediate change to Step 4 and the tutorial should be deployed this sprint?",
+      "guidance": "e.g., Make teammate invites optional with a 'Skip' button, defer survey."
+    },
+    {
+      "id": "future_instrumentation",
+      "label": "4. Experimentation & Retention Guardrails",
+      "placeholder": "How should future onboarding changes be tested via holdout cohorts before 100% rollout?",
+      "guidance": "Propose rolling A/B holdouts and time-to-first-value telemetry."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "retention_data_accuracy",
+        "name": "Retention Matrix & Cohort Analysis Accuracy",
+        "weight": 30,
+        "criteria": "Directly cites the drop from 41-42% D7 retention down to 25-26% and tracks D1-D14 trajectory."
+      },
+      {
+        "id": "funnel_friction_diagnosis",
+        "name": "Friction Point & Drop-off Root Cause",
+        "weight": 30,
+        "criteria": "Isolates Step 4 (Mandatory Colleague Invites) as the 48% drop-off bottleneck alienating solo practitioners."
+      },
+      {
+        "id": "product_actionability",
+        "name": "Actionable Product Recommendations",
+        "weight": 20,
+        "criteria": "Recommends adding an explicit 'Skip' option on invites and reducing time-to-first-value below 60 seconds."
+      },
+      {
+        "id": "experimentation_rigor",
+        "name": "Cohort Experimentation & Monitoring Guardrails",
+        "weight": 20,
+        "criteria": "Mandates that future onboarding changes evaluate D7 retention in a 50/50 A/B test rather than tracking only top-of-funnel signups."
+      }
+    ]
+  }
+}

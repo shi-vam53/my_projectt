@@ -681,7 +681,7 @@ const MISSIONS_DATA = {
 // ============================================================================
 
 const state = {
-  currentView: 'workspace', // 'tracks' or 'workspace'
+  currentView: 'workspace', // 'tracks', 'workspace', 'catalog', 'admin', 'profile'
   activeTrackId: 'cloud-engineer',
   activeMissionId: 'cloud-sre-01',
   activeEvidenceTabId: 'timeline',
@@ -698,6 +698,18 @@ const state = {
   // Log filter state
   logSearchQuery: '',
   logLevelFilter: 'ALL',
+
+  // Catalog Filter State
+  catalogFilter: {
+    track: 'all',
+    seq: 'all',
+    search: ''
+  },
+  allMissions: [],
+
+  // Admin & Reviewer Ledger State
+  submissionsLedger: [],
+  selectedReviewSubmission: null,
 
   // Auto-save debounce timer
   autoSaveTimer: null
@@ -717,9 +729,13 @@ function initApp() {
   bindQuizModal();
   bindRubricModal();
   bindRoleGuideModal();
+  bindReviewerModal();
+  bindCatalogControls();
+  bindAdminControls();
+  bindProfileControls();
   bindFormEvents();
 
-  // Render initial track selector and active mission
+  loadMissionsCatalog();
   renderTracksView();
   renderMissionWorkspace(state.activeMissionId);
 
@@ -742,6 +758,15 @@ function bindNavigation() {
   bcRoot.addEventListener('click', () => switchView('tracks'));
   sidebarQuickSwitch.addEventListener('click', () => switchView('tracks'));
 
+  const navCatalog = document.getElementById('nav-catalog');
+  if (navCatalog) navCatalog.addEventListener('click', () => switchView('catalog'));
+
+  const navAdmin = document.getElementById('nav-admin');
+  if (navAdmin) navAdmin.addEventListener('click', () => switchView('admin'));
+
+  const navProfile = document.getElementById('nav-profile');
+  if (navProfile) navProfile.addEventListener('click', () => switchView('profile'));
+
   navReadiness.addEventListener('click', () => {
     openReadinessQuiz(state.activeTrackId);
   });
@@ -759,22 +784,34 @@ function bindNavigation() {
 
 function switchView(viewName) {
   state.currentView = viewName;
-  const viewTracks = document.getElementById('view-tracks');
-  const viewWorkspace = document.getElementById('view-workspace');
-  const navTracks = document.getElementById('nav-tracks');
-  const navWorkspace = document.getElementById('nav-workspace');
+  const views = {
+    tracks: document.getElementById('view-tracks'),
+    workspace: document.getElementById('view-workspace'),
+    catalog: document.getElementById('view-catalog'),
+    admin: document.getElementById('view-admin'),
+    profile: document.getElementById('view-profile')
+  };
+  const navs = {
+    tracks: document.getElementById('nav-tracks'),
+    workspace: document.getElementById('nav-workspace'),
+    catalog: document.getElementById('nav-catalog'),
+    admin: document.getElementById('nav-admin'),
+    profile: document.getElementById('nav-profile')
+  };
 
-  if (viewName === 'tracks') {
-    viewTracks.style.display = 'block';
-    viewWorkspace.style.display = 'none';
-    navTracks.classList.add('active');
-    navWorkspace.classList.remove('active');
-  } else {
-    viewTracks.style.display = 'none';
-    viewWorkspace.style.display = 'block';
-    navTracks.classList.remove('active');
-    navWorkspace.classList.add('active');
-  }
+  Object.keys(views).forEach(key => {
+    if (views[key]) views[key].style.display = (key === viewName) ? 'block' : 'none';
+    if (navs[key]) {
+      if (key === viewName) navs[key].classList.add('active');
+      else navs[key].classList.remove('active');
+    }
+  });
+
+  if (viewName === 'catalog') renderCatalogView();
+  if (viewName === 'admin') renderAdminView();
+  if (viewName === 'profile') renderProfileView();
+  if (viewName === 'tracks') renderTracksView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function bindHeaderControls() {
@@ -934,9 +971,24 @@ function renderGlossaryItems() {
 // 5. INTERACTIVE MISSION WORKSPACE RENDERING
 // ============================================================================
 
-function renderMissionWorkspace(missionId) {
-  const mission = MISSIONS_DATA[missionId] || MISSIONS_DATA['cloud-sre-01'];
-  const track = TRACKS_DATA[mission.track_id] || TRACKS_DATA['cloud-engineer'];
+async function renderMissionWorkspace(missionId) {
+  let mission = MISSIONS_DATA[missionId];
+  if (!mission || !mission.evidence_tabs) {
+    try {
+      const res = await fetch(`/api/missions/${missionId}`);
+      if (res.ok) {
+        mission = await res.json();
+        MISSIONS_DATA[missionId] = mission;
+      }
+    } catch (e) {
+      console.warn('Mission fetch fallback:', e);
+    }
+  }
+  if (!mission) mission = MISSIONS_DATA['cloud-sre-01'];
+  state.activeMissionId = mission.id;
+  if (mission.track_id) state.activeTrackId = mission.track_id;
+
+  const track = TRACKS_DATA[mission.track_id] || TRACKS_DATA[state.activeTrackId] || TRACKS_DATA['cloud-engineer'];
 
   // Mission Header Banner
   const titleEl = document.getElementById('mission-title');
@@ -2334,4 +2386,452 @@ async function openRoleGuideModal(trackId) {
 
   if (content) content.innerHTML = html;
   if (modal) modal.style.display = 'flex';
+}
+
+// ============================================================================
+// 10. MISSION CATALOG & LEARNING SEQUENCE
+// ============================================================================
+
+async function loadMissionsCatalog() {
+  try {
+    const res = await fetch('/api/missions');
+    if (res.ok) {
+      const missions = await res.json();
+      state.allMissions = missions;
+      missions.forEach(m => {
+        MISSIONS_DATA[m.id] = Object.assign({}, MISSIONS_DATA[m.id] || {}, m);
+      });
+      const pill = document.getElementById('catalog-count-pill');
+      if (pill) pill.textContent = `${missions.length} Missions`;
+    }
+  } catch (err) {
+    console.warn('API mission catalog fallback:', err);
+    state.allMissions = Object.values(MISSIONS_DATA);
+  }
+}
+
+function bindCatalogControls() {
+  const trackPills = document.querySelectorAll('#catalog-track-pills .pill-btn');
+  trackPills.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      trackPills.forEach(b => b.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      state.catalogFilter.track = e.currentTarget.getAttribute('data-track');
+      renderCatalogView();
+    });
+  });
+
+  const seqPills = document.querySelectorAll('#catalog-sequence-pills .pill-btn');
+  seqPills.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      seqPills.forEach(b => b.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      state.catalogFilter.seq = e.currentTarget.getAttribute('data-seq');
+      renderCatalogView();
+    });
+  });
+
+  const searchInput = document.getElementById('catalog-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      state.catalogFilter.search = e.target.value.toLowerCase().trim();
+      renderCatalogView();
+    });
+  }
+}
+
+function renderCatalogView() {
+  const grid = document.getElementById('catalog-missions-grid');
+  if (!grid) return;
+
+  const missions = state.allMissions.length ? state.allMissions : Object.values(MISSIONS_DATA);
+  const filterTrack = state.catalogFilter.track;
+  const filterSeq = state.catalogFilter.seq;
+  const filterSearch = state.catalogFilter.search;
+
+  const filtered = missions.filter(m => {
+    if (filterTrack !== 'all' && m.track_id !== filterTrack) return false;
+    if (filterSeq !== 'all' && (m.type || 'guided') !== filterSeq) return false;
+    if (filterSearch) {
+      const haystack = `${m.title} ${m.problem_brief} ${m.id} ${m.difficulty || ''}`.toLowerCase();
+      if (!haystack.includes(filterSearch)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+        <h3>No missions found matching filters</h3>
+        <p class="text-muted">Try resetting search or selecting "All Tracks" / "All Types".</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = '';
+  filtered.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'catalog-mission-card';
+    const isGuided = (m.type || 'guided') === 'guided';
+    const trackObj = TRACKS_DATA[m.track_id] || { title: 'Engineering' };
+
+    card.innerHTML = `
+      <div>
+        <div class="catalog-card-header">
+          <span class="badge ${isGuided ? 'badge-indigo' : 'badge-emerald'}">
+            ${isGuided ? 'Guided Mission' : 'Independent Simulation'}
+          </span>
+          <span class="text-muted" style="font-size: 0.8rem; font-weight: 600;">⏱️ ${m.estimated_time_mins || 30} mins</span>
+        </div>
+        <h3 class="catalog-card-title">${escapeHtml(m.title)}</h3>
+        <div style="font-size: 0.8rem; font-weight: 600; color: var(--indigo-600); margin-bottom: 0.5rem;">
+          Track: ${escapeHtml(trackObj.title)} | ${escapeHtml(m.difficulty || 'Associate')}
+        </div>
+        <p class="catalog-card-brief">${escapeHtml((m.problem_brief || '').substring(0, 150))}...</p>
+      </div>
+      <div class="catalog-card-footer">
+        <span class="text-muted" style="font-size: 0.75rem;">
+          ${isGuided ? 'Includes Checkpoints & Hints' : 'Production Raw Evidence'}
+        </span>
+        <button class="btn btn-primary btn-sm btn-launch-mission" data-mission-id="${m.id}">
+          Launch Mission
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('.btn-launch-mission').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const mId = e.currentTarget.getAttribute('data-mission-id');
+      renderMissionWorkspace(mId);
+      switchView('workspace');
+    });
+  });
+}
+
+// ============================================================================
+// 11. STAFF REVIEWER & ADMIN PORTAL
+// ============================================================================
+
+function bindAdminControls() {
+  const refreshBtn = document.getElementById('admin-refresh-btn');
+  if (refreshBtn) refreshBtn.addEventListener('click', renderAdminView);
+}
+
+async function renderAdminView() {
+  const tbody = document.getElementById('admin-submissions-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading submissions from SQLite database...</td></tr>`;
+
+  try {
+    const res = await fetch('/api/submissions');
+    if (res.ok) {
+      state.submissionsLedger = await res.json();
+    }
+  } catch (err) {
+    console.warn('Submissions ledger fetch fallback:', err);
+  }
+
+  const subs = state.submissionsLedger || [];
+
+  // Update summary metrics
+  const totalEl = document.getElementById('admin-total-subs');
+  const approvedRateEl = document.getElementById('admin-approved-rate');
+  const pendingEl = document.getElementById('admin-pending-count');
+  const avgScoreEl = document.getElementById('admin-avg-score');
+
+  if (totalEl) totalEl.textContent = subs.length;
+
+  if (subs.length > 0) {
+    const approvedCount = subs.filter(s => (s.reviewer_status || s.approval_status) === 'approved').length;
+    const avgScore = Math.round(subs.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0) / subs.length);
+    const pendingCount = subs.filter(s => !s.reviewer_status).length;
+
+    if (approvedRateEl) approvedRateEl.textContent = `${Math.round((approvedCount / subs.length) * 100)}%`;
+    if (pendingEl) pendingEl.textContent = pendingCount;
+    if (avgScoreEl) avgScoreEl.textContent = `${avgScore} / 100`;
+  } else {
+    if (approvedRateEl) approvedRateEl.textContent = '0%';
+    if (pendingEl) pendingEl.textContent = '0';
+    if (avgScoreEl) avgScoreEl.textContent = '--';
+  }
+
+  if (subs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+          No candidate submissions in database yet. Submit any mission to see live rubric and reviewer logs.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = '';
+  subs.forEach(s => {
+    const tr = document.createElement('tr');
+    const mission = MISSIONS_DATA[s.mission_id] || { title: s.mission_id, track_id: 'cloud-engineer' };
+    const track = TRACKS_DATA[mission.track_id] || { title: 'Engineering' };
+    const scoreVal = s.score || s.overall_score || 0;
+    const revStatus = s.reviewer_status || (s.approval_status === 'approved' ? 'Staff Approved' : 'Pending Review');
+    const timeFormatted = (s.created_at || '').replace('T', ' ').substring(0, 19);
+
+    tr.innerHTML = `
+      <td style="font-family: monospace; font-size: 0.8rem;">${escapeHtml(timeFormatted)}</td>
+      <td><strong>${escapeHtml(mission.title || s.mission_id)}</strong></td>
+      <td><span class="badge badge-indigo">${escapeHtml(track.title)}</span></td>
+      <td><strong>${scoreVal} / 100</strong></td>
+      <td>
+        <span class="badge ${scoreVal >= 80 ? 'badge-emerald' : 'badge-amber'}">
+          ${escapeHtml(s.approval_status || 'Evaluated')}
+        </span>
+      </td>
+      <td>
+        <span class="badge ${s.reviewer_status === 'approved' ? 'badge-emerald' : (s.reviewer_status === 'needs_revision' ? 'badge-amber' : 'badge-indigo')}">
+          ${escapeHtml(revStatus)}
+        </span>
+      </td>
+      <td>
+        <button class="btn btn-outline btn-sm btn-inspect-sub" data-sub-id="${s.submission_id}">
+          Inspect & Review
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.btn-inspect-sub').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const subId = e.currentTarget.getAttribute('data-sub-id');
+      openReviewerModal(subId);
+    });
+  });
+}
+
+function bindReviewerModal() {
+  const modal = document.getElementById('reviewer-modal');
+  const closeBtn = document.getElementById('reviewer-modal-close-btn');
+  const approveBtn = document.getElementById('reviewer-action-approve');
+  const reviseBtn = document.getElementById('reviewer-action-revise');
+
+  if (closeBtn) closeBtn.addEventListener('click', closeReviewerModal);
+  if (approveBtn) approveBtn.addEventListener('click', () => submitReviewerDecision('approved'));
+  if (reviseBtn) reviseBtn.addEventListener('click', () => submitReviewerDecision('needs_revision'));
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeReviewerModal();
+    });
+  }
+}
+
+function closeReviewerModal() {
+  const modal = document.getElementById('reviewer-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function openReviewerModal(submissionId) {
+  const sub = (state.submissionsLedger || []).find(s => s.submission_id === submissionId);
+  if (!sub) return;
+
+  state.selectedReviewSubmission = sub;
+  const modal = document.getElementById('reviewer-modal');
+  const title = document.getElementById('reviewer-modal-title');
+  const content = document.getElementById('reviewer-modal-content');
+  const ts = document.getElementById('reviewer-modal-ts');
+
+  const mission = MISSIONS_DATA[sub.mission_id] || { title: sub.mission_id };
+  if (title) title.textContent = `Candidate Review: ${mission.title}`;
+  if (ts) ts.textContent = `Submission ID: ${sub.submission_id} | Created: ${sub.created_at}`;
+
+  let answersHtml = Object.entries(sub.answers || {}).map(([key, val]) => `
+    <div class="reviewer-answer-item">
+      <div class="reviewer-answer-label">${escapeHtml(key.replace(/_/g, ' '))}</div>
+      <div class="reviewer-answer-text">${escapeHtml(String(val))}</div>
+    </div>
+  `).join('');
+
+  let dimsHtml = (sub.dimensions || []).map(d => `
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.35rem 0; border-bottom: 1px solid var(--border-subtle);">
+      <span>${escapeHtml(d.name)}</span>
+      <strong>${d.score} / ${d.weight} pts</strong>
+    </div>
+  `).join('');
+
+  let html = `
+    <div style="display: flex; gap: 1rem; align-items: center; background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+      <div style="font-size: 1.5rem; font-weight: 800; color: var(--indigo-600);">${sub.score || sub.overall_score || 0} / 100</div>
+      <div>
+        <div style="font-weight: 700; font-size: 0.95rem;">Automated Rubric Verdict: ${escapeHtml(sub.approval_message || sub.approval_status)}</div>
+        <div style="font-size: 0.825rem; color: var(--text-muted);">${escapeHtml(sub.evaluation_note || 'Deterministic rubric scoring.')}</div>
+      </div>
+    </div>
+
+    <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem;">Dimensional Rubric Scores:</h4>
+    <div style="margin-bottom: 1.25rem; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 0.75rem 1rem;">
+      ${dimsHtml}
+    </div>
+
+    <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem;">Candidate's Structured Incident Report:</h4>
+    <div>${answersHtml}</div>
+
+    <div style="margin-top: 1.25rem;">
+      <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); display: block; margin-bottom: 0.35rem;">
+        Staff Reviewer Coaching Comments & Calibration:
+      </label>
+      <textarea id="reviewer-notes-input" class="field-textarea" style="height: 80px;" placeholder="Add human reviewer notes for the candidate...">${escapeHtml(sub.reviewer_notes || '')}</textarea>
+    </div>
+  `;
+
+  if (content) content.innerHTML = html;
+  if (modal) modal.style.display = 'flex';
+}
+
+async function submitReviewerDecision(status) {
+  const sub = state.selectedReviewSubmission;
+  if (!sub) return;
+
+  const notesEl = document.getElementById('reviewer-notes-input');
+  const notes = notesEl ? notesEl.value.trim() : '';
+
+  try {
+    const res = await fetch(`/api/submissions/${sub.submission_id}/review`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: status, notes: notes })
+    });
+    if (res.ok) {
+      showToast(`Review saved: marked as ${status.toUpperCase()}`, 'success');
+      closeReviewerModal();
+      renderAdminView();
+      return;
+    }
+  } catch (err) {
+    console.warn('Reviewer patch fallback:', err);
+  }
+
+  // Local update fallback
+  sub.reviewer_status = status;
+  sub.reviewer_notes = notes;
+  showToast(`Updated reviewer status locally to ${status.toUpperCase()}`, 'info');
+  closeReviewerModal();
+  renderAdminView();
+}
+
+// ============================================================================
+// 12. LEARNER PROGRESS & COMPETENCY TRANSCRIPT
+// ============================================================================
+
+function bindProfileControls() {
+  const exportBtn = document.getElementById('btn-export-transcript');
+  if (exportBtn) exportBtn.addEventListener('click', exportLearnerTranscript);
+
+  const resetBtn = document.getElementById('btn-reset-progress');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Clear local draft and simulation history?')) {
+        localStorage.clear();
+        showToast('Local progress reset.', 'info');
+        renderProfileView();
+      }
+    });
+  }
+}
+
+function renderProfileView() {
+  const completedMissions = state.submissionsLedger || [];
+  const compCountEl = document.getElementById('pstat-completed');
+  const avgScoreEl = document.getElementById('pstat-avg-score');
+  const readinessEl = document.getElementById('pstat-readiness');
+
+  if (compCountEl) compCountEl.textContent = completedMissions.length;
+
+  if (completedMissions.length > 0) {
+    const avg = Math.round(completedMissions.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0) / completedMissions.length);
+    if (avgScoreEl) avgScoreEl.textContent = `${avg} / 100`;
+    if (readinessEl) readinessEl.textContent = avg >= 80 ? 'Production Ready' : 'In Calibration';
+  } else {
+    if (avgScoreEl) avgScoreEl.textContent = '--';
+    if (readinessEl) readinessEl.textContent = 'In Training';
+  }
+
+  // Competencies list
+  const compList = document.getElementById('profile-competencies-list');
+  if (compList) {
+    const coreCompetencies = [
+      'Sev-1 Incident Triage & War Room Escalation',
+      'Telemetry & APM Analysis (p99/p95 latency percentiles)',
+      'Root Cause Analysis with Fact vs Assumption Discipline',
+      'Operational Runbook Execution & Zero-Downtime Rollbacks',
+      'API Idempotency & Database Unique Constraints',
+      'Asynchronous Event Emitter Memory Leak Cleanup',
+      'SQL Parameterization & Defense in Depth',
+      'Cohort Retention Funnel Drop-off Analysis',
+      'Chi-Square Sample Ratio Mismatch (SRM) Detection'
+    ];
+
+    compList.innerHTML = coreCompetencies.map((comp, idx) => `
+      <div class="comp-item">
+        <span class="comp-check">${idx < (completedMissions.length + 2) ? '✓' : '○'}</span>
+        <span class="comp-text">${escapeHtml(comp)}</span>
+      </div>
+    `).join('');
+  }
+
+  // History list
+  const historyList = document.getElementById('profile-history-list');
+  if (historyList) {
+    if (completedMissions.length === 0) {
+      historyList.innerHTML = `<p class="text-muted" style="padding: 1rem 0;">No completed missions yet. Launch any mission from the catalog to build your verified record.</p>`;
+    } else {
+      historyList.innerHTML = completedMissions.map(s => {
+        const m = MISSIONS_DATA[s.mission_id] || { title: s.mission_id };
+        return `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
+            <div>
+              <strong>${escapeHtml(m.title)}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${s.created_at || ''}</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="badge badge-emerald">${s.score || s.overall_score || 0}/100</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function exportLearnerTranscript() {
+  const subs = state.submissionsLedger || [];
+  let md = `# WorkSim Engineering Practical Verification Transcript\n\n`;
+  md += `**Candidate:** Learner Practitioner (Fresher / Fresher)\n`;
+  md += `**Generated Date:** ${new Date().toISOString()}\n`;
+  md += `**Total Simulations Completed:** ${subs.length}\n\n`;
+  md += `## Verified Simulations Ledger\n\n`;
+
+  if (subs.length === 0) {
+    md += `*No verified missions recorded yet.*\n`;
+  } else {
+    subs.forEach((s, idx) => {
+      const m = MISSIONS_DATA[s.mission_id] || { title: s.mission_id };
+      md += `### ${idx + 1}. ${m.title}\n`;
+      md += `- **Mission ID:** \`${s.mission_id}\`\n`;
+      md += `- **Rubric Score:** ${s.score || s.overall_score || 0} / 100\n`;
+      md += `- **Approval Status:** ${s.reviewer_status || s.approval_status}\n`;
+      md += `- **Timestamp:** ${s.created_at}\n\n`;
+    });
+  }
+
+  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `WorkSim_Engineering_Transcript_${Date.now()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Verified transcript exported as Markdown.', 'success');
 }

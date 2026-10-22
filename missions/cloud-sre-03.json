@@ -1,0 +1,104 @@
+{
+  "id": "cloud-sre-03",
+  "track_id": "cloud-engineer",
+  "type": "independent",
+  "difficulty": "Mid-Level SRE / Associate",
+  "estimated_time_mins": 30,
+  "title": "Incident 1520: Intermittent DNS Resolution Cascades & CoreDNS Throttling",
+  "problem_brief": "During flash sales, downstream microservices report intermittent 'EAI_AGAIN (getaddrinfo ENOTFOUND)' connection drops reaching 3.4% of API calls. Kubernetes worker node CPU is below 40%, but CoreDNS latency spiked to 2,400ms. Inspect the CoreDNS logs, conntrack table metrics, and pod /etc/resolv.conf search domains. Diagnose the root cause without guided hints, provide safe operational mitigation, and propose a resilient cluster DNS architecture.",
+  "metadata": {
+    "service": "k8s-cluster-dns",
+    "cluster": "prod-k8s-eu-central-1",
+    "tier": "Core Infrastructure"
+  },
+  "evidence_tabs": [
+    {
+      "id": "dns_logs",
+      "label": "CoreDNS Query Logs",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "16:22:01 UTC", "level": "WARN", "message": "[WARNING] plugin/errors: 2 api.stripe.com.default.svc.cluster.local. A: NXDOMAIN"},
+        {"timestamp": "16:22:01 UTC", "level": "WARN", "message": "[WARNING] plugin/errors: 2 api.stripe.com.svc.cluster.local. A: NXDOMAIN"},
+        {"timestamp": "16:22:01 UTC", "level": "WARN", "message": "[WARNING] plugin/errors: 2 api.stripe.com.cluster.local. A: NXDOMAIN"},
+        {"timestamp": "16:22:02 UTC", "level": "INFO", "message": "[OK] 2 api.stripe.com. A: NOERROR (5 queries fired for 1 external domain)"},
+        {"timestamp": "16:22:05 UTC", "level": "ERROR", "message": "iptables conntrack: table full, dropping packet (ip_conntrack_max limit reached)."}
+      ]
+    },
+    {
+      "id": "resolv_conf",
+      "label": "Pod /etc/resolv.conf & ndots Config",
+      "type": "markdown",
+      "content": "```text\nnameserver 10.96.0.10\nsearch default.svc.cluster.local svc.cluster.local cluster.local\noptions ndots:5\n```\n**Note:** Because `api.stripe.com` contains fewer than 5 dots (it has 2 dots), glibc appends each search domain sequentially before attempting the raw domain as an external FQDN, generating 4 unnecessary NXDOMAIN queries per external API call."
+    },
+    {
+      "id": "telemetry",
+      "label": "Network & Conntrack Telemetry",
+      "type": "telemetry",
+      "summary": {
+        "coredns_qps": "48,000 queries/sec (82% are redundant NXDOMAIN lookups)",
+        "kernel_conntrack_entries": "262,144 / 262,144 (100% saturated - UDP packets dropping)",
+        "node_local_dns_cache": "Disabled in this cluster"
+      }
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "incident_timeline",
+      "label": "1. Incident Timeline & Scope of Packet Loss",
+      "placeholder": "Document timestamps, affected external API calls, and conntrack table saturation...",
+      "guidance": "Focus on the relationship between traffic surges and DNS packet drops."
+    },
+    {
+      "id": "hypothesis",
+      "label": "2. Root Cause Hypothesis (ndots:5 vs conntrack table)",
+      "placeholder": "Explain how default ndots:5 configuration generated an internal query explosion...",
+      "guidance": "Distinguish verified CoreDNS NXDOMAIN logs from upstream ISP assumptions."
+    },
+    {
+      "id": "safe_mitigation_plan",
+      "label": "3. Immediate Safe Mitigation Plan",
+      "placeholder": "How will you alleviate DNS pressure and conntrack saturation right now?",
+      "guidance": "Consider CoreDNS autoscale, sysctl conntrack limit, and trailing dot FQDNs."
+    },
+    {
+      "id": "verification_steps",
+      "label": "4. Verification & Health Confirmation",
+      "placeholder": "What metrics confirm DNS latency returned to <5ms with 0% dropped UDP packets?",
+      "guidance": "Define CoreDNS metrics and conntrack table saturation thresholds."
+    },
+    {
+      "id": "follow_up_improvement",
+      "label": "5. Preventative Follow-up Action",
+      "placeholder": "What cluster-wide architectural change (e.g. NodeLocal DNSCache) prevents this permanently?",
+      "guidance": "Consider NodeLocal DNSCache daemonset and pod dnsConfig tuning."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "evidence_accuracy",
+        "name": "Evidence Accuracy",
+        "weight": 25,
+        "criteria": "Correctly links conntrack table saturation (262,144 limit) and ndots:5 generating 4 NXDOMAIN queries per external call."
+      },
+      {
+        "id": "plausibility_and_distinction",
+        "name": "Plausibility & Fact/Assumption Clarity",
+        "weight": 25,
+        "criteria": "Explains the glibc ndots DNS lookup mechanics accurately, separating UDP packet drops from node CPU capacity."
+      },
+      {
+        "id": "safety_and_constraints",
+        "name": "Safe Mitigation Plan",
+        "weight": 25,
+        "criteria": "Safely increases kernel conntrack sysctl max, scales CoreDNS replicas, or appends trailing dot (api.stripe.com.) in client configurations."
+      },
+      {
+        "id": "verification_and_followup",
+        "name": "Verification & Preventive Engineering",
+        "weight": 25,
+        "criteria": "Monitors CoreDNS p99 latency < 5ms; deploys Kubernetes NodeLocal DNSCache DaemonSet for local link caching."
+      }
+    ]
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "id": "swe-03",
+  "track_id": "software-developer",
+  "type": "independent",
+  "difficulty": "Mid-Level Software Engineer",
+  "estimated_time_mins": 35,
+  "title": "Security Triage: SQL Injection & Filter Bypass in Product Search API",
+  "problem_brief": "An internal penetration audit discovered that an attacker can inject arbitrary SQL fragments into the `/api/v2/products/search?category=electronics' OR '1'='1` query parameter, bypassing tenant isolation filters. The backend constructs SQL with dynamic string concatenation. Refactor the repository layer to use parameterized queries, ensure backward compatibility for valid special characters, and write security regression test cases.",
+  "metadata": {
+    "service": "catalog-search-api",
+    "runtime": "Python / SQLAlchemy & PostgreSQL",
+    "tier": "Tier-1 Public API"
+  },
+  "evidence_tabs": [
+    {
+      "id": "audit_report",
+      "label": "Security Audit Finding",
+      "type": "markdown",
+      "content": "### Vulnerability ID: SEC-2026-SQLI-01\n**Severity:** Critical (CVSS 9.8)\n**Description:** Tenant isolation check is appended after an unescaped user filter string, allowing unauthenticated attackers to dump competitor products across isolated tenant boundaries:\n`SELECT * FROM products WHERE tenant_id = 42 AND category = '` + user_input + `'`"
+    },
+    {
+      "id": "vulnerable_code",
+      "label": "Vulnerable Repository Code",
+      "type": "markdown",
+      "content": "```python\ndef search_products(db: Session, tenant_id: int, category: str, query: str):\n    # VULNERABLE: Direct string interpolation!\n    sql = f\"\"\"\n        SELECT id, name, price, stock \n        FROM products \n        WHERE tenant_id = {tenant_id} \n          AND category = '{category}'\n          AND name ILIKE '%{query}%'\n    \"\"\"\n    return db.execute(text(sql)).fetchall()\n```"
+    },
+    {
+      "id": "query_logs",
+      "label": "Database Engine Query Logs",
+      "type": "logs",
+      "entries": [
+        {"timestamp": "11:20:10 UTC", "level": "WARN", "message": "Executing raw SQL: SELECT id, name FROM products WHERE tenant_id = 42 AND category = 'books' OR '1'='1' AND name ILIKE '%%'"},
+        {"timestamp": "11:20:11 UTC", "level": "WARN", "message": "Query returned 14,200 rows belonging to all tenant IDs (Isolation breached)."}
+      ]
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "bug_analysis",
+      "label": "1. Vulnerability Analysis & Injection Vector",
+      "placeholder": "Explain how the raw f-string broke SQL syntax and bypassed tenant_id = 42 filter...",
+      "guidance": "Demonstrate the operator precedence of AND vs OR in the raw SQL statement."
+    },
+    {
+      "id": "fix_implementation",
+      "label": "2. Parameterized Fix (SQLAlchemy Bind Parameters)",
+      "placeholder": "Provide the secure refactored code using bind parameters or ORM query builders...",
+      "guidance": "Never sanitize strings manually; use prepared statements."
+    },
+    {
+      "id": "testing_plan",
+      "label": "3. Security Regression Test Suite",
+      "placeholder": "Design test cases passing quotes, semicolons, and OR 1=1 payloads verifying they are treated strictly as literal strings...",
+      "guidance": "Include assertions verifying rows from other tenant IDs are never returned."
+    },
+    {
+      "id": "customer_remediation",
+      "label": "4. Static Analysis & CI Security Guardrails",
+      "placeholder": "What automated linter (e.g. Bandit, Semgrep) should be added to the CI pipeline to prevent future raw SQL interpolation?",
+      "guidance": "Propose automated static application security testing (SAST)."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "vulnerability_diagnosis",
+        "name": "Vulnerability Vector & SQL Operator Mechanics",
+        "weight": 30,
+        "criteria": "Correctly diagnoses string concatenation, explaining how AND/OR precedence neutralized the tenant_id isolation boundary."
+      },
+      {
+        "id": "parameterization_quality",
+        "name": "Parameterized Prepared Statements Implementation",
+        "weight": 30,
+        "criteria": "Rewrites query using bind parameters (e.g. text('... WHERE tenant_id = :tenant_id ...'), {'tenant_id': ...}) or native ORM filtering."
+      },
+      {
+        "id": "test_verification",
+        "name": "Security Test Case Rigor",
+        "weight": 20,
+        "criteria": "Creates tests verifying malicious injection payloads are escaped and return zero cross-tenant records."
+      },
+      {
+        "id": "ci_guardrails",
+        "name": "SAST Guardrails & Defense in Depth",
+        "weight": 20,
+        "criteria": "Proposes Semgrep / Bandit rules blocking raw string formatting inside db.execute() calls."
+      }
+    ]
+  }
+}
