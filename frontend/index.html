@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WorkSim | Practical Engineering Simulation Platform</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
+  <title>Praxis | Practical Engineering Simulation Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'><polygon points='16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5' stroke='%236366f1' stroke-width='2.2' fill='%23111827'/><line x1='16' y1='2' x2='16' y2='16' stroke='%2306b6d4' stroke-width='1.8'/><line x1='16' y1='16' x2='29' y2='22.5' stroke='%233b82f6' stroke-width='1.8'/><line x1='16' y1='16' x2='3' y2='22.5' stroke='%2310b981' stroke-width='1.8'/><circle cx='16' cy='16' r='3.2' fill='%23a855f7'/></svg>">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,15 +14,28 @@
       <div class="sidebar-header">
         <div class="brand">
           <div class="brand-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-              <polyline points="2 17 12 22 22 17"></polyline>
-              <polyline points="2 12 12 17 22 12"></polyline>
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-emblem-svg">
+              <defs>
+                <linearGradient id="praxis-grad-primary" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="50%" stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="#10b981"/>
+                </linearGradient>
+                <linearGradient id="praxis-grad-inner" x1="16" y1="8" x2="16" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#a855f7"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+              <polygon points="16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5" stroke="url(#praxis-grad-primary)" stroke-width="2.2" stroke-linejoin="round" fill="rgba(99, 102, 241, 0.12)"/>
+              <line x1="16" y1="2" x2="16" y2="16" stroke="url(#praxis-grad-primary)" stroke-width="1.8"/>
+              <line x1="16" y1="16" x2="29" y2="22.5" stroke="url(#praxis-grad-primary)" stroke-width="1.8"/>
+              <line x1="16" y1="16" x2="3" y2="22.5" stroke="url(#praxis-grad-primary)" stroke-width="1.8"/>
+              <circle cx="16" cy="16" r="3.2" fill="url(#praxis-grad-inner)"/>
             </svg>
           </div>
           <div class="brand-text">
-            <span class="brand-title">WorkSim</span>
-            <span class="brand-subtitle">Work Simulation Platform</span>
+            <span class="brand-title">Praxis</span>
+            <span class="brand-subtitle">Workplace Simulation Platform</span>
           </div>
         </div>
       </div>
@@ -127,7 +140,7 @@
       <header class="top-header">
         <div class="header-left">
           <div class="breadcrumbs">
-            <span class="breadcrumb-item" id="bc-root">WorkSim</span>
+            <span class="breadcrumb-item" id="bc-root">Praxis</span>
             <span class="breadcrumb-separator">/</span>
             <span class="breadcrumb-item" id="bc-track">Cloud Engineer</span>
             <span class="breadcrumb-separator">/</span>
@@ -429,7 +442,7 @@
             <div class="card-header-flex">
               <div>
                 <h2 class="card-title">Candidate Submissions Ledger</h2>
-                <p class="card-subtitle">Real-time submissions evaluated and persisted to WorkSim SQLite database.</p>
+                <p class="card-subtitle">Real-time submissions evaluated and persisted to Praxis SQLite database.</p>
               </div>
               <button class="btn btn-outline btn-sm" id="admin-refresh-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">

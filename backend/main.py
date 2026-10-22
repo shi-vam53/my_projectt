@@ -37,8 +37,17 @@ class SubmissionRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    mission_id: str = Field(min_length=1, description="ID of the mission being submitted")
-    answers: dict[str, Any] = Field(min_length=1, description="Answer values keyed by submission field ID")
+    mission_id: str = Field(
+        min_length=1,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$",
+        description="ID of the mission being submitted",
+    )
+    answers: dict[str, Any] = Field(
+        min_length=1,
+        max_length=50,
+        description="Answer values keyed by submission field ID",
+    )
 
 
 class ReviewRequest(BaseModel):
@@ -46,8 +55,13 @@ class ReviewRequest(BaseModel):
 
     model_config = ConfigDict(extra="ignore")
 
-    status: str = Field(min_length=1, description="Review status: 'approved' or 'needs_revision'")
-    notes: str = Field(default="", description="Reviewer comments and coaching notes")
+    status: str = Field(
+        min_length=1,
+        max_length=50,
+        pattern=r"^(approved|needs_revision|conditional|pending)$",
+        description="Review status: 'approved' or 'needs_revision'",
+    )
+    notes: str = Field(default="", max_length=10000, description="Reviewer comments and coaching notes")
 
 
 class DataCatalog:
@@ -281,19 +295,29 @@ def create_app(
     store = SubmissionStore(db_path)
 
     application = FastAPI(
-        title="WorkSim API",
+        title="Praxis API",
         version="1.0.0",
         description="Career-track and practical-mission API with transparent rubric scoring.",
     )
     application.state.catalog = catalog
     application.state.submission_store = store
 
+    # Security Headers Middleware
+    @application.middleware("http")
+    async def add_security_headers(request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        return response
+
     # Suitable for the companion local frontend; no cookies or credentials are
     # enabled, so wildcard origins do not expose credentialed browser requests.
     application.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_methods=["GET", "POST", "OPTIONS"],
+        allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
         allow_headers=["*"],
     )
 
@@ -343,6 +367,16 @@ def create_app(
         mission = catalog.get_mission(payload.mission_id)
         if mission is None:
             raise HTTPException(status_code=404, detail=f"Mission '{payload.mission_id}' was not found")
+
+        # Validate answer field keys and lengths
+        for key, value in payload.answers.items():
+            if not re.fullmatch(r"^[A-Za-z0-9_-]{1,100}$", str(key)):
+                raise HTTPException(status_code=422, detail=f"Invalid field ID format: '{key}'")
+            if isinstance(value, str) and len(value) > 30000:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Answer for '{key}' exceeds maximum allowed length (30,000 characters)",
+                )
 
         required_fields = _submission_fields(mission)
         missing_fields = [field_id for field_id in required_fields if field_id not in payload.answers]
@@ -394,6 +428,8 @@ def create_app(
 
     @application.get("/api/submissions/{submission_id}", tags=["submissions"])
     def get_submission(submission_id: str) -> dict[str, Any]:
+        if not re.fullmatch(r"^[A-Za-z0-9-]{1,64}$", submission_id):
+            raise HTTPException(status_code=400, detail="Invalid submission ID format")
         submission = store.get(submission_id)
         if submission is None:
             raise HTTPException(status_code=404, detail=f"Submission '{submission_id}' was not found")
@@ -401,6 +437,8 @@ def create_app(
 
     @application.patch("/api/submissions/{submission_id}/review", tags=["submissions"])
     def review_submission(submission_id: str, payload: ReviewRequest) -> dict[str, Any]:
+        if not re.fullmatch(r"^[A-Za-z0-9-]{1,64}$", submission_id):
+            raise HTTPException(status_code=400, detail="Invalid submission ID format")
         updated = store.update_review(submission_id, payload.status, payload.notes)
         if updated is None:
             raise HTTPException(status_code=404, detail=f"Submission '{submission_id}' was not found")

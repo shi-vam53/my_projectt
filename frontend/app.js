@@ -1396,14 +1396,16 @@ function renderLogEntries(entries) {
 
 function renderSimpleMarkdown(text) {
   if (!text) return '';
-  return text
+  // Sanitize raw HTML tags first to neutralize script and event handler injection
+  const sanitized = escapeHtml(text);
+  return sanitized
     .replace(/^### (.*$)/gim, '<h3>$1</h3>')
     .replace(/^## (.*$)/gim, '<h2>$1</h2>')
     .replace(/^# (.*$)/gim, '<h1>$1</h1>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/```([a-z]*)\n([\s\S]*?)```/g, '<div class="code-diff-block">$2</div>')
+    .replace(/```([a-z]*)\n([\s\S]*?)```/g, '<div class="code-diff-block"><pre>$2</pre></div>')
     .replace(/\n\n/g, '<br><br>');
 }
 
@@ -1980,7 +1982,7 @@ function handleSubmitRubric() {
       backendSubmissionId: backendResult.submission_id
     };
     displayRubricResults(mission, evalResult);
-    showToast('Evaluated & Persisted to WorkSim Database', 'success');
+    showToast('Evaluated & Persisted to Praxis Database', 'success');
   })
   .catch(err => {
     console.warn('Backend unavailable or network error; using client evaluation:', err);
@@ -2173,7 +2175,7 @@ function exportRubricMarkdown() {
   const evalRes = state.lastEvaluation;
   const mission = MISSIONS_DATA[state.activeMissionId];
 
-  let md = `# WorkSim Evaluation Report: ${mission.title}\n`;
+  let md = `# Praxis Evaluation Report: ${mission.title}\n`;
   md += `**Date:** ${new Date().toISOString()}\n`;
   md += `**Overall Score:** ${evalRes.totalScore} / 100 (${evalRes.statusPill})\n\n`;
   md += `## Dimensional Scoring\n\n`;
@@ -2807,7 +2809,7 @@ function renderProfileView() {
 
 function exportLearnerTranscript() {
   const subs = state.submissionsLedger || [];
-  let md = `# WorkSim Engineering Practical Verification Transcript\n\n`;
+  let md = `# Praxis Engineering Practical Verification Transcript\n\n`;
   md += `**Candidate:** Learner Practitioner (Fresher / Fresher)\n`;
   md += `**Generated Date:** ${new Date().toISOString()}\n`;
   md += `**Total Simulations Completed:** ${subs.length}\n\n`;
@@ -2830,7 +2832,7 @@ function exportLearnerTranscript() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `WorkSim_Engineering_Transcript_${Date.now()}.md`;
+  a.download = `Praxis_Engineering_Transcript_${Date.now()}.md`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('Verified transcript exported as Markdown.', 'success');
