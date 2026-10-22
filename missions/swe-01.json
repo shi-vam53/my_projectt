@@ -23,11 +23,31 @@
       "label": "Webhook Logs",
       "type": "logs",
       "entries": [
-        {"timestamp": "09:00:01.120Z", "level": "INFO", "message": "Received webhook evt_109283 (invoice.payment_succeeded)"},
-        {"timestamp": "09:00:01.125Z", "level": "INFO", "message": "Dispatched async handlers for evt_109283"},
-        {"timestamp": "09:00:01.140Z", "level": "INFO", "message": "Stripe timeout waiting for 200 OK (network blip)"},
-        {"timestamp": "09:00:01.350Z", "level": "INFO", "message": "Received retry webhook evt_109283 (invoice.payment_succeeded)"},
-        {"timestamp": "09:00:01.410Z", "level": "WARN", "message": "Second insert for evt_109283 executed without uniqueness check"}
+        {
+          "timestamp": "09:00:01.120Z",
+          "level": "INFO",
+          "message": "Received webhook evt_109283 (invoice.payment_succeeded)"
+        },
+        {
+          "timestamp": "09:00:01.125Z",
+          "level": "INFO",
+          "message": "Dispatched async handlers for evt_109283"
+        },
+        {
+          "timestamp": "09:00:01.140Z",
+          "level": "INFO",
+          "message": "Stripe timeout waiting for 200 OK (network blip)"
+        },
+        {
+          "timestamp": "09:00:01.350Z",
+          "level": "INFO",
+          "message": "Received retry webhook evt_109283 (invoice.payment_succeeded)"
+        },
+        {
+          "timestamp": "09:00:01.410Z",
+          "level": "WARN",
+          "message": "Second insert for evt_109283 executed without uniqueness check"
+        }
       ]
     },
     {

@@ -12,9 +12,18 @@
     "tier": "Tier-1 Payment Infrastructure"
   },
   "hints": [
-    {"checkpoint": "1. Pod Exit Code", "hint": "Exit Code 137 indicates SIGKILL sent by Linux kernel cgroup OOM (Out of Memory) killer."},
-    {"checkpoint": "2. Cache Invalidation", "hint": "Look at the application cache log: unbounded in-memory map without TTL or LRU eviction."},
-    {"checkpoint": "3. Safe Mitigation", "hint": "Scale memory limits temporarily while rolling back the unbounded in-memory cache release."}
+    {
+      "checkpoint": "1. Pod Exit Code",
+      "hint": "Exit Code 137 indicates SIGKILL sent by Linux kernel cgroup OOM (Out of Memory) killer."
+    },
+    {
+      "checkpoint": "2. Cache Invalidation",
+      "hint": "Look at the application cache log: unbounded in-memory map without TTL or LRU eviction."
+    },
+    {
+      "checkpoint": "3. Safe Mitigation",
+      "hint": "Scale memory limits temporarily while rolling back the unbounded in-memory cache release."
+    }
   ],
   "evidence_tabs": [
     {
@@ -22,10 +31,26 @@
       "label": "Kubernetes Pod Events",
       "type": "logs",
       "entries": [
-        {"timestamp": "10:02:11 UTC", "level": "WARN", "message": "Killing container billing-gateway: container exceeded memory limit 1024Mi."},
-        {"timestamp": "10:02:12 UTC", "level": "ERROR", "message": "Pod billing-gateway-7b94d terminated with exit code 137 (OOMKilled)."},
-        {"timestamp": "10:02:20 UTC", "level": "INFO", "message": "Restarting container in pod billing-gateway-7b94d. RestartCount: 6."},
-        {"timestamp": "10:02:25 UTC", "level": "WARN", "message": "Back-off 5m0s restarting failed container billing-gateway in pod billing-gateway-7b94d (CrashLoopBackOff)."}
+        {
+          "timestamp": "10:02:11 UTC",
+          "level": "WARN",
+          "message": "Killing container billing-gateway: container exceeded memory limit 1024Mi."
+        },
+        {
+          "timestamp": "10:02:12 UTC",
+          "level": "ERROR",
+          "message": "Pod billing-gateway-7b94d terminated with exit code 137 (OOMKilled)."
+        },
+        {
+          "timestamp": "10:02:20 UTC",
+          "level": "INFO",
+          "message": "Restarting container in pod billing-gateway-7b94d. RestartCount: 6."
+        },
+        {
+          "timestamp": "10:02:25 UTC",
+          "level": "WARN",
+          "message": "Back-off 5m0s restarting failed container billing-gateway in pod billing-gateway-7b94d (CrashLoopBackOff)."
+        }
       ]
     },
     {

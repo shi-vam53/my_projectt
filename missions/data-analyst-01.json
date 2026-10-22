@@ -17,10 +17,30 @@
       "label": "Overall Funnel Metrics",
       "type": "table",
       "data": [
-        {"step": "1. Product View", "last_week": "450,000", "this_week": "452,000", "change": "+0.4%"},
-        {"step": "2. Add to Cart", "last_week": "135,000 (30.0%)", "this_week": "136,500 (30.2%)", "change": "+1.1%"},
-        {"step": "3. Initiate Checkout", "last_week": "67,500 (15.0%)", "this_week": "68,000 (15.0%)", "change": "+0.7%"},
-        {"step": "4. Complete Purchase", "last_week": "21,600 (4.8%)", "this_week": "14,012 (3.1%)", "change": "-35.1% ⚠️"}
+        {
+          "step": "1. Product View",
+          "last_week": "450,000",
+          "this_week": "452,000",
+          "change": "+0.4%"
+        },
+        {
+          "step": "2. Add to Cart",
+          "last_week": "135,000 (30.0%)",
+          "this_week": "136,500 (30.2%)",
+          "change": "+1.1%"
+        },
+        {
+          "step": "3. Initiate Checkout",
+          "last_week": "67,500 (15.0%)",
+          "this_week": "68,000 (15.0%)",
+          "change": "+0.7%"
+        },
+        {
+          "step": "4. Complete Purchase",
+          "last_week": "21,600 (4.8%)",
+          "this_week": "14,012 (3.1%)",
+          "change": "-35.1% \u26a0\ufe0f"
+        }
       ]
     },
     {
@@ -28,10 +48,34 @@
       "label": "Segmented by Platform & OS",
       "type": "table",
       "data": [
-        {"segment": "Desktop Chrome", "traffic_share": "45%", "conversion_last_week": "5.2%", "conversion_this_week": "5.3%", "status": "Normal"},
-        {"segment": "Desktop Safari", "traffic_share": "15%", "conversion_last_week": "4.9%", "conversion_this_week": "4.8%", "status": "Normal"},
-        {"segment": "Android App (v4.2)", "traffic_share": "20%", "conversion_last_week": "4.4%", "conversion_this_week": "4.3%", "status": "Normal"},
-        {"segment": "iOS App (v4.3 - Released Oct 14)", "traffic_share": "20%", "conversion_last_week": "4.6%", "conversion_this_week": "0.4%", "status": "CRITICAL DROP 🚨"}
+        {
+          "segment": "Desktop Chrome",
+          "traffic_share": "45%",
+          "conversion_last_week": "5.2%",
+          "conversion_this_week": "5.3%",
+          "status": "Normal"
+        },
+        {
+          "segment": "Desktop Safari",
+          "traffic_share": "15%",
+          "conversion_last_week": "4.9%",
+          "conversion_this_week": "4.8%",
+          "status": "Normal"
+        },
+        {
+          "segment": "Android App (v4.2)",
+          "traffic_share": "20%",
+          "conversion_last_week": "4.4%",
+          "conversion_this_week": "4.3%",
+          "status": "Normal"
+        },
+        {
+          "segment": "iOS App (v4.3 - Released Oct 14)",
+          "traffic_share": "20%",
+          "conversion_last_week": "4.6%",
+          "conversion_this_week": "0.4%",
+          "status": "CRITICAL DROP \ud83d\udea8"
+        }
       ]
     },
     {
@@ -39,8 +83,18 @@
       "label": "Frontend Error Logs (iOS v4.3)",
       "type": "logs",
       "entries": [
-        {"timestamp": "Oct 15 10:22:01", "level": "FATAL", "client": "iOS v4.3", "error": "ApplePayController: nil unwrapped optional on `shipping_contact_postal_code`"},
-        {"timestamp": "Oct 15 10:24:19", "level": "FATAL", "client": "iOS v4.3", "error": "Crash report: checkout sheet terminated unexpectedly on ApplePay button touch."}
+        {
+          "timestamp": "Oct 15 10:22:01",
+          "level": "FATAL",
+          "client": "iOS v4.3",
+          "error": "ApplePayController: nil unwrapped optional on `shipping_contact_postal_code`"
+        },
+        {
+          "timestamp": "Oct 15 10:24:19",
+          "level": "FATAL",
+          "client": "iOS v4.3",
+          "error": "Crash report: checkout sheet terminated unexpectedly on ApplePay button touch."
+        }
       ]
     }
   ],

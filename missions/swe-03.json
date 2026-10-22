@@ -1,7 +1,7 @@
 {
   "id": "swe-03",
   "track_id": "software-developer",
-  "type": "independent",
+  "type": "guided",
   "difficulty": "Mid-Level Software Engineer",
   "estimated_time_mins": 35,
   "title": "Security Triage: SQL Injection & Filter Bypass in Product Search API",
@@ -29,8 +29,16 @@
       "label": "Database Engine Query Logs",
       "type": "logs",
       "entries": [
-        {"timestamp": "11:20:10 UTC", "level": "WARN", "message": "Executing raw SQL: SELECT id, name FROM products WHERE tenant_id = 42 AND category = 'books' OR '1'='1' AND name ILIKE '%%'"},
-        {"timestamp": "11:20:11 UTC", "level": "WARN", "message": "Query returned 14,200 rows belonging to all tenant IDs (Isolation breached)."}
+        {
+          "timestamp": "11:20:10 UTC",
+          "level": "WARN",
+          "message": "Executing raw SQL: SELECT id, name FROM products WHERE tenant_id = 42 AND category = 'books' OR '1'='1' AND name ILIKE '%%'"
+        },
+        {
+          "timestamp": "11:20:11 UTC",
+          "level": "WARN",
+          "message": "Query returned 14,200 rows belonging to all tenant IDs (Isolation breached)."
+        }
       ]
     }
   ],

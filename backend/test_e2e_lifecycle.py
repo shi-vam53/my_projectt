@@ -148,4 +148,4 @@ def test_complete_user_journey_and_quality_audit(client):
     assert csv_resp.status_code == 200
     csv_text = csv_resp.text
     assert "User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform" in csv_text
-    assert "fresher_rohit,Rohit Verma,Cloud & Platform SRE,Yes (Permanent),Passed (5/5),5/5" in csv_text
+    assert "fresher_rohit,Rohit Verma,Cloud Engineer,Yes (Permanent),Passed (5/5),5/5" in csv_text

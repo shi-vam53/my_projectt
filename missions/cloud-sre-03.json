@@ -1,7 +1,7 @@
 {
   "id": "cloud-sre-03",
   "track_id": "cloud-engineer",
-  "type": "independent",
+  "type": "guided",
   "difficulty": "Mid-Level SRE / Associate",
   "estimated_time_mins": 30,
   "title": "Incident 1520: Intermittent DNS Resolution Cascades & CoreDNS Throttling",
@@ -17,11 +17,31 @@
       "label": "CoreDNS Query Logs",
       "type": "logs",
       "entries": [
-        {"timestamp": "16:22:01 UTC", "level": "WARN", "message": "[WARNING] plugin/errors: 2 api.stripe.com.default.svc.cluster.local. A: NXDOMAIN"},
-        {"timestamp": "16:22:01 UTC", "level": "WARN", "message": "[WARNING] plugin/errors: 2 api.stripe.com.svc.cluster.local. A: NXDOMAIN"},
-        {"timestamp": "16:22:01 UTC", "level": "WARN", "message": "[WARNING] plugin/errors: 2 api.stripe.com.cluster.local. A: NXDOMAIN"},
-        {"timestamp": "16:22:02 UTC", "level": "INFO", "message": "[OK] 2 api.stripe.com. A: NOERROR (5 queries fired for 1 external domain)"},
-        {"timestamp": "16:22:05 UTC", "level": "ERROR", "message": "iptables conntrack: table full, dropping packet (ip_conntrack_max limit reached)."}
+        {
+          "timestamp": "16:22:01 UTC",
+          "level": "WARN",
+          "message": "[WARNING] plugin/errors: 2 api.stripe.com.default.svc.cluster.local. A: NXDOMAIN"
+        },
+        {
+          "timestamp": "16:22:01 UTC",
+          "level": "WARN",
+          "message": "[WARNING] plugin/errors: 2 api.stripe.com.svc.cluster.local. A: NXDOMAIN"
+        },
+        {
+          "timestamp": "16:22:01 UTC",
+          "level": "WARN",
+          "message": "[WARNING] plugin/errors: 2 api.stripe.com.cluster.local. A: NXDOMAIN"
+        },
+        {
+          "timestamp": "16:22:02 UTC",
+          "level": "INFO",
+          "message": "[OK] 2 api.stripe.com. A: NOERROR (5 queries fired for 1 external domain)"
+        },
+        {
+          "timestamp": "16:22:05 UTC",
+          "level": "ERROR",
+          "message": "iptables conntrack: table full, dropping packet (ip_conntrack_max limit reached)."
+        }
       ]
     },
     {

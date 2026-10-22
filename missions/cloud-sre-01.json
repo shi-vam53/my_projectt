@@ -17,11 +17,26 @@
       "label": "Incident Timeline",
       "type": "timeline",
       "items": [
-        {"time": "14:05 UTC", "event": "CI/CD pipeline builds tag release-v2.4.0 (Author: commit 9fa812c)."},
-        {"time": "14:10 UTC", "event": "Rolling deployment of release-v2.4.0 completes across 12 pods in prod-us-east-1."},
-        {"time": "14:14 UTC", "event": "p99 latency metric crosses threshold of 500ms (reaches 1,200ms)."},
-        {"time": "14:15 UTC", "event": "PagerDuty Severity-1 alert fires: Payments API 5xx error rate > 5%."},
-        {"time": "14:18 UTC", "event": "On-call SRE acknowledges alert and opens incident war room."}
+        {
+          "time": "14:05 UTC",
+          "event": "CI/CD pipeline builds tag release-v2.4.0 (Author: commit 9fa812c)."
+        },
+        {
+          "time": "14:10 UTC",
+          "event": "Rolling deployment of release-v2.4.0 completes across 12 pods in prod-us-east-1."
+        },
+        {
+          "time": "14:14 UTC",
+          "event": "p99 latency metric crosses threshold of 500ms (reaches 1,200ms)."
+        },
+        {
+          "time": "14:15 UTC",
+          "event": "PagerDuty Severity-1 alert fires: Payments API 5xx error rate > 5%."
+        },
+        {
+          "time": "14:18 UTC",
+          "event": "On-call SRE acknowledges alert and opens incident war room."
+        }
       ]
     },
     {
@@ -43,11 +58,31 @@
       "label": "Application Logs",
       "type": "logs",
       "entries": [
-        {"timestamp": "14:12:04 UTC", "level": "INFO", "message": "Service checkout-payments-api v2.4.0 warm-up complete."},
-        {"timestamp": "14:13:21 UTC", "level": "WARN", "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."},
-        {"timestamp": "14:13:45 UTC", "level": "ERROR", "message": "POST /v1/checkout/charge failed - upstream timeout after 5000ms (client_id: u_88291)."},
-        {"timestamp": "14:14:10 UTC", "level": "ERROR", "message": "DB connection pool exhausted. Active: 100, Idle: 0, Waiting: 42. Thread blocked at com.payments.dao.AuditLogger.persistSyncAuditLog()"},
-        {"timestamp": "14:15:02 UTC", "level": "ERROR", "message": "HTTP 504 Gateway Timeout dispatched to ingress gateway. Latency: 5002ms."}
+        {
+          "timestamp": "14:12:04 UTC",
+          "level": "INFO",
+          "message": "Service checkout-payments-api v2.4.0 warm-up complete."
+        },
+        {
+          "timestamp": "14:13:21 UTC",
+          "level": "WARN",
+          "message": "HikariPool-1 - Connection is not available, request timed out after 3000ms."
+        },
+        {
+          "timestamp": "14:13:45 UTC",
+          "level": "ERROR",
+          "message": "POST /v1/checkout/charge failed - upstream timeout after 5000ms (client_id: u_88291)."
+        },
+        {
+          "timestamp": "14:14:10 UTC",
+          "level": "ERROR",
+          "message": "DB connection pool exhausted. Active: 100, Idle: 0, Waiting: 42. Thread blocked at com.payments.dao.AuditLogger.persistSyncAuditLog()"
+        },
+        {
+          "timestamp": "14:15:02 UTC",
+          "level": "ERROR",
+          "message": "HTTP 504 Gateway Timeout dispatched to ingress gateway. Latency: 5002ms."
+        }
       ]
     },
     {

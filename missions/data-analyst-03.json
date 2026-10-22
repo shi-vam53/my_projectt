@@ -1,7 +1,7 @@
 {
   "id": "data-analyst-03",
   "track_id": "data-analyst",
-  "type": "independent",
+  "type": "guided",
   "difficulty": "Mid-Level Product Data Analyst",
   "estimated_time_mins": 35,
   "title": "Experimentation Audit: Sample Ratio Mismatch (SRM) in Checkout A/B Test",
@@ -17,9 +17,24 @@
       "label": "Observed vs Expected Sample Counts",
       "type": "table",
       "data": [
-        {"variant": "Control (A)", "observed_users": "54,200 (54.2%)", "expected_users": "50,000 (50.0%)", "deviation": "+4,200 users"},
-        {"variant": "Variant B (Single Page)", "observed_users": "45,800 (45.8%)", "expected_users": "50,000 (50.0%)", "deviation": "-4,200 users"},
-        {"variant": "Chi-Square Metric", "observed_users": "Chi^2 = 70.56", "expected_users": "p-value < 0.0000001", "deviation": "EXTREME SRM DETECTED 🚨"}
+        {
+          "variant": "Control (A)",
+          "observed_users": "54,200 (54.2%)",
+          "expected_users": "50,000 (50.0%)",
+          "deviation": "+4,200 users"
+        },
+        {
+          "variant": "Variant B (Single Page)",
+          "observed_users": "45,800 (45.8%)",
+          "expected_users": "50,000 (50.0%)",
+          "deviation": "-4,200 users"
+        },
+        {
+          "variant": "Chi-Square Metric",
+          "observed_users": "Chi^2 = 70.56",
+          "expected_users": "p-value < 0.0000001",
+          "deviation": "EXTREME SRM DETECTED \ud83d\udea8"
+        }
       ]
     },
     {
@@ -27,9 +42,21 @@
       "label": "CDN Edge Redirect Logs (Variant B)",
       "type": "logs",
       "entries": [
-        {"timestamp": "Day 4 14:10:02", "level": "WARN", "message": "Edge worker redirecting user to /checkout/variant-b"},
-        {"timestamp": "Day 4 14:10:03", "level": "ERROR", "message": "Safari iOS: 302 redirect loop detected (3 redirects). Safari dropped session cookie and fell back to Control"},
-        {"timestamp": "Day 4 14:10:05", "level": "INFO", "message": "High-value desktop Chrome users successfully entered Variant B; mobile Safari users dropped back to Control"}
+        {
+          "timestamp": "Day 4 14:10:02",
+          "level": "WARN",
+          "message": "Edge worker redirecting user to /checkout/variant-b"
+        },
+        {
+          "timestamp": "Day 4 14:10:03",
+          "level": "ERROR",
+          "message": "Safari iOS: 302 redirect loop detected (3 redirects). Safari dropped session cookie and fell back to Control"
+        },
+        {
+          "timestamp": "Day 4 14:10:05",
+          "level": "INFO",
+          "message": "High-value desktop Chrome users successfully entered Variant B; mobile Safari users dropped back to Control"
+        }
       ]
     }
   ],

@@ -1,0 +1,138 @@
+{
+  "id": "swe-07",
+  "track_id": "software-developer",
+  "type": "guided",
+  "difficulty": "Mid-Level Specialist",
+  "estimated_time_mins": 35,
+  "title": "Data Modeling: Zero-Downtime Database Migration for User Phone Numbers",
+  "problem_brief": "Execute expand-and-contract column migration without locking table or breaking APIs.",
+  "metadata": {
+    "track": "software-developer",
+    "category": "Guided Simulation",
+    "tier": "Tier-1 Production"
+  },
+  "evidence_tabs": [
+    {
+      "id": "timeline",
+      "label": "Incident Timeline",
+      "type": "timeline",
+      "items": [
+        {
+          "time": "00:00 UTC",
+          "event": "Baseline metrics normal; telemetry within expected SLO bounds."
+        },
+        {
+          "time": "00:15 UTC",
+          "event": "Automated monitoring alert triggers for Data Modeling: Zero-Downtime Database Migration for User Phone Numbers."
+        },
+        {
+          "time": "00:20 UTC",
+          "event": "On-call specialist acknowledges alert and initiates investigation."
+        },
+        {
+          "time": "00:30 UTC",
+          "event": "Engineering war room opened; telemetry and diagnostic logs collected."
+        }
+      ]
+    },
+    {
+      "id": "telemetry",
+      "label": "Telemetry & Metrics",
+      "type": "telemetry",
+      "summary": {
+        "health_status": "Degraded",
+        "anomaly_detected": "Data Modeling: Zero-Downtime Database Migration for User Phone Numbers",
+        "target_service": "prod-software-developer-core",
+        "sli_compliance": "Violation (Below 99.9% Target)"
+      }
+    },
+    {
+      "id": "logs",
+      "label": "System Logs",
+      "type": "logs",
+      "entries": [
+        {
+          "timestamp": "00:15:02 UTC",
+          "level": "WARN",
+          "message": "Anomaly threshold crossed in software-developer subsystem."
+        },
+        {
+          "timestamp": "00:18:22 UTC",
+          "level": "ERROR",
+          "message": "Operation failure: Execute expand-and-contract column migration without locking table or breaking A..."
+        },
+        {
+          "timestamp": "00:22:45 UTC",
+          "level": "INFO",
+          "message": "Diagnostics captured. Awaiting engineer remediation plan."
+        }
+      ]
+    },
+    {
+      "id": "runbook",
+      "label": "Operating Runbook",
+      "type": "markdown",
+      "content": "### Operational Runbook & SOP: Data Modeling: Zero-Downtime Database Migration for User Phone Numbers\n\n**Standard Operating Procedure:**\n1. Confirm symptom against live metrics and logs.\n2. Execute immediate safe mitigation to protect customer SLA.\n3. Formulate verifiable hypothesis distinguishing verified facts from unverified assumptions.\n4. Define health verification criteria.\n5. Document permanent prevention action."
+    }
+  ],
+  "submission_fields": [
+    {
+      "id": "incident_timeline",
+      "label": "1. Timeline & Impact Assessment",
+      "placeholder": "Summarize what occurred, timestamps, and customer or data impact...",
+      "guidance": "Include start time, affected systems, and severity."
+    },
+    {
+      "id": "hypothesis",
+      "label": "2. Root Cause Hypothesis (Facts vs Assumptions)",
+      "placeholder": "What caused the issue? Clearly state what is proven by evidence vs working assumptions...",
+      "guidance": "Reference specific evidence items, logs, or metrics."
+    },
+    {
+      "id": "safe_mitigation_plan",
+      "label": "3. Immediate Safe Mitigation Plan",
+      "placeholder": "What immediate action should be taken right now according to SOP?",
+      "guidance": "Consult the Runbook for approved remediation commands."
+    },
+    {
+      "id": "verification_steps",
+      "label": "4. Verification & Health Confirmation",
+      "placeholder": "How will you confirm normal healthy state before closing the incident?",
+      "guidance": "Define exact metrics, observation windows, and test queries."
+    },
+    {
+      "id": "follow_up_improvement",
+      "label": "5. Preventative Hardening",
+      "placeholder": "What long-term architectural or process fix prevents recurrence?",
+      "guidance": "Consider automated CI/CD gates, alerts, or architectural decoupling."
+    }
+  ],
+  "rubric": {
+    "dimensions": [
+      {
+        "id": "evidence_accuracy",
+        "name": "Evidence Accuracy",
+        "weight": 25,
+        "criteria": "Accurately references the problem details for Data Modeling: Zero-Downtime Database Migration for User Phone Numbers, recognizing the core failure symptoms and evidence logs."
+      },
+      {
+        "id": "plausibility_and_distinction",
+        "name": "Root Cause Plausibility",
+        "weight": 25,
+        "criteria": "Distinguishes facts directly supported by logs/metrics from unproven working assumptions."
+      },
+      {
+        "id": "safety_and_constraints",
+        "name": "Safe Mitigation Strategy",
+        "weight": 25,
+        "criteria": "Proposes safe, controlled remediation adhering to runbook SOP without introducing secondary outages."
+      },
+      {
+        "id": "verification_and_followup",
+        "name": "Verification & Prevention",
+        "weight": 25,
+        "criteria": "Specifies concrete telemetry verification criteria and a durable architectural improvement."
+      }
+    ]
+  }
+}

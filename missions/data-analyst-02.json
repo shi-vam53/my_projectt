@@ -12,8 +12,14 @@
     "period": "Oct 2026 Cohorts"
   },
   "hints": [
-    {"checkpoint": "1. Time to First Value", "hint": "Look at the median time required to reach the main product dashboard: jumped from 45 seconds to 410 seconds."},
-    {"checkpoint": "2. Step Drop-off", "hint": "Step 4 (Mandatory Team Invites) has a 48% immediate drop-off rate among solo freelancers."}
+    {
+      "checkpoint": "1. Time to First Value",
+      "hint": "Look at the median time required to reach the main product dashboard: jumped from 45 seconds to 410 seconds."
+    },
+    {
+      "checkpoint": "2. Step Drop-off",
+      "hint": "Step 4 (Mandatory Team Invites) has a 48% immediate drop-off rate among solo freelancers."
+    }
   ],
   "evidence_tabs": [
     {
@@ -21,10 +27,34 @@
       "label": "Cohort Retention Matrix",
       "type": "table",
       "data": [
-        {"cohort": "Week of Sep 28 (Old 1-Step Flow)", "d1_retention": "68%", "d3_retention": "54%", "d7_retention": "42%", "d14_retention": "36%"},
-        {"cohort": "Week of Oct 05 (Old 1-Step Flow)", "d1_retention": "69%", "d3_retention": "53%", "d7_retention": "41%", "d14_retention": "35%"},
-        {"cohort": "Week of Oct 12 (New 6-Step Flow)", "d1_retention": "51%", "d3_retention": "36%", "d7_retention": "26%", "d14_retention": "19% 🚨"},
-        {"cohort": "Week of Oct 19 (New 6-Step Flow)", "d1_retention": "49%", "d3_retention": "34%", "d7_retention": "25%", "d14_retention": "18% 🚨"}
+        {
+          "cohort": "Week of Sep 28 (Old 1-Step Flow)",
+          "d1_retention": "68%",
+          "d3_retention": "54%",
+          "d7_retention": "42%",
+          "d14_retention": "36%"
+        },
+        {
+          "cohort": "Week of Oct 05 (Old 1-Step Flow)",
+          "d1_retention": "69%",
+          "d3_retention": "53%",
+          "d7_retention": "41%",
+          "d14_retention": "35%"
+        },
+        {
+          "cohort": "Week of Oct 12 (New 6-Step Flow)",
+          "d1_retention": "51%",
+          "d3_retention": "36%",
+          "d7_retention": "26%",
+          "d14_retention": "19% \ud83d\udea8"
+        },
+        {
+          "cohort": "Week of Oct 19 (New 6-Step Flow)",
+          "d1_retention": "49%",
+          "d3_retention": "34%",
+          "d7_retention": "25%",
+          "d14_retention": "18% \ud83d\udea8"
+        }
       ]
     },
     {
@@ -32,12 +62,36 @@
       "label": "Onboarding Tutorial Funnel Steps",
       "type": "table",
       "data": [
-        {"step": "Step 1: Account Creation", "completion_rate": "100%", "drop_off": "0%"},
-        {"step": "Step 2: Role Selection", "completion_rate": "94%", "drop_off": "-6%"},
-        {"step": "Step 3: Industry Survey", "completion_rate": "88%", "drop_off": "-6%"},
-        {"step": "Step 4: Mandatory Colleague Invites", "completion_rate": "46%", "drop_off": "-48% ⚠️ (Massive Friction Point)"},
-        {"step": "Step 5: Interactive Tour", "completion_rate": "38%", "drop_off": "-8%"},
-        {"step": "Step 6: Dashboard Reached", "completion_rate": "35%", "drop_off": "-3%"}
+        {
+          "step": "Step 1: Account Creation",
+          "completion_rate": "100%",
+          "drop_off": "0%"
+        },
+        {
+          "step": "Step 2: Role Selection",
+          "completion_rate": "94%",
+          "drop_off": "-6%"
+        },
+        {
+          "step": "Step 3: Industry Survey",
+          "completion_rate": "88%",
+          "drop_off": "-6%"
+        },
+        {
+          "step": "Step 4: Mandatory Colleague Invites",
+          "completion_rate": "46%",
+          "drop_off": "-48% \u26a0\ufe0f (Massive Friction Point)"
+        },
+        {
+          "step": "Step 5: Interactive Tour",
+          "completion_rate": "38%",
+          "drop_off": "-8%"
+        },
+        {
+          "step": "Step 6: Dashboard Reached",
+          "completion_rate": "35%",
+          "drop_off": "-3%"
+        }
       ]
     }
   ],

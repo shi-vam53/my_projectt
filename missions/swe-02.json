@@ -12,8 +12,14 @@
     "tier": "Tier-2 Messaging"
   },
   "hints": [
-    {"checkpoint": "1. Listener Cleanup", "hint": "Every time `acquireClient()` runs, an `error` listener is added with `.on('error')` instead of `.once('error')` and is never removed upon release."},
-    {"checkpoint": "2. Unhandled Rejection", "hint": "Redis reconnect attempts return a rejected promise that lacked a `.catch()` or try/catch boundary, triggering process.exit(1)."}
+    {
+      "checkpoint": "1. Listener Cleanup",
+      "hint": "Every time `acquireClient()` runs, an `error` listener is added with `.on('error')` instead of `.once('error')` and is never removed upon release."
+    },
+    {
+      "checkpoint": "2. Unhandled Rejection",
+      "hint": "Redis reconnect attempts return a rejected promise that lacked a `.catch()` or try/catch boundary, triggering process.exit(1)."
+    }
   ],
   "evidence_tabs": [
     {
@@ -21,9 +27,21 @@
       "label": "Process Error Logs & Stack Trace",
       "type": "logs",
       "entries": [
-        {"timestamp": "04:12:01.201Z", "level": "WARN", "message": "(node:4102) MaxListenersExceededWarning: 11 error listeners added to [RedisSocket]. Use emitter.setMaxListeners() to increase limit"},
-        {"timestamp": "04:12:03.411Z", "level": "ERROR", "message": "UnhandledPromiseRejection: Error: Socket closed abruptly at RedisSocket.onClose (/app/node_modules/@redis/client/dist/lib/client/socket.js:142)"},
-        {"timestamp": "04:12:03.412Z", "level": "FATAL", "message": "Process exited with code 1 due to unhandled promise rejection in strict mode."}
+        {
+          "timestamp": "04:12:01.201Z",
+          "level": "WARN",
+          "message": "(node:4102) MaxListenersExceededWarning: 11 error listeners added to [RedisSocket]. Use emitter.setMaxListeners() to increase limit"
+        },
+        {
+          "timestamp": "04:12:03.411Z",
+          "level": "ERROR",
+          "message": "UnhandledPromiseRejection: Error: Socket closed abruptly at RedisSocket.onClose (/app/node_modules/@redis/client/dist/lib/client/socket.js:142)"
+        },
+        {
+          "timestamp": "04:12:03.412Z",
+          "level": "FATAL",
+          "message": "Process exited with code 1 due to unhandled promise rejection in strict mode."
+        }
       ]
     },
     {

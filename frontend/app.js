@@ -847,6 +847,7 @@ function switchView(viewName) {
   if (viewName === 'admin') renderAdminView();
   if (viewName === 'profile') renderProfileView();
   if (viewName === 'tracks') renderTracksView();
+  if (viewName === 'handbook') updateHandbookForUserRole();
   if (viewName === 'quiz') loadQuizQuestions();
   if (viewName === 'problems') loadProblemsBank();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2953,21 +2954,26 @@ function updateUserHeaderUI() {
     const roleName = getRoleDisplayName(state.user.role);
     if (role) role.textContent = state.user.role_locked ? `🔒 ${roleName}` : 'Unassigned';
     if (sidebarTrack) sidebarTrack.textContent = roleName;
+    updateHandbookForUserRole();
   } else {
     if (avatar) avatar.textContent = 'G';
     if (name) name.textContent = 'Guest';
     if (role) role.textContent = 'Sign In Required';
+    updateHandbookForUserRole();
   }
 }
 
 function getRoleDisplayName(roleId) {
   const map = {
-    'cloud-sre': 'Cloud & Platform SRE',
-    'backend-eng': 'Backend & API Engineer',
-    'data-ai': 'Data & AI Systems Engineer',
-    'fullstack-prod': 'Full-Stack Product Engineer'
+    'software-developer': 'Software Developer',
+    'cloud-engineer': 'Cloud Engineer',
+    'data-analyst': 'Data Analyst',
+    'cloud-sre': 'Cloud Engineer',
+    'backend-eng': 'Software Developer',
+    'data-ai': 'Data Analyst',
+    'fullstack-prod': 'Software Developer'
   };
-  return map[roleId] || roleId || 'Cloud & Platform SRE';
+  return map[roleId] || roleId || 'Software Developer';
 }
 
 function bindAuthControls() {
@@ -3259,6 +3265,26 @@ function highlightSection(el) {
   }, 2200);
 }
 
+function updateHandbookForUserRole() {
+  const role = state.user ? state.user.role : null;
+  const roleTitle = getRoleDisplayName(role);
+
+  const downloadBtn = document.getElementById('btn-download-handbook-pdf');
+  if (downloadBtn) {
+    downloadBtn.href = role ? `/api/handbook/download?role=${encodeURIComponent(role)}` : '/api/handbook/download';
+    downloadBtn.download = role ? `${roleTitle.replace(/\s+/g, '_')}_Handbook.pdf` : 'Praxis_Industry_Foundations_Handbook.pdf';
+    downloadBtn.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Download ${roleTitle} Handbook (12-Page PDF)
+    `;
+  }
+
+  const heroTitle = document.getElementById('handbook-hero-title');
+  if (heroTitle) {
+    heroTitle.textContent = `${roleTitle} Foundations Handbook`;
+  }
+}
+
 async function loadQuizQuestions() {
   const container = document.getElementById('quiz-questions-list');
   if (!container) return;
@@ -3426,13 +3452,17 @@ async function renderDashboardView() {
   const incompleteInter = Math.max(0, interProbs.length - solvedInter);
   const totalIncomplete = Math.max(0, state.problemsList.length - totalSolved);
 
-  const totalLabs = Object.keys(MISSIONS_DATA).length || 9;
-  const solvedLabs = (state.submissionsLedger || []).length;
-  const incompleteLabs = Math.max(0, totalLabs - solvedLabs);
+  const userTrack = state.user ? (state.user.role === 'cloud-sre' ? 'cloud-engineer' : (state.user.role === 'backend-eng' ? 'software-developer' : (state.user.role === 'data-ai' ? 'data-analyst' : state.user.role))) : null;
+  const roleMissions = state.allMissions.filter(m => !userTrack || m.track_id === userTrack);
+  const guidedMissions = roleMissions.filter(m => m.type === 'guided');
+  const indepMissions = roleMissions.filter(m => m.type === 'independent');
+
+  const totalMissionCount = roleMissions.length || 70;
+  const guidedCount = guidedMissions.length || 20;
 
   if (statIncomplete) statIncomplete.textContent = totalIncomplete;
   if (statSolved) statSolved.textContent = totalSolved;
-  if (statLabs) statLabs.textContent = incompleteLabs;
+  if (statLabs) statLabs.textContent = totalMissionCount;
 
   const badgeBasic = document.getElementById('dash-badge-basic-text');
   const badgeInter = document.getElementById('dash-badge-inter-text');
@@ -3440,7 +3470,7 @@ async function renderDashboardView() {
 
   if (badgeBasic) badgeBasic.textContent = `${incompleteBasic} Incomplete`;
   if (badgeInter) badgeInter.textContent = `${incompleteInter} Incomplete`;
-  if (badgeLabs) badgeLabs.textContent = `${incompleteLabs} Incomplete Labs`;
+  if (badgeLabs) badgeLabs.textContent = `${guidedCount} Guided Missions`;
 
   // Render Up Next: 3 Incomplete Problems
   const queueList = document.getElementById('dashboard-queue-list');

@@ -28,6 +28,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from .generate_handbook import build_handbook_pdf
+from .generate_role_handbooks import build_role_handbook_pdf, ROLE_CONFIGS
 from .problems import ROLES, QUIZ_QUESTIONS, PROBLEMS, evaluate_problem_submission
 from .rubric import evaluate_submission
 
@@ -411,10 +412,13 @@ class SubmissionStore:
             connection.close()
 
         role_display = {
-            "cloud-sre": "Cloud & Platform SRE",
-            "backend-eng": "Backend & API Systems Engineer",
-            "data-ai": "Data & AI Systems Engineer",
-            "fullstack-prod": "Full-Stack Product Engineer",
+            "software-developer": "Software Developer",
+            "cloud-engineer": "Cloud Engineer",
+            "data-analyst": "Data Analyst",
+            "cloud-sre": "Cloud Engineer",
+            "backend-eng": "Software Developer",
+            "data-ai": "Data Analyst",
+            "fullstack-prod": "Software Developer",
         }
 
         lines = [
@@ -702,7 +706,13 @@ def create_app(
         authorization: str | None = Header(default=None),
     ) -> dict[str, Any]:
         user = _require_user(authorization)
-        valid_role_ids = {r["id"] for r in ROLES}
+        role_aliases = {
+            "cloud-sre": "cloud-engineer",
+            "backend-eng": "software-developer",
+            "data-ai": "data-analyst",
+            "fullstack-prod": "software-developer",
+        }
+        valid_role_ids = {r["id"] for r in ROLES} | set(role_aliases.keys())
         if payload.role not in valid_role_ids:
             raise HTTPException(status_code=400, detail=f"Invalid role. Choose from {sorted(valid_role_ids)}")
 
@@ -714,27 +724,113 @@ def create_app(
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    # --------------------------------------------------------------------------
-    # 12-PAGE PDF HANDBOOK
-    # --------------------------------------------------------------------------
-    @application.get("/api/handbook/download", tags=["handbook"])
-    def download_handbook():
+    ROLE_HANDBOOK_FILENAMES = {
+        "software-developer": "Software_Developer_Handbook.pdf",
+        "cloud-engineer": "Cloud_Engineer_Handbook.pdf",
+        "data-analyst": "Data_Analyst_Handbook.pdf",
+        "backend-eng": "Software_Developer_Handbook.pdf",
+        "cloud-sre": "Cloud_Engineer_Handbook.pdf",
+        "data-ai": "Data_Analyst_Handbook.pdf",
+    }
+
+    def _get_role_pdf_path(role: str | None) -> tuple[Path, str]:
+        assets_dir = PROJECT_ROOT / "frontend" / "assets"
+        if role and role in ROLE_HANDBOOK_FILENAMES:
+            fname = ROLE_HANDBOOK_FILENAMES[role]
+            target_path = assets_dir / fname
+            if not target_path.is_file():
+                build_role_handbook_pdf(role, target_path)
+            return target_path, fname
         if not HANDBOOK_PATH.is_file():
             build_handbook_pdf(HANDBOOK_PATH)
+        return HANDBOOK_PATH, "Praxis_Industry_Foundations_Handbook.pdf"
+
+    # --------------------------------------------------------------------------
+    # 12-PAGE ROLE-SPECIFIC KNOWLEDGE PDF HANDBOOK DELIVERY
+    # --------------------------------------------------------------------------
+    @application.get("/api/handbook/download", tags=["handbook"])
+    def download_handbook(
+        role: str | None = Query(default=None),
+        authorization: str | None = Header(default=None),
+    ):
+        user = _resolve_user(authorization) if authorization else None
+        target_role = role or (user.get("role") if user else None)
+        pdf_path, filename = _get_role_pdf_path(target_role)
         return FileResponse(
-            HANDBOOK_PATH,
+            pdf_path,
             media_type="application/pdf",
-            filename="Praxis_Industry_Foundations_Handbook.pdf",
+            filename=filename,
+        )
+
+    @application.get("/api/handbook/{role_id}/download", tags=["handbook"])
+    def download_role_handbook(role_id: str):
+        pdf_path, filename = _get_role_pdf_path(role_id)
+        return FileResponse(
+            pdf_path,
+            media_type="application/pdf",
+            filename=filename,
         )
 
     @application.get("/api/handbook/pdf", tags=["handbook"])
-    def view_handbook():
-        if not HANDBOOK_PATH.is_file():
-            build_handbook_pdf(HANDBOOK_PATH)
+    def view_handbook(
+        role: str | None = Query(default=None),
+        authorization: str | None = Header(default=None),
+    ):
+        user = _resolve_user(authorization) if authorization else None
+        target_role = role or (user.get("role") if user else None)
+        pdf_path, _ = _get_role_pdf_path(target_role)
         return FileResponse(
-            HANDBOOK_PATH,
+            pdf_path,
             media_type="application/pdf",
         )
+
+    @application.get("/api/handbook/info", tags=["handbook"])
+    def get_handbook_info(
+        role: str | None = Query(default=None),
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        user = _resolve_user(authorization) if authorization else None
+        target_role = role or (user.get("role") if user else None)
+        if target_role and target_role in ROLE_CONFIGS:
+            cfg = ROLE_CONFIGS[target_role]
+            return {
+                "role": target_role,
+                "title": cfg["title"],
+                "subtitle": cfg["subtitle"],
+                "lead_paragraph": cfg["lead_paragraph"],
+                "chapters": [
+                    {
+                        "num": ch["num"],
+                        "title": ch["title"],
+                        "tagline": ch["tagline"],
+                        "body": ch["body"],
+                        "callout_title": ch["callout_title"],
+                        "callout_body": ch["callout_body"],
+                        "table_data": ch["table_data"],
+                    }
+                    for ch in cfg["chapters"]
+                ],
+            }
+        # Fallback to software-developer config
+        cfg = ROLE_CONFIGS["software-developer"]
+        return {
+            "role": "software-developer",
+            "title": cfg["title"],
+            "subtitle": cfg["subtitle"],
+            "lead_paragraph": cfg["lead_paragraph"],
+            "chapters": [
+                {
+                    "num": ch["num"],
+                    "title": ch["title"],
+                    "tagline": ch["tagline"],
+                    "body": ch["body"],
+                    "callout_title": ch["callout_title"],
+                    "callout_body": ch["callout_body"],
+                    "table_data": ch["table_data"],
+                }
+                for ch in cfg["chapters"]
+            ],
+        }
 
     # --------------------------------------------------------------------------
     # 5-QUESTION READINESS QUIZ

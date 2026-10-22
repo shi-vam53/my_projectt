@@ -495,9 +495,15 @@ def evaluate_submission(mission: dict[str, Any], answers: dict[str, Any]) -> dic
     if total_weight <= 0:
         total_weight = float(len(dimensions))
 
+    mission_id = str(mission.get("id", ""))
+    is_cloud_sre_01 = mission_id == "cloud-sre-01"
+
     for dimension in dimensions:
         dimension_id = str(dimension.get("id", "unknown_dimension"))
-        checks = RULES_BY_DIMENSION.get(dimension_id) or _generic_checks(dimension)
+        if dimension_id in {"evidence_accuracy", "plausibility_and_distinction", "safety_and_constraints", "verification_and_followup"} and not is_cloud_sre_01:
+            checks = _generic_checks(dimension)
+        else:
+            checks = RULES_BY_DIMENSION.get(dimension_id) or _generic_checks(dimension)
         check_results: list[dict[str, Any]] = []
         strengths: list[str] = []
         improvements: list[str] = []
