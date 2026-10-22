@@ -3165,6 +3165,54 @@ async function confirmRoleLock() {
 // ----------------------------------------------------------------------------
 
 function bindHandbookAndQuizControls() {
+  // Read Online in Browser button
+  const readOnlineBtn = document.getElementById('btn-read-online');
+  if (readOnlineBtn) {
+    readOnlineBtn.addEventListener('click', () => {
+      const reader = document.getElementById('handbook-reader-view');
+      if (reader) {
+        reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const firstSec = document.getElementById('sec-01');
+        if (firstSec) highlightSection(firstSec);
+      }
+    });
+  }
+
+  // Clickable syllabus cards -> Jump directly to section
+  const chapterCards = document.querySelectorAll('.chapter-card[data-target]');
+  chapterCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const targetId = card.dataset.target;
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        highlightSection(targetEl);
+      }
+    });
+  });
+
+  // Sticky Section jump pills
+  const navPills = document.querySelectorAll('.reader-nav-pill-btn[data-target]');
+  navPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const targetId = pill.dataset.target;
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        highlightSection(targetEl);
+      }
+    });
+  });
+
+  // Bottom action in reader
+  const readerProceedBtn = document.getElementById('reader-proceed-to-quiz-btn');
+  if (readerProceedBtn) {
+    readerProceedBtn.addEventListener('click', () => {
+      switchView('quiz');
+      loadQuizQuestions();
+    });
+  }
+
   const proceedToQuizBtn = document.getElementById('proceed-to-quiz-btn');
   if (proceedToQuizBtn) {
     proceedToQuizBtn.addEventListener('click', () => {
@@ -3195,6 +3243,14 @@ function bindHandbookAndQuizControls() {
       renderProblemsList(state.problemsFilter);
     });
   });
+}
+
+function highlightSection(el) {
+  document.querySelectorAll('.reader-section-block').forEach(b => b.classList.remove('highlight-pulse'));
+  el.classList.add('highlight-pulse');
+  setTimeout(() => {
+    el.classList.remove('highlight-pulse');
+  }, 2200);
 }
 
 async function loadQuizQuestions() {
