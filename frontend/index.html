@@ -115,7 +115,19 @@
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-label">Your Foundation</div>
+        <div class="nav-section-label">Your Workspace</div>
+        <button class="nav-item active" id="nav-dashboard" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9"></rect>
+            <rect x="14" y="3" width="7" height="5"></rect>
+            <rect x="14" y="12" width="7" height="9"></rect>
+            <rect x="3" y="16" width="7" height="5"></rect>
+          </svg>
+          <span>Dashboard</span>
+          <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Hub</span>
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 1.25rem;">Your Foundation</div>
         <button class="nav-item" id="nav-handbook" data-view="handbook">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -135,7 +147,7 @@
         </button>
 
         <div class="nav-section-label" style="margin-top: 1.25rem;">Problem Bank</div>
-        <button class="nav-item active" id="nav-problems" data-view="problems">
+        <button class="nav-item" id="nav-problems" data-view="problems">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
@@ -258,6 +270,129 @@
 
       <!-- Main Scrollable Content -->
       <main class="content-container">
+
+        <!-- VIEW: Learner Operations Dashboard (3 Incomplete Problem Sections + 1 Visit Handbook) -->
+        <section class="view-section" id="view-dashboard" style="display: none;">
+          <div class="dashboard-container">
+            <!-- Welcome Banner -->
+            <div class="dashboard-welcome-banner">
+              <div class="dashboard-welcome-text">
+                <div class="badge badge-emerald" style="background: rgba(16, 185, 129, 0.25); color: #34d399; margin-bottom: 0.5rem; width: fit-content;">
+                  Readiness Assessment: Passed (5/5) ✓
+                </div>
+                <h1 id="dash-welcome-user">Welcome to Your Engineering Dashboard</h1>
+                <p id="dash-welcome-track">Active Career Track: 🔒 Cloud & Platform SRE</p>
+              </div>
+              <div class="dashboard-stats-row">
+                <div class="dashboard-stat-pill">
+                  <span class="dashboard-stat-val" id="dash-stat-incomplete-count">40</span>
+                  <span class="dashboard-stat-lbl">Incomplete Probs</span>
+                </div>
+                <div class="dashboard-stat-pill">
+                  <span class="dashboard-stat-val" id="dash-stat-solved-count">0</span>
+                  <span class="dashboard-stat-lbl">Solved</span>
+                </div>
+                <div class="dashboard-stat-pill">
+                  <span class="dashboard-stat-val" id="dash-stat-labs-count">9</span>
+                  <span class="dashboard-stat-lbl">Incident Labs</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- The 4 Main Action Sections: 3 Incomplete Problem Sections + 1 Visit Handbook -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Engineering Curriculum & Resources</h2>
+                <span style="font-size: 0.8rem; color: #64748b;">Click any section below to jump directly</span>
+              </div>
+
+              <div class="dashboard-grid-4">
+                <!-- Section 1: Incomplete Basic Problems (1 - 20) -->
+                <div class="dashboard-section-card" id="dash-card-basic-problems">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Phase 01 • Basic</span>
+                    <span class="dashboard-card-badge-incomplete" id="dash-badge-basic">
+                      ● <span id="dash-badge-basic-text">20 Incomplete</span>
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Basic Production Problems</div>
+                  <div class="dashboard-card-desc">
+                    20 fundamental production challenges covering OOM container crashes, connection pool leaks, unindexed foreign keys, and rate limiters. Features SOP reference & syntax guidance.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Solve Incomplete Problems ➔
+                  </div>
+                </div>
+
+                <!-- Section 2: Incomplete Intermediate Problems (21 - 40) -->
+                <div class="dashboard-section-card" id="dash-card-inter-problems">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Phase 02 • Intermediate</span>
+                    <span class="dashboard-card-badge-incomplete" id="dash-badge-inter">
+                      ● <span id="dash-badge-inter-text">20 Incomplete</span>
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Intermediate Production Problems</div>
+                  <div class="dashboard-card-desc">
+                    20 advanced distributed systems challenges: cascading thread pool exhaustion, distributed lock lease expiry, multi-region replication lag, and saga rollbacks without help statements.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Tackle Incomplete Problems ➔
+                  </div>
+                </div>
+
+                <!-- Section 3: Incomplete Full Incident Simulation Labs -->
+                <div class="dashboard-section-card" id="dash-card-simulation-labs">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Hands-On Incident Triage</span>
+                    <span class="dashboard-card-badge-incomplete" id="dash-badge-labs">
+                      ● <span id="dash-badge-labs-text">9 Incomplete Labs</span>
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Incident Simulation Labs</div>
+                  <div class="dashboard-card-desc">
+                    9 comprehensive Tier-1 production outage missions. Triage multi-tab telemetry graphs, server logs, code diffs, and submit rubric-evaluated incident mitigations.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Enter Incomplete Labs ➔
+                  </div>
+                </div>
+
+                <!-- Section 4: Visit Handbook (12-Page Field Manual) -->
+                <div class="dashboard-section-card" id="dash-card-visit-handbook">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Field Manual</span>
+                    <span class="dashboard-card-badge-handbook">
+                      ✓ Field Manual Ready
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Visit Foundations Handbook</div>
+                  <div class="dashboard-card-desc">
+                    Revisit the publication-grade 12-page industry guide anytime. Review organizational topologies, agile ceremonies, Git etiquette, CI/CD, observability, and 40+ industry keywords.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Visit Handbook & Reader (12p PDF) ➔
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Priority Incomplete Problems Queue -->
+            <div class="dashboard-queue-box">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Up Next: 3 Incomplete Problems</h3>
+                  <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Immediate production tickets waiting for your triage and solution.</p>
+                </div>
+                <span class="badge badge-indigo">Priority Queue</span>
+              </div>
+
+              <div id="dashboard-queue-list" style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
 
         <!-- VIEW: 12-Page Industry Foundations Handbook -->
         <section class="view-section" id="view-handbook" style="display: none;">

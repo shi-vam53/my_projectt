@@ -750,6 +750,9 @@ function initApp() {
 
 // Navigation between Career Tracks and Mission Workspace
 function bindNavigation() {
+  const navDashboard = document.getElementById('nav-dashboard');
+  if (navDashboard) navDashboard.addEventListener('click', () => switchView('dashboard'));
+
   const navTracks = document.getElementById('nav-tracks');
   const navWorkspace = document.getElementById('nav-workspace');
   const navReadiness = document.getElementById('nav-readiness');
@@ -760,7 +763,7 @@ function bindNavigation() {
 
   if (navTracks) navTracks.addEventListener('click', () => switchView('tracks'));
   if (navWorkspace) navWorkspace.addEventListener('click', () => switchView('workspace'));
-  if (bcRoot) bcRoot.addEventListener('click', () => switchView('tracks'));
+  if (bcRoot) bcRoot.addEventListener('click', () => switchView('dashboard'));
   if (sidebarQuickSwitch) sidebarQuickSwitch.addEventListener('click', () => switchView('tracks'));
 
   const navCatalog = document.getElementById('nav-catalog');
@@ -809,6 +812,7 @@ function bindNavigation() {
 function switchView(viewName) {
   state.currentView = viewName;
   const views = {
+    dashboard: document.getElementById('view-dashboard'),
     tracks: document.getElementById('view-tracks'),
     workspace: document.getElementById('view-workspace'),
     catalog: document.getElementById('view-catalog'),
@@ -819,6 +823,7 @@ function switchView(viewName) {
     problems: document.getElementById('view-problems')
   };
   const navs = {
+    dashboard: document.getElementById('nav-dashboard'),
     tracks: document.getElementById('nav-tracks'),
     workspace: document.getElementById('nav-workspace'),
     catalog: document.getElementById('nav-catalog'),
@@ -837,6 +842,7 @@ function switchView(viewName) {
     }
   });
 
+  if (viewName === 'dashboard') renderDashboardView();
   if (viewName === 'catalog') renderCatalogView();
   if (viewName === 'admin') renderAdminView();
   if (viewName === 'profile') renderProfileView();
@@ -2908,7 +2914,7 @@ async function checkAuthAndSession() {
         if (!state.user.quiz_passed) {
           switchView('handbook');
         } else {
-          switchView('problems');
+          switchView('dashboard');
         }
       }
     } else {
@@ -3037,7 +3043,7 @@ function bindAuthControls() {
             if (!state.user.quiz_passed) {
               switchView('handbook');
             } else {
-              switchView('problems');
+              switchView('dashboard');
             }
           }
         } else {
@@ -3367,7 +3373,7 @@ function renderQuizResults(data) {
   });
 
   if (data.passed) {
-    showToast('Readiness Assessment Passed! Production Problems Unlocked.', 'success');
+    showToast('Readiness Assessment Passed! Opening your operations dashboard...', 'success');
     if (state.user) state.user.quiz_passed = true;
     const sidebarPill = document.getElementById('quiz-sidebar-pill');
     if (sidebarPill) {
@@ -3375,8 +3381,136 @@ function renderQuizResults(data) {
       sidebarPill.style.background = 'rgba(16, 185, 129, 0.2)';
       sidebarPill.style.color = '#10b981';
     }
+    if (unlockBtn) {
+      unlockBtn.textContent = 'Go to Operations Dashboard ➔';
+      unlockBtn.style.display = 'inline-flex';
+      unlockBtn.onclick = () => switchView('dashboard');
+    }
+    setTimeout(() => {
+      switchView('dashboard');
+    }, 1800);
   } else {
     showToast('Score under 80%. Review explanations and retry.', 'warning');
+  }
+}
+
+// ----------------------------------------------------------------------------
+// LEARNER DASHBOARD CONTROLLER
+// ----------------------------------------------------------------------------
+
+async function renderDashboardView() {
+  if (state.problemsList.length === 0) {
+    await loadProblemsBank();
+  }
+
+  const welcomeUser = document.getElementById('dash-welcome-user');
+  const welcomeTrack = document.getElementById('dash-welcome-track');
+  const statIncomplete = document.getElementById('dash-stat-incomplete-count');
+  const statSolved = document.getElementById('dash-stat-solved-count');
+  const statLabs = document.getElementById('dash-stat-labs-count');
+
+  if (state.user) {
+    if (welcomeUser) welcomeUser.textContent = `Welcome, ${state.user.full_name || state.user.username}!`;
+    if (welcomeTrack) welcomeTrack.textContent = `Active Career Track: 🔒 ${getRoleDisplayName(state.user.role)}`;
+  }
+
+  // Calculate counts
+  const basicProbs = state.problemsList.filter(p => p.phase === 1);
+  const interProbs = state.problemsList.filter(p => p.phase === 2);
+
+  const solvedBasic = basicProbs.filter(p => p.status === 'completed').length;
+  const solvedInter = interProbs.filter(p => p.status === 'completed').length;
+  const totalSolved = solvedBasic + solvedInter;
+
+  const incompleteBasic = Math.max(0, basicProbs.length - solvedBasic);
+  const incompleteInter = Math.max(0, interProbs.length - solvedInter);
+  const totalIncomplete = Math.max(0, state.problemsList.length - totalSolved);
+
+  const totalLabs = Object.keys(MISSIONS_DATA).length || 9;
+  const solvedLabs = (state.submissionsLedger || []).length;
+  const incompleteLabs = Math.max(0, totalLabs - solvedLabs);
+
+  if (statIncomplete) statIncomplete.textContent = totalIncomplete;
+  if (statSolved) statSolved.textContent = totalSolved;
+  if (statLabs) statLabs.textContent = incompleteLabs;
+
+  const badgeBasic = document.getElementById('dash-badge-basic-text');
+  const badgeInter = document.getElementById('dash-badge-inter-text');
+  const badgeLabs = document.getElementById('dash-badge-labs-text');
+
+  if (badgeBasic) badgeBasic.textContent = `${incompleteBasic} Incomplete`;
+  if (badgeInter) badgeInter.textContent = `${incompleteInter} Incomplete`;
+  if (badgeLabs) badgeLabs.textContent = `${incompleteLabs} Incomplete Labs`;
+
+  // Render Up Next: 3 Incomplete Problems
+  const queueList = document.getElementById('dashboard-queue-list');
+  if (queueList) {
+    const nextIncomplete = state.problemsList.filter(p => p.status !== 'completed').slice(0, 3);
+    if (nextIncomplete.length === 0) {
+      queueList.innerHTML = `<div style="padding: 1rem; color: #16a34a; font-weight: 700;">🎉 All production problems completed! Check reviewer portal or launch incident labs.</div>`;
+    } else {
+      queueList.innerHTML = nextIncomplete.map(p => `
+        <div class="dashboard-queue-item" data-problem-id="${p.id}">
+          <div class="dash-queue-left">
+            <span class="dash-queue-id">${p.id.toUpperCase()} • ${escapeHtml(p.category)}</span>
+            <span class="dash-queue-title">${escapeHtml(p.title)}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="dash-queue-badge ${p.phase === 1 ? 'prob-badge-basic' : 'prob-badge-inter'}">
+              ${p.phase === 1 ? 'Basic • Help' : 'Inter • Standalone'}
+            </span>
+            <span class="dashboard-card-badge-incomplete">● Incomplete</span>
+            <span style="color: #4f46e5; font-weight: 800; font-size: 0.85rem;">Solve ➔</span>
+          </div>
+        </div>
+      `).join('');
+
+      queueList.querySelectorAll('.dashboard-queue-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const pid = item.dataset.problemId;
+          state.activeProblemId = pid;
+          switchView('problems');
+          renderProblemDetail(pid);
+        });
+      });
+    }
+  }
+
+  // Bind clicks on the 4 dashboard section cards
+  const cardBasic = document.getElementById('dash-card-basic-problems');
+  if (cardBasic) {
+    cardBasic.onclick = () => {
+      state.problemsFilter = 'basic';
+      switchView('problems');
+      const filterBtns = document.querySelectorAll('.prob-filter-btn');
+      filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'basic'));
+      renderProblemsList('basic');
+    };
+  }
+
+  const cardInter = document.getElementById('dash-card-inter-problems');
+  if (cardInter) {
+    cardInter.onclick = () => {
+      state.problemsFilter = 'inter';
+      switchView('problems');
+      const filterBtns = document.querySelectorAll('.prob-filter-btn');
+      filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'inter'));
+      renderProblemsList('inter');
+    };
+  }
+
+  const cardLabs = document.getElementById('dash-card-simulation-labs');
+  if (cardLabs) {
+    cardLabs.onclick = () => {
+      switchView('catalog');
+    };
+  }
+
+  const cardHandbook = document.getElementById('dash-card-visit-handbook');
+  if (cardHandbook) {
+    cardHandbook.onclick = () => {
+      switchView('handbook');
+    };
   }
 }
 
