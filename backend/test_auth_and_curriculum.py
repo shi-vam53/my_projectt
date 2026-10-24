@@ -164,3 +164,12 @@ def test_admin_users_csv_export_matches_google_sheet_columns(client):
     assert "User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform" in content
     assert "sheetuser,Sheet Sync User" in content
 
+
+def test_google_sheet_info_endpoint(client):
+    res = client.get("/api/admin/google-sheet")
+    assert res.status_code == 200
+    data = res.json()
+    assert "sheet_id" in data
+    assert "web_view_link" in data
+    assert "total_users" in data
+    assert data["sheet_id"] == "1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0"

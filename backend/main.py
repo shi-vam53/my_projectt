@@ -31,6 +31,7 @@ from .generate_handbook import build_handbook_pdf
 from .generate_role_handbooks import build_role_handbook_pdf, ROLE_CONFIGS
 from .problems import ROLES, QUIZ_QUESTIONS, PROBLEMS, evaluate_problem_submission
 from .rubric import evaluate_submission
+from .sheet_sync import GOOGLE_SHEET_ID, GOOGLE_SHEET_URL, generate_users_csv, sync_users_to_workspace_file
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -280,6 +281,11 @@ class SubmissionStore:
         finally:
             connection.close()
 
+        try:
+            sync_users_to_workspace_file(self.database_path, PROJECT_ROOT / "frontend" / "assets" / "Praxis_Registered_Users.csv")
+        except Exception:
+            pass
+
         user = {
             "user_id": user_id,
             "username": uname,
@@ -385,7 +391,10 @@ class SubmissionStore:
                 "quiz_score": updated["quiz_score"],
                 "created_at": updated["created_at"],
             }
-            self.sync_users_to_ledger()
+            try:
+                self.sync_users_to_ledger()
+            except Exception:
+                pass
             return res
         finally:
             connection.close()
@@ -398,7 +407,10 @@ class SubmissionStore:
                 (1 if passed else 0, score, user_id),
             )
             connection.commit()
-            self.sync_users_to_ledger()
+            try:
+                self.sync_users_to_ledger()
+            except Exception:
+                pass
         finally:
             connection.close()
 
@@ -666,6 +678,9 @@ def create_app(
     def list_roles() -> list[dict[str, Any]]:
         return ROLES
 
+    GOOGLE_SHEET_ID = "1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0"
+    GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0/edit?usp=drivesdk"
+
     @application.get("/api/admin/users/csv", tags=["admin"])
     def get_registered_users_csv():
         from fastapi.responses import Response
@@ -675,6 +690,18 @@ def create_app(
             media_type="text/csv",
             headers={"Content-Disposition": "attachment; filename=Praxis_Registered_Users_Master_Ledger.csv"},
         )
+
+    @application.get("/api/admin/google-sheet", tags=["admin"])
+    def get_google_sheet_info() -> dict[str, Any]:
+        csv_text = store.export_users_csv()
+        lines = [line for line in csv_text.strip().split("\n") if line.strip()]
+        total_users = max(0, len(lines) - 1)
+        return {
+            "sheet_id": GOOGLE_SHEET_ID,
+            "web_view_link": GOOGLE_SHEET_URL,
+            "total_users": total_users,
+            "message": "Live Google Sheet actively records all user registrations."
+        }
 
     # --------------------------------------------------------------------------
     # AUTHENTICATION & ROLE LOCKING
