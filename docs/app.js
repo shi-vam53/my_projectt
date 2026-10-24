@@ -3323,9 +3323,19 @@ function updateHandbookForUserRole() {
   const role = state.user ? state.user.role : null;
   const roleTitle = getRoleDisplayName(role);
 
+  const pdfFileMap = {
+    'software-developer': 'assets/Software_Developer_Handbook.pdf',
+    'cloud-engineer': 'assets/Cloud_Engineer_Handbook.pdf',
+    'data-analyst': 'assets/Data_Analyst_Handbook.pdf',
+    'cloud-sre': 'assets/Cloud_Engineer_Handbook.pdf',
+    'backend-eng': 'assets/Software_Developer_Handbook.pdf',
+    'data-ai': 'assets/Data_Analyst_Handbook.pdf',
+  };
+  const pdfStaticPath = pdfFileMap[role] || 'assets/Praxis_Industry_Foundations_Handbook.pdf';
+
   const downloadBtn = document.getElementById('btn-download-handbook-pdf');
   if (downloadBtn) {
-    downloadBtn.href = role ? `/api/handbook/download?role=${encodeURIComponent(role)}` : '/api/handbook/download';
+    downloadBtn.href = pdfStaticPath;
     downloadBtn.download = role ? `${roleTitle.replace(/\s+/g, '_')}_Handbook.pdf` : 'Praxis_Industry_Foundations_Handbook.pdf';
     downloadBtn.innerHTML = `
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
