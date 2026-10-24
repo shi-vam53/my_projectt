@@ -1,0 +1,894 @@
+// Praxis Curriculum & Problems Offline Bank (Generated from backend/problems.py)
+window.PRAXIS_OFFLINE_DATA = {
+  "ROLES": [
+    {
+      "id": "software-developer",
+      "title": "Software Developer",
+      "badge": "Application & Systems Architecture",
+      "description": "Design high-throughput microservices, clean REST/gRPC APIs, transactional data models, automated test suites, and distributed web applications.",
+      "icon": "code",
+      "core_skills": [
+        "Python / JavaScript / Go",
+        "REST & GraphQL APIs",
+        "PostgreSQL & Redis",
+        "System Design",
+        "Unit & Integration Testing",
+        "CI/CD & Git"
+      ]
+    },
+    {
+      "id": "cloud-engineer",
+      "title": "Cloud Engineer",
+      "badge": "Cloud Infrastructure & SRE",
+      "description": "Master distributed systems resilience, Kubernetes, zero-downtime deployments, Terraform Infrastructure-as-Code, and SLI/SLO error budgets.",
+      "icon": "cloud",
+      "core_skills": [
+        "Kubernetes & Docker",
+        "Terraform & IaC",
+        "AWS / Cloud Networking",
+        "Prometheus & Grafana",
+        "Linux & Shell",
+        "Incident Response"
+      ]
+    },
+    {
+      "id": "data-analyst",
+      "title": "Data Analyst",
+      "badge": "Data Pipelines & Analytics",
+      "description": "Build automated ETL pipelines, analytics data models, high-performance SQL aggregations, anomaly detection models, and executive BI dashboards.",
+      "icon": "chart",
+      "core_skills": [
+        "SQL & Relational Modeling",
+        "Python (Pandas / NumPy)",
+        "ETL & Data Warehousing",
+        "Tableau / BI Dashboards",
+        "Statistical Modeling",
+        "Data Quality & SLAs"
+      ]
+    }
+  ],
+  "QUIZ_QUESTIONS": [
+    {
+      "id": "q1",
+      "question": "At 14:15 UTC, a new release causes p99 latency to jump from 45ms to 2,800ms and 5xx errors to surge to 8%. What is the immediate first action the on-call engineer must take according to standard SRE incident triage?",
+      "options": [
+        {
+          "id": "a",
+          "text": "SSH into production instances to run live GDB/heap profilers and attach debuggers to inspect memory."
+        },
+        {
+          "id": "b",
+          "text": "Trigger an immediate rollback or disable the release feature flag, restoring service health before offline diagnosis."
+        },
+        {
+          "id": "c",
+          "text": "Open a general Slack thread asking team members if anyone has time to review their pull requests."
+        },
+        {
+          "id": "d",
+          "text": "Double the database max connection pool size and continually restart pods until memory usage drops."
+        }
+      ],
+      "correct": "b",
+      "explanation": "Incident triage rule #1 is 'Mitigate first, diagnose offline.' Rolling back or toggling off the feature flag immediately protects customer SLA/SLO while preserving logs/traces for root cause analysis."
+    },
+    {
+      "id": "q2",
+      "question": "Your microservice has an agreed SLO of 99.9% availability over a rolling 30-day period. Midway through the month, an outage exhausts 100% of your remaining error budget. According to standard SRE discipline, what operational policy takes effect?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Change the SLO definition to 99.0% so the service remains in compliance."
+        },
+        {
+          "id": "b",
+          "text": "Non-critical feature deployments freeze; engineering capacity shifts exclusively to reliability, architectural hardening, and automated test gates."
+        },
+        {
+          "id": "c",
+          "text": "Increase compute node count on Kubernetes to artificially mask the errors."
+        },
+        {
+          "id": "d",
+          "text": "Continue shipping planned roadmap features as long as local unit tests pass in CI."
+        }
+      ],
+      "correct": "b",
+      "explanation": "An exhausted error budget is the mathematical governor balancing velocity with reliability: new feature releases pause while engineering remediates systemic failure modes."
+    },
+    {
+      "id": "q3",
+      "question": "You need to rename a column in a high-traffic PostgreSQL table used by 4 microservices. What is the safest deployment sequence to avoid production downtime?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Execute 'ALTER TABLE orders RENAME COLUMN status TO order_status;' during peak business hours in production."
+        },
+        {
+          "id": "b",
+          "text": "Multi-phase expand/contract migration: add new column, dual-write to both columns, backfill legacy rows, update readers, then drop old column after all services upgrade."
+        },
+        {
+          "id": "c",
+          "text": "Take down the entire database cluster for a 4-hour scheduled outage on Saturday morning for manual script execution."
+        },
+        {
+          "id": "d",
+          "text": "Write a cron job that copies data between columns every 5 minutes."
+        }
+      ],
+      "correct": "b",
+      "explanation": "Zero-downtime database migrations follow the expand/contract (parallel run) pattern to prevent breaking existing microservices reading the legacy schema."
+    },
+    {
+      "id": "q4",
+      "question": "Your dashboard shows average response time is 32ms, but customer churn complaints are spiking. You investigate percentiles and discover p50 is 18ms, p95 is 120ms, and p99 is 4,800ms. What does this indicate?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The system is functioning optimally because the average is well under 100ms."
+        },
+        {
+          "id": "b",
+          "text": "1% of your requests (frequently heavy queries or high-volume enterprise accounts) are experiencing severe 5-second stalls, which averages hide."
+        },
+        {
+          "id": "c",
+          "text": "The monitoring agent is broken and emitting false telemetry."
+        },
+        {
+          "id": "d",
+          "text": "Client internet connections are solely responsible for the delay."
+        }
+      ],
+      "correct": "b",
+      "explanation": "Averages conceal tail latency. A p99 of 4,800ms indicates serious head-of-line blocking, connection pool starvation, or unindexed database queries affecting significant traffic."
+    },
+    {
+      "id": "q5",
+      "question": "A junior developer requests the production PostgreSQL superuser ('postgres') credentials to inspect why a customer report is showing incorrect sums. What is the correct response under Principle of Least Privilege (PoLP)?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Share the credentials via encrypted Slack direct message and ask them not to run 'DROP TABLE'."
+        },
+        {
+          "id": "b",
+          "text": "Reject direct production DB access; provide sanitized data in a staging environment or use read-only query tooling with audited access and masked PII."
+        },
+        {
+          "id": "c",
+          "text": "Temporarily give them AWS root console access to take a manual snapshot."
+        },
+        {
+          "id": "d",
+          "text": "Advise them to write a script that dumps the production database to an open S3 bucket."
+        }
+      ],
+      "correct": "b",
+      "explanation": "Direct production write or superuser credentials must never be shared. Developers diagnose issues using sanitized staging data or audited read-only interfaces with sensitive PII masked."
+    }
+  ],
+  "PROBLEMS": [
+    {
+      "id": "prob-01",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Container CrashLoopBackOff & Exit Code 137",
+      "category": "Containerization & Kubernetes",
+      "scenario": "A newly deployed payment worker pod in Kubernetes keeps crashing every 90 seconds with status 'CrashLoopBackOff' and exit code 137. The container logs show no uncaught exceptions.",
+      "task": "Diagnose the exact cause of exit code 137 and write the Kubernetes resource configuration update to prevent premature termination.",
+      "help_statement": "Reference Hint: Exit code 137 is 128 + 9 (SIGKILL). In Linux and Kubernetes, this is almost always triggered by the Out-Of-Memory (OOM) Killer when the container's memory exceeds 'resources.limits.memory'. Inspect 'kubectl describe pod' for 'OOMKilled: true' and raise the memory limit with appropriate request buffers.",
+      "starter_template": "# 1. Identify Root Cause:\n# Exit code 137 indicates ...\n\n# 2. Kubernetes Pod Spec Fix:\nresources:\n  requests:\n    memory: \"...\"\n    cpu: \"...\"\n  limits:\n    memory: \"...\"\n    cpu: \"...\"",
+      "expected_keywords": [
+        "oom",
+        "sigkill",
+        "limits",
+        "memory",
+        "137"
+      ]
+    },
+    {
+      "id": "prob-02",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Database Connection Pool Starvation Under Spike Traffic",
+      "category": "Database Architecture",
+      "scenario": "During a flash sale, API response times jump from 50ms to 30,000ms. Application logs report 'HikariPool-1 - Connection is not available, request timed out after 30000ms'. Database CPU is only at 14%.",
+      "task": "Explain why connection starvation happens despite low DB CPU and provide the architectural fix in the connection lifecycle.",
+      "help_statement": "Reference Hint: When DB CPU is low but pool timeouts occur, connections are leaking (checked out but never returned). Ensure every query checkout is wrapped in a try/finally block or Python context manager ('with engine.connect() as conn:'). Also set 'leakDetectionThreshold: 2000ms' to log lingering callers.",
+      "starter_template": "def query_user_orders(user_id: str):\n    # Fix connection checkout and ensure release:\n    pass",
+      "expected_keywords": [
+        "leak",
+        "finally",
+        "context manager",
+        "release",
+        "leakdetectionthreshold"
+      ]
+    },
+    {
+      "id": "prob-03",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Unindexed Foreign Key Leading to Full Table Scan",
+      "category": "SQL & Relational Databases",
+      "scenario": "A query 'SELECT * FROM order_items WHERE order_id = $1' takes 4.2 seconds on a table with 12 million rows. EXPLAIN ANALYZE shows 'Seq Scan on order_items (cost=0.00..342110.00)'.",
+      "task": "Write the DDL migration statement to optimize this lookup and explain why foreign keys are not automatically indexed in relational databases.",
+      "help_statement": "Reference Hint: While Primary Keys automatically create unique B-Tree indexes, Foreign Keys do NOT. Create an index using: 'CREATE INDEX CONCURRENTLY idx_order_items_order_id ON order_items(order_id);'. The 'CONCURRENTLY' keyword prevents table locking in production.",
+      "starter_template": "-- Write safe, zero-lock index creation migration:\nCREATE INDEX ...",
+      "expected_keywords": [
+        "create index",
+        "concurrently",
+        "b-tree",
+        "seq scan",
+        "order_id"
+      ]
+    },
+    {
+      "id": "prob-04",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "HTTP 429 Rate Limiter with RFC 6585 Headers",
+      "category": "API Gateway & Traffic Control",
+      "scenario": "A public webhook endpoint is being hammered by a rogue partner script sending 400 requests/second. You must implement rate limiting returning HTTP 429 with compliant headers.",
+      "task": "Define the required RFC 6585 response headers and explain how a Redis sliding window counter prevents window-boundary burst attacks.",
+      "help_statement": "Reference Hint: Standard rate limit headers include 'Retry-After: <seconds>', 'X-RateLimit-Limit: 100', 'X-RateLimit-Remaining: 0', and 'X-RateLimit-Reset: <epoch>'. A sliding window in Redis uses sorted sets (ZADD / ZREMRANGEBYSCORE) using the current millisecond timestamp.",
+      "starter_template": "# HTTP 429 Response Headers & Redis Sliding Window Logic:\nheaders = {\n    \"Retry-After\": \"...\",\n    \"X-RateLimit-Limit\": \"...\",\n}",
+      "expected_keywords": [
+        "retry-after",
+        "429",
+        "sliding window",
+        "redis",
+        "zadd"
+      ]
+    },
+    {
+      "id": "prob-05",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Transparent Password Hash Upgrade (MD5 to Argon2id)",
+      "category": "Authentication & Cryptography",
+      "scenario": "A legacy authentication database contains 50,000 user passwords stored as unsalted MD5 hashes. You cannot force all users to reset their passwords at once.",
+      "task": "Design a transparent, zero-downtime migration strategy that upgrades password hashes to Argon2id (or Bcrypt) as users log in.",
+      "help_statement": "Reference Hint: On login: verify user credentials against legacy hash (if starts with 'md5:'). If valid, immediately compute new Argon2id hash ('argon2.PasswordHasher().hash(plaintext)'), update the DB record, and set 'hash_version = 2'. Subsequent logins use Argon2id.",
+      "starter_template": "def authenticate_and_upgrade(username, plain_password):\n    # 1. Fetch user\n    # 2. Check hash version\n    # 3. Upgrade if legacy\n    pass",
+      "expected_keywords": [
+        "argon2",
+        "bcrypt",
+        "transparent",
+        "login",
+        "salt"
+      ]
+    },
+    {
+      "id": "prob-06",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Distributed Trace ID Propagation in Microservices",
+      "category": "Observability & Telemetry",
+      "scenario": "When an order fails in downstream Service C, engineers cannot find the related log entries in Service A or B because logs only contain isolated timestamps.",
+      "task": "Implement an HTTP middleware pattern that extracts or generates an 'X-Correlation-ID' / W3C 'traceparent' and attaches it to all outbound HTTP calls and structured log lines.",
+      "help_statement": "Reference Hint: In incoming requests, check 'request.headers.get(\"X-Correlation-ID\")' or generate 'uuid.uuid4()'. Store it in context (e.g. Python's 'contextvars' or ThreadLocal MDC). Set the response header and inject it into all outgoing HTTP client headers.",
+      "starter_template": "# Middleware implementation for Correlation ID:\nasync def correlation_middleware(request, call_next):\n    pass",
+      "expected_keywords": [
+        "correlation-id",
+        "traceparent",
+        "contextvars",
+        "uuid",
+        "propagate"
+      ]
+    },
+    {
+      "id": "prob-07",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Clean Git Feature Branch Rebase & Conflict Resolution",
+      "category": "Source Control & Collaboration",
+      "scenario": "Your feature branch 'feat/checkout' has diverged from 'main' by 14 commits. A direct merge creates an ugly merge commit and breaks CI tests.",
+      "task": "Provide the exact Git CLI commands to rebase onto latest main, resolve conflicts, and safely update the remote branch without destroying teammates' work.",
+      "help_statement": "Reference Hint: Commands: 'git checkout feat/checkout', 'git fetch origin', 'git rebase origin/main'. If conflicts occur, edit files, 'git add <file>', and 'git rebase --continue'. To push, NEVER use bare '--force'; always use 'git push --force-with-lease'.",
+      "starter_template": "# Git CLI Commands Sequence:\ngit checkout feat/checkout\n# ...",
+      "expected_keywords": [
+        "rebase",
+        "fetch",
+        "force-with-lease",
+        "continue",
+        "origin/main"
+      ]
+    },
+    {
+      "id": "prob-08",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "CORS Preflight (OPTIONS) Rejection on Custom Headers",
+      "category": "Web Security & Protocols",
+      "scenario": "Frontend single-page app reports: 'Access to XMLHttpRequest from origin http://app.praxis.dev has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No Access-Control-Allow-Origin header is present'.",
+      "task": "Explain what a CORS preflight request is and write the HTTP headers required for a server to permit requests with custom 'Authorization' and 'X-Tenant-ID' headers.",
+      "help_statement": "Reference Hint: When browsers send non-simple requests (like custom headers or PUT/DELETE), they first send an HTTP 'OPTIONS' request. The server must reply with HTTP 200/204 and headers: 'Access-Control-Allow-Origin: https://app.praxis.dev', 'Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS', 'Access-Control-Allow-Headers: Authorization,Content-Type,X-Tenant-ID'.",
+      "starter_template": "# Required CORS Headers:\naccess_control_headers = {\n    \"Access-Control-Allow-Origin\": \"...\",\n    \"Access-Control-Allow-Methods\": \"...\",\n    \"Access-Control-Allow-Headers\": \"...\",\n}",
+      "expected_keywords": [
+        "options",
+        "preflight",
+        "access-control-allow-origin",
+        "access-control-allow-headers",
+        "authorization"
+      ]
+    },
+    {
+      "id": "prob-09",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "PII & Secret Scrubber for Structured Application Logs",
+      "category": "Data Privacy & Compliance",
+      "scenario": "An audit discovers that authorization bearer tokens and customer credit card numbers are being printed to Datadog logs whenever an HTTP request fails.",
+      "task": "Write a sanitization filter function that regex-masks sensitive values (tokens, passwords, credit card digits) before logs are written to stdout.",
+      "help_statement": "Reference Hint: Use regular expressions to redact patterns like 'Bearer [A-Za-z0-9._-]+' -> 'Bearer [REDACTED]' and 'password=[^&\\s]+' -> 'password=[REDACTED]'. In Python, custom 'logging.Filter' or 'json_formatter' intercepts log records before emission.",
+      "starter_template": "import re\n\ndef sanitize_log_payload(record_dict: dict) -> dict:\n    # Mask PII and secrets\n    pass",
+      "expected_keywords": [
+        "regex",
+        "redacted",
+        "mask",
+        "bearer",
+        "password"
+      ]
+    },
+    {
+      "id": "prob-10",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Kubernetes Liveness vs. Readiness Probe Deadlock",
+      "category": "Containerization & Kubernetes",
+      "scenario": "A microservice that takes 45 seconds to load an internal cache at startup keeps restarting in an infinite loop every 20 seconds after deployment.",
+      "task": "Explain why this probe deadlock occurs and rewrite the Kubernetes probe configuration using appropriate readiness and startup probes.",
+      "help_statement": "Reference Hint: If a **liveness probe** fails, Kubernetes restarts the container. If the app needs 45s to warm up but liveness checks after 15s, it will kill it repeatedly! Use a **startupProbe** with 'failureThreshold: 30' and 'periodSeconds: 2' to guard startup, while **readinessProbe** controls traffic routing.",
+      "starter_template": "startupProbe:\n  httpGet:\n    path: /health\n    port: 8080\n  initialDelaySeconds: ...\nreadinessProbe:\n  # ...",
+      "expected_keywords": [
+        "startupprobe",
+        "readinessprobe",
+        "livenessprobe",
+        "initialdelayseconds",
+        "warmup"
+      ]
+    },
+    {
+      "id": "prob-11",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "SQL Injection Defense & Parameterized Query Enforcement",
+      "category": "Application Security (OWASP)",
+      "scenario": "A legacy search function executes: `query = f\"SELECT * FROM items WHERE name LIKE '%{user_input}%'\"`. An attacker sends `' OR '1'='1` and dumps the entire inventory.",
+      "task": "Refactor this query to use parameterized bindings and explain why string formatting causes SQL injection.",
+      "help_statement": "Reference Hint: In SQLite/Postgres: `cursor.execute(\"SELECT * FROM items WHERE name LIKE ?\", (f\"%{user_input}%\",))` or `%s` in Postgres. Parameters are sent to the database engine separately from the SQL statement AST, making code injection impossible.",
+      "starter_template": "def safe_search_items(cursor, user_input: str):\n    # Use parameterized query:\n    pass",
+      "expected_keywords": [
+        "parameterized",
+        "placeholder",
+        "binding",
+        "ast",
+        "injection"
+      ]
+    },
+    {
+      "id": "prob-12",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Graceful Web Server Shutdown on SIGTERM",
+      "category": "System Architecture",
+      "scenario": "During Kubernetes rolling updates, users experience random HTTP 502 Bad Gateway errors because pods are immediately killed while processing active checkout requests.",
+      "task": "Implement a signal handling routine that traps SIGTERM, stops accepting new requests, drains active requests within 15 seconds, and cleanly closes DB connections.",
+      "help_statement": "Reference Hint: When Kubernetes terminates a pod, it sends SIGTERM. The app should catch SIGTERM (e.g. `signal.signal(signal.SIGTERM, handler)`), notify the HTTP server to enter draining mode (`server.shutdown()`), await active workers, close connection pools, and exit with code 0.",
+      "starter_template": "import signal\nimport sys\n\ndef handle_sigterm(signum, frame):\n    # 1. Stop ingress\n    # 2. Drain active requests\n    # 3. Close database pools\n    pass",
+      "expected_keywords": [
+        "sigterm",
+        "drain",
+        "shutdown",
+        "exit(0)",
+        "connection pool"
+      ]
+    },
+    {
+      "id": "prob-13",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Cache Stampede (Thundering Herd) Mitigation",
+      "category": "Distributed Caching",
+      "scenario": "When the homepage product catalog cache key expires at midnight, 8,000 concurrent requests simultaneously query the primary SQL database, causing database CPU to spike to 100% and crash.",
+      "task": "Describe the cache stampede problem and implement a mutex lock (or probabilistic early expiration) pattern in Python/Redis.",
+      "help_statement": "Reference Hint: Use Redis distributed mutex: when key is missing, only ONE request acquires lock (`SET lock:catalog token NX EX 10`). That request queries DB and repopulates cache. Other concurrent requests either wait 100ms and re-read cache or serve stale cached data (`stale-while-revalidate`).",
+      "starter_template": "def get_product_catalog(redis_client, db):\n    # Implement mutex or stale-while-revalidate:\n    pass",
+      "expected_keywords": [
+        "mutex",
+        "lock",
+        "nx",
+        "stale-while-revalidate",
+        "thundering herd"
+      ]
+    },
+    {
+      "id": "prob-14",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Zero-Downtime Expand/Contract Schema Migration",
+      "category": "Database DevOps",
+      "scenario": "You need to split a `users.full_name` column into `users.first_name` and `users.last_name`. The API cannot experience a single second of downtime during the rollout.",
+      "task": "Detail the 5 phases of the Expand/Contract (Parallel Run) migration pattern.",
+      "help_statement": "Reference Hint: Phase 1: Expand (Add first_name, last_name as nullable). Phase 2: Dual-write (App writes to both old and new columns). Phase 3: Backfill (Async script splits existing full_name). Phase 4: Switch readers (App reads from new columns). Phase 5: Contract (Deprecate and DROP full_name column).",
+      "starter_template": "# 5 Migration Phases:\n# Phase 1 (Expand):\n# Phase 2 (Dual Write):\n# Phase 3 (Backfill):\n# Phase 4 (Read Cutover):\n# Phase 5 (Contract):",
+      "expected_keywords": [
+        "expand",
+        "contract",
+        "dual-write",
+        "backfill",
+        "nullable"
+      ]
+    },
+    {
+      "id": "prob-15",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Idempotency Key Implementation for Financial Transactions",
+      "category": "Financial APIs & Distributed State",
+      "scenario": "A mobile app user with spotty cellular connectivity taps 'Pay $50' twice because the first request timed out on the client side. The user's credit card is charged $100.",
+      "task": "Design the server-side Idempotency Key architecture using Redis or database constraints to guarantee exactly-once payment processing.",
+      "help_statement": "Reference Hint: Client sends header `Idempotency-Key: <UUID>`. Server stores key in Redis with state 'PROCESSING'. If duplicate request arrives with same key, server returns 409 Conflict or waits. Once payment succeeds, store response payload with TTL (24h). Return cached response for any future replay.",
+      "starter_template": "def process_payment(idempotency_key: str, amount_cents: int):\n    # Check idempotency record\n    pass",
+      "expected_keywords": [
+        "idempotency-key",
+        "processing",
+        "replay",
+        "uuid",
+        "exactly-once"
+      ]
+    },
+    {
+      "id": "prob-16",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Dead Letter Queue (DLQ) Routing for Poison Pill Messages",
+      "category": "Message Queues & Event Streaming",
+      "scenario": "A malformed JSON payload in a Kafka/RabbitMQ order queue throws an unhandled `JSONDecodeError`, causing the consumer worker to crash and restart in an infinite loop, halting all subsequent order processing.",
+      "task": "Implement dead letter queue routing logic with a maximum retry counter (e.g. 3 attempts) and metadata tagging.",
+      "help_statement": "Reference Hint: Inspect message header `x-delivery-count`. If < 3, reject with requeue (`NACK`). If >= 3, publish message to `orders.DLQ` with error headers (`x-exception-message`, `x-original-queue`) and acknowledge (`ACK`) from main queue to unblock traffic.",
+      "starter_template": "def handle_message(message, max_retries=3):\n    # Route to DLQ if max retries exceeded:\n    pass",
+      "expected_keywords": [
+        "dlq",
+        "poison pill",
+        "ack",
+        "nack",
+        "max_retries"
+      ]
+    },
+    {
+      "id": "prob-17",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Circuit Breaker State Machine (Closed, Open, Half-Open)",
+      "category": "Distributed Systems Resilience",
+      "scenario": "An external SMS notification provider is experiencing severe outages, timing out after 10 seconds. Your primary checkout API threads are stalling while waiting for SMS confirmation.",
+      "task": "Design a 3-state Circuit Breaker pattern that isolates the failing SMS provider and permits quick fallback.",
+      "help_statement": "Reference Hint: States: **Closed** (Normal traffic passes). If failure rate > 50% over 10s window -> trip to **Open** (Fail fast immediately without calling external API, return fallback). After cool-down timeout (e.g. 30s) -> **Half-Open** (Allow 3 test requests; if they succeed, reset to Closed; if fail, return to Open).",
+      "starter_template": "class CircuitBreaker:\n    def __init__(self, failure_threshold=5, reset_timeout=30):\n        self.state = 'CLOSED' # CLOSED, OPEN, HALF_OPEN\n    \n    def call(self, func, *args, **kwargs):\n        pass",
+      "expected_keywords": [
+        "closed",
+        "open",
+        "half-open",
+        "fail-fast",
+        "fallback"
+      ]
+    },
+    {
+      "id": "prob-18",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Linux File Descriptor & Socket Leak Diagnosis",
+      "category": "Linux Systems & Networking",
+      "scenario": "After running for 4 days, a microservice starts throwing `OSError: [Errno 24] Too many open files` and rejects all incoming connections. CPU and memory are normal.",
+      "task": "Explain how file descriptors relate to network sockets in Linux, provide debugging CLI commands, and identify the code-level leak.",
+      "help_statement": "Reference Hint: In Linux, network sockets are file descriptors. Run `lsof -p <PID>` or `ls -l /proc/<PID>/fd | wc -l` to count open handles. The bug is typically an HTTP client or DB client opening connections without closing response bodies or reusing pooled session adapters.",
+      "starter_template": "# 1. Linux diagnostic commands:\n# lsof -p ...\n\n# 2. Python connection session fix:\nimport requests\n# Ensure connection pooling with requests.Session()",
+      "expected_keywords": [
+        "lsof",
+        "file descriptor",
+        "socket",
+        "close",
+        "session"
+      ]
+    },
+    {
+      "id": "prob-19",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Prometheus Metric Types: Counter vs Gauge vs Histogram",
+      "category": "Metrics & Telemetry",
+      "scenario": "A junior engineer instrumented API latency using a Prometheus Gauge (`api_latency_gauge.set(response_time)`). In Grafana, the latency graph shows erratic zigzag lines and cannot compute p95 percentiles.",
+      "task": "Explain why Gauge is inappropriate for request latency and write the correct Prometheus Histogram metric declaration with standard buckets.",
+      "help_statement": "Reference Hint: Gauges only store the current instantaneous value (suitable for temperature or memory in MB). Request latency requires a **Histogram** with exponential buckets (`buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0]`) to allow `histogram_quantile(0.95, rate(http_latency_bucket[5m]))`.",
+      "starter_template": "from prometheus_client import Histogram\n\n# Correct latency histogram instrumentation:\nREQUEST_LATENCY = Histogram(\n    'http_request_duration_seconds',\n    'HTTP request latency in seconds',\n    ['method', 'endpoint'],\n    buckets=[...]\n)",
+      "expected_keywords": [
+        "histogram",
+        "gauge",
+        "buckets",
+        "histogram_quantile",
+        "p95"
+      ]
+    },
+    {
+      "id": "prob-20",
+      "phase": 1,
+      "difficulty": "Basic",
+      "title": "Blameless Postmortem & Root Cause Analysis (5 Whys)",
+      "category": "Engineering Culture & Operations",
+      "scenario": "A developer accidentally ran `DROP DATABASE staging_crm` because their local `.env` file pointed to staging instead of localhost. A manager wants to fire the developer.",
+      "task": "Write a blameless postmortem using the '5 Whys' framework that identifies systemic safeguards rather than blaming individual human error.",
+      "help_statement": "Reference Hint: Never stop at 'human clicked wrong button'. Ask 5 Whys: Why did it drop staging? Dev had staging credentials. Why? Shared credentials in team wiki. Why? No staging IAM role separation. Action Items: (1) Rotate credentials, (2) Restrict drop permissions via IAM, (3) Block direct connection to staging DB from developer laptops via VPN/bastion.",
+      "starter_template": "# Blameless Postmortem:\n# Incident: Staging CRM drop\n# 5 Whys Analysis:\n# Action Items (Preventative, Assigned, Dated):",
+      "expected_keywords": [
+        "5 whys",
+        "blameless",
+        "iam",
+        "least privilege",
+        "action items"
+      ]
+    },
+    {
+      "id": "prob-21",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Cascading Thread Pool Exhaustion Across Service Mesh",
+      "category": "Distributed Systems",
+      "scenario": "Downstream Recommendation Service D experiences a 400ms latency degradation. Within 3 minutes, upstream Gateway Service A, Auth Service B, and Catalog Service C all exhaust their worker thread pools and crash across the entire cluster, causing a total company outage.",
+      "task": "Provide an architectural root cause analysis and implement the Bulkhead isolation and timeout budget propagation strategy to prevent cascading collapses.",
+      "help_statement": null,
+      "starter_template": "# 1. Root Cause Breakdown:\n# ...\n\n# 2. Bulkhead & Timeout Propagation Architecture:\n# ...",
+      "expected_keywords": [
+        "bulkhead",
+        "timeout",
+        "cascading",
+        "thread pool",
+        "isolation"
+      ]
+    },
+    {
+      "id": "prob-22",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Distributed Lock Lease Expiry & Fencing Tokens (Redlock)",
+      "category": "Concurrency & Distributed State",
+      "scenario": "Service Node 1 acquires a Redis distributed lock with a 10-second TTL to generate an invoice. A major Java Garbage Collection pause freezes Node 1 for 12 seconds. Node 2 acquires the lock and begins writing. Node 1 wakes up and also writes, corrupting the financial ledger.",
+      "task": "Explain how lock lease expiration breaks mutual exclusion during process pauses and implement Martin Kleppmann's Fencing Token pattern to ensure storage-level safety.",
+      "help_statement": null,
+      "starter_template": "# Fencing Token Pattern Implementation:\nclass FencingTokenValidator:\n    def __init__(self):\n        self.highest_token = 0\n    \n    def write_to_storage(self, token: int, data: dict):\n        pass",
+      "expected_keywords": [
+        "fencing token",
+        "redlock",
+        "lease",
+        "gc pause",
+        "monotonic"
+      ]
+    },
+    {
+      "id": "prob-23",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Read-After-Write Consistency Lag in Distributed Replicas",
+      "category": "Database Architecture",
+      "scenario": "A user updates their profile picture and is redirected to their profile page. The page still displays the old picture because the read query was routed to an asynchronous read replica with 800ms replication lag. The user files a bug report claiming the upload failed.",
+      "task": "Design a Session-Consistent / Read-Your-Own-Writes routing layer that dynamically routes queries to the primary database when a recent write has occurred.",
+      "help_statement": null,
+      "starter_template": "# Read-Your-Own-Writes Router:\ndef route_database_query(user_id: str, query_type: str, last_write_timestamp: float):\n    pass",
+      "expected_keywords": [
+        "read-your-own-writes",
+        "replication lag",
+        "primary",
+        "replica",
+        "session consistency"
+      ]
+    },
+    {
+      "id": "prob-24",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Memory Leak in Event Listener & Closure Retainers",
+      "category": "Memory Management & Profiling",
+      "scenario": "A long-running Node.js or Python background worker accumulates 4GB of RAM over 12 hours until killed by the kernel. Heap profiling indicates that thousands of request context objects are retained in an event listener registry.",
+      "task": "Diagnose how closures and unbound event emitter listeners cause memory retention and refactor the code to use WeakMap / explicit unsubscription.",
+      "help_statement": null,
+      "starter_template": "# Refactor listener lifecycle to prevent memory leaks:\nclass EventHub:\n    def __init__(self):\n        pass",
+      "expected_keywords": [
+        "closure",
+        "retainer",
+        "weakmap",
+        "unsubscribe",
+        "eventemitter"
+      ]
+    },
+    {
+      "id": "prob-25",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Deadlock Resolution in Concurrent Account Transfers",
+      "category": "Transaction Isolation & Deadlocks",
+      "scenario": "Thread 1 transfers $50 from Account A to Account B (`SELECT ... FOR UPDATE` on A, then B). Thread 2 concurrently transfers $30 from Account B to Account A (`SELECT ... FOR UPDATE` on B, then A). Both threads block indefinitely and PostgreSQL aborts with `ERROR: deadlock detected`.",
+      "task": "Explain the circular wait condition and implement deterministic row-lock ordering to eliminate database transfer deadlocks.",
+      "help_statement": null,
+      "starter_template": "def transfer_funds(db, from_account_id: int, to_account_id: int, amount: float):\n    # Enforce deterministic locking order:\n    pass",
+      "expected_keywords": [
+        "deadlock",
+        "deterministic",
+        "circular wait",
+        "for update",
+        "order by"
+      ]
+    },
+    {
+      "id": "prob-26",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Cross-Tenant Data Leak via Thread-Local Context Reuse",
+      "category": "Multi-Tenant Security",
+      "scenario": "In a multi-tenant SaaS application running on a Gunicorn thread pool, Tenant X occasionally sees Tenant Y's confidential financial metrics because tenant context was stored in a ThreadLocal variable that was not cleared when the thread serviced the next HTTP request.",
+      "task": "Identify why thread pool reuse causes cross-tenant data leaks and write a foolproof context management middleware that guarantees context cleanup.",
+      "help_statement": null,
+      "starter_template": "# Clean Thread-Local / ContextVars Middleware:\nimport contextvars\n\ntenant_context = contextvars.ContextVar('tenant_id', default=None)\n\nasync def tenant_isolation_middleware(request, call_next):\n    pass",
+      "expected_keywords": [
+        "threadlocal",
+        "contextvars",
+        "cross-tenant",
+        "reset",
+        "finally"
+      ]
+    },
+    {
+      "id": "prob-27",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Exponential Backoff with Full Jitter for Retries",
+      "category": "Networking & Distributed Resilience",
+      "scenario": "When an external credit score API recovers from a brief 10-second outage, 15,000 pending client requests retry at exact 2-second intervals, immediately crashing the API again in periodic synchronized waves (retry storm).",
+      "task": "Explain why fixed or purely exponential retries synchronize and implement the 'Exponential Backoff with Full Jitter' algorithm recommended by AWS Architecture.",
+      "help_statement": null,
+      "starter_template": "import random\nimport time\n\ndef calculate_full_jitter_delay(attempt: int, base_delay: float = 1.0, max_delay: float = 30.0) -> float:\n    # Implement Full Jitter: min(max_delay, random.uniform(0, base_delay * (2 ** attempt)))\n    pass",
+      "expected_keywords": [
+        "jitter",
+        "exponential backoff",
+        "retry storm",
+        "random",
+        "synchronization"
+      ]
+    },
+    {
+      "id": "prob-28",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Kafka Hot Partitioning & Uneven Consumer Lag",
+      "category": "Event Streaming & Distributed Logs",
+      "scenario": "In a 12-partition Kafka topic, Partition 4 has 450,000 unconsumed messages and 40-minute consumer lag, while all other 11 partitions have 0 lag. Messages are keyed by `country_code`, and 85% of traffic originates from `US`.",
+      "task": "Explain why key hashing creates hot partitions and design a compound partitioning key or salted partition strategy to balance throughput.",
+      "help_statement": null,
+      "starter_template": "# Compound / Salted Partition Key Strategy:\ndef generate_balanced_partition_key(country_code: str, user_id: str, salt_range: int = 10) -> str:\n    pass",
+      "expected_keywords": [
+        "hot partition",
+        "salt",
+        "consumer lag",
+        "hash",
+        "compound key"
+      ]
+    },
+    {
+      "id": "prob-29",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "TCP Half-Open Keep-Alive Mismatch Behind AWS ALB",
+      "category": "Cloud Infrastructure & Networking",
+      "scenario": "A web app behind an AWS Application Load Balancer reports sporadic `502 Bad Gateway` errors (~0.1% of requests) during steady traffic. ALB access logs show `elb_status_code=502` and `backend_status_code=-`. ALB idle timeout is set to 60s; Gunicorn/Node server keepalive timeout is set to 60s.",
+      "task": "Explain the TCP race condition when upstream load balancer and backend server have identical keep-alive timeouts and formulate the timing rule to resolve it.",
+      "help_statement": null,
+      "starter_template": "# ALB vs Backend Keepalive Timeout Configuration:\n# ALB idle timeout: 60s\n# Backend server keepalive timeout rule: ...",
+      "expected_keywords": [
+        "keepalive",
+        "idle timeout",
+        "race condition",
+        "alb",
+        "502"
+      ]
+    },
+    {
+      "id": "prob-30",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Silent Data Truncation on UTF-8 Multi-Byte Emojis",
+      "category": "Database Encoding & Character Sets",
+      "scenario": "When a customer submits a comment containing an emoji like 'Great service! \ud83d\udc4d', the text stored in MySQL is truncated to 'Great service! ' and all subsequent characters are lost without throwing an error.",
+      "task": "Explain the difference between MySQL's legacy `utf8` and standard `utf8mb4` character sets, and provide the ALTER TABLE script to safely upgrade collations.",
+      "help_statement": null,
+      "starter_template": "-- Migration script to convert database, table, and columns to utf8mb4:\nALTER TABLE ...",
+      "expected_keywords": [
+        "utf8mb4",
+        "utf8",
+        "4 bytes",
+        "emoji",
+        "collation"
+      ]
+    },
+    {
+      "id": "prob-31",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Zero-Downtime TLS Certificate Hot-Reloading",
+      "category": "Production Cryptography & Nginx",
+      "scenario": "Your production Nginx/Envoy proxy terminates HTTPS for 50,000 persistent WebSocket connections. You must rotate the SSL/TLS certificate without dropping active WebSocket connections.",
+      "task": "Explain how master-worker process architectures handle configuration reloads (`SIGHUP` or `nginx -s reload`) without breaking existing TCP sockets.",
+      "help_statement": null,
+      "starter_template": "# Zero-downtime certificate rotation procedure:\n# Command & signal execution sequence:\n# Verification steps:",
+      "expected_keywords": [
+        "sighup",
+        "reload",
+        "master",
+        "worker",
+        "graceful"
+      ]
+    },
+    {
+      "id": "prob-32",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Redis Eviction Policy Catastrophe in Mixed Cache/Session Stores",
+      "category": "Distributed Caching & In-Memory Stores",
+      "scenario": "A company stores both transient HTML cache keys and active user login sessions in the same Redis instance configured with `maxmemory-policy: allkeys-lru`. During a marketing crawl, all active users are logged out unexpectedly.",
+      "task": "Explain why `allkeys-lru` evicted user sessions and architect a safe separation strategy or eviction policy configuration (`volatile-lru` vs separate clusters).",
+      "help_statement": null,
+      "starter_template": "# Redis Architecture Remediation Plan:\n# 1. Why sessions were dropped:\n# 2. Redis cluster separation & maxmemory-policy fix:",
+      "expected_keywords": [
+        "allkeys-lru",
+        "volatile-lru",
+        "eviction",
+        "sessions",
+        "separation"
+      ]
+    },
+    {
+      "id": "prob-33",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Goroutine / Asyncio Task Leak in Long-Lived WebSockets",
+      "category": "Asynchronous Concurrency",
+      "scenario": "A chat microservice handles 10,000 WebSocket connections. When clients disconnect abruptly without sending a TCP close handshake, background heartbeat tasks continue running indefinitely, consuming 100% CPU.",
+      "task": "Implement a context cancellation / timeout watchdog pattern that detects dropped sockets and guarantees background task termination.",
+      "help_statement": null,
+      "starter_template": "import asyncio\n\nasync def websocket_handler(websocket):\n    # Ensure cancellation of background worker tasks on disconnect:\n    pass",
+      "expected_keywords": [
+        "cancellation",
+        "asyncio",
+        "disconnect",
+        "finally",
+        "task.cancel"
+      ]
+    },
+    {
+      "id": "prob-34",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Distributed Transaction Rollback via Saga Pattern",
+      "category": "Microservices Architecture",
+      "scenario": "An e-commerce order workflow spans Order Service, Payment Service, and Inventory Service. Payment succeeds, but Inventory reservation fails due to a stock discrepancy. You cannot use 2-Phase Commit (2PC).",
+      "task": "Design a Choreographed or Orchestrated Saga with compensating transactions that cleanly rolls back payment and marks the order as CANCELLED.",
+      "help_statement": null,
+      "starter_template": "# Saga Orchestrator with Compensating Actions:\nclass OrderSagaOrchestrator:\n    def execute(self, order_id: str):\n        pass",
+      "expected_keywords": [
+        "saga",
+        "compensating transaction",
+        "rollback",
+        "orchestrator",
+        "idempotent"
+      ]
+    },
+    {
+      "id": "prob-35",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Log Forgery & CRLF Injection Prevention",
+      "category": "Application Security",
+      "scenario": "An attacker sends an HTTP header `User-Agent: Mozilla/5.0\r\n2026-10-22 14:10:00 [INFO] Admin user logged in successfully`. The log parsing pipeline ingests this as a genuine admin login event, bypassing SIEM audit rules.",
+      "task": "Explain CRLF log injection and implement a sanitizer that strips carriage return (`\\r`) and line feed (`\\n`) bytes from untrusted log fields.",
+      "help_statement": null,
+      "starter_template": "def sanitize_for_logging(untrusted_input: str) -> str:\n    # Strip CRLF characters to prevent log forgery:\n    pass",
+      "expected_keywords": [
+        "crlf",
+        "injection",
+        "log forgery",
+        "newline",
+        "sanitize"
+      ]
+    },
+    {
+      "id": "prob-36",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Kubernetes CFS CPU Throttling Despite Low Average Usage",
+      "category": "Linux Kernel & Kubernetes Cgroups",
+      "scenario": "A microservice container has `resources.limits.cpu: '1.0'`. Average CPU utilization is only 25%, but p99 latency is severely degraded and Linux kernel metrics report `nr_throttled: 42000` in `/sys/fs/cgroup/cpu/cpu.stat`.",
+      "task": "Explain how the Linux Completely Fair Scheduler (CFS) enforces CPU quotas over 100ms periods and why multi-threaded bursts trigger throttling.",
+      "help_statement": null,
+      "starter_template": "# Analysis of CFS Quota (cpu.cfs_quota_us vs cpu.cfs_period_us):\n# Why bursts cause throttling at 25% avg CPU:\n# Recommended Kubernetes resource tuning:",
+      "expected_keywords": [
+        "cfs",
+        "cgroup",
+        "throttling",
+        "period",
+        "burst"
+      ]
+    },
+    {
+      "id": "prob-37",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Circular Dependency Deadlock on Cold Cluster Startup",
+      "category": "System Architecture & Resilience",
+      "scenario": "During a total data center cold boot, Authentication Service requires Organization Service to validate tenant tokens, while Organization Service requires Authentication Service to start its internal HTTP client. Neither service can pass health checks, and the cluster remains down.",
+      "task": "Identify why synchronous inter-service dependencies create cold boot deadlocks and re-architect the startup sequence to break circular dependencies.",
+      "help_statement": null,
+      "starter_template": "# Cold Boot Decoupling Architecture:\n# 1. Break synchronous bootstrap coupling:\n# 2. Asynchronous / Cached local validation design:",
+      "expected_keywords": [
+        "circular dependency",
+        "cold boot",
+        "decouple",
+        "asynchronous",
+        "health check"
+      ]
+    },
+    {
+      "id": "prob-38",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Surrogate-Key (Cache-Tag) Edge Cache Invalidation",
+      "category": "CDN & Edge Architecture",
+      "scenario": "An article page cached across Cloudflare/Fastly edge nodes includes product pricing widgets. Purging the entire CDN cache causes origin overload, but waiting for TTL (24h) displays stale prices.",
+      "task": "Design a Surrogate-Key (Cache-Tag) invalidation architecture where backend services issue targeted PURGE requests only for affected product tags.",
+      "help_statement": null,
+      "starter_template": "# Surrogate-Key Header Generation & Targeted Purge:\n# Response Headers:\n# Edge Purge API Payload:",
+      "expected_keywords": [
+        "surrogate-key",
+        "cache-tag",
+        "purge",
+        "cdn",
+        "invalidation"
+      ]
+    },
+    {
+      "id": "prob-39",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "Unbounded In-Memory Query Aggregation Causing Stop-the-World GC",
+      "category": "High-Performance Data Processing",
+      "scenario": "An API endpoint calculates monthly tax summaries by executing `SELECT * FROM transactions WHERE user_id = $1` and loading all 1.2 million rows into an in-memory list. The server freezes for 8 seconds during Garbage Collection, failing health probes.",
+      "task": "Refactor the endpoint to use database-level streaming cursors / chunked generators to achieve constant O(1) memory usage.",
+      "help_statement": null,
+      "starter_template": "def stream_transaction_aggregates(cursor, user_id: str, batch_size: int = 1000):\n    # Implement generator yielding batches to maintain constant memory:\n    pass",
+      "expected_keywords": [
+        "generator",
+        "stream",
+        "cursor",
+        "constant memory",
+        "chunk"
+      ]
+    },
+    {
+      "id": "prob-40",
+      "phase": 2,
+      "difficulty": "Intermediate",
+      "title": "BGP Route Flapping & Multi-AZ Split-Brain Partitioning",
+      "category": "Site Reliability & Network Consensus",
+      "scenario": "A cross-availability-zone network link flutters (flaps) intermittently. Two database nodes in different AZs lose communication with each other but both still see customer traffic, leading to conflicting write splits (split-brain).",
+      "task": "Explain how quorum-based consensus (Raft/Paxos) with fencing prevents split-brain and formulate the minimum node count rule for high availability.",
+      "help_statement": null,
+      "starter_template": "# Quorum Consensus Architecture:\n# Minimum node formula (2F + 1):\n# Split-brain fencing mechanism:",
+      "expected_keywords": [
+        "quorum",
+        "split-brain",
+        "raft",
+        "fencing",
+        "consensus"
+      ]
+    }
+  ]
+};

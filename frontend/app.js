@@ -2918,14 +2918,36 @@ async function checkAuthAndSession() {
           switchView('dashboard');
         }
       }
+      return;
     } else {
       localStorage.removeItem('praxis_token');
+      localStorage.removeItem('praxis_offline_user');
       state.token = null;
       state.user = null;
       showAuthOverlay(true);
+      return;
     }
   } catch (err) {
-    console.error('Session check failed:', err);
+    console.warn('Backend session check unreachable, verifying local learner session:', err);
+    const offlineUserStr = localStorage.getItem('praxis_offline_user');
+    if (offlineUserStr) {
+      try {
+        state.user = JSON.parse(offlineUserStr);
+        showAuthOverlay(false);
+        updateUserHeaderUI();
+        if (!state.user.role_locked) {
+          openRoleOnboardingModal();
+        } else {
+          closeRoleOnboardingModal();
+          if (!state.user.quiz_passed) {
+            switchView('handbook');
+          } else {
+            switchView('dashboard');
+          }
+        }
+        return;
+      } catch (e) {}
+    }
     showAuthOverlay(true);
   }
 }
@@ -3060,10 +3082,25 @@ function bindAuthControls() {
           }
         }
       } catch (err) {
-        if (errorMsg) {
-          errorMsg.textContent = 'Network error. Please try again.';
-          errorMsg.style.display = 'block';
-        }
+        console.warn('Backend auth unreachable, initializing local learner session:', err);
+        const localUser = {
+          user_id: 'local-' + Date.now(),
+          username: username,
+          full_name: full_name || username,
+          role: null,
+          role_locked: false,
+          quiz_passed: false,
+          quiz_score: 0
+        };
+        const localToken = 'local-token-' + Date.now();
+        localStorage.setItem('praxis_token', localToken);
+        localStorage.setItem('praxis_offline_user', JSON.stringify(localUser));
+        state.token = localToken;
+        state.user = localUser;
+        showAuthOverlay(false);
+        updateUserHeaderUI();
+        showToast(`Welcome, ${state.user.full_name || state.user.username}!`, 'success');
+        openRoleOnboardingModal();
       }
     });
   }
@@ -3095,9 +3132,15 @@ async function openRoleOnboardingModal() {
     if (res.ok) {
       state.rolesList = await res.json();
       renderRoleSelectionGrid();
+      return;
     }
   } catch (err) {
-    console.error('Failed to load roles:', err);
+    console.warn('Backend roles API unreachable, loading offline roles:', err);
+  }
+
+  if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.ROLES) {
+    state.rolesList = window.PRAXIS_OFFLINE_DATA.ROLES;
+    renderRoleSelectionGrid();
   }
 }
 
@@ -3166,7 +3209,18 @@ async function confirmRoleLock() {
       showToast(err.detail || 'Role locking failed.', 'error');
     }
   } catch (err) {
-    showToast('Network error while locking role.', 'error');
+    console.warn('Backend select-role offline, locking locally:', err);
+    if (state.user) {
+      state.user.role = state.selectedRoleForOnboarding;
+      state.user.role_locked = true;
+      localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+      closeRoleOnboardingModal();
+      updateUserHeaderUI();
+      showToast(`Track permanently locked to ${getRoleDisplayName(state.user.role)}.`, 'success');
+      switchView('handbook');
+    } else {
+      showToast('Network error while locking role.', 'error');
+    }
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -3295,8 +3349,20 @@ async function loadQuizQuestions() {
     if (res.ok) {
       state.quizQuestions = await res.json();
       renderQuizQuestions();
+      return;
     }
   } catch (err) {
+    console.warn('Backend quiz API unreachable, loading offline questions:', err);
+  }
+
+  if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) {
+    state.quizQuestions = window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS.map(q => ({
+      id: q.id,
+      question: q.question,
+      options: q.options
+    }));
+    renderQuizQuestions();
+  } else {
     container.innerHTML = `<div style="color: #ef4444; padding: 1rem;">Failed to load questions. Please check connection.</div>`;
   }
 }
@@ -3364,7 +3430,36 @@ async function submitReadinessQuiz() {
       showToast(err.detail || 'Evaluation failed.', 'error');
     }
   } catch (err) {
-    showToast('Network error during quiz evaluation.', 'error');
+    console.warn('Backend quiz submission offline, evaluating locally:', err);
+    const offlineQs = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || [];
+    let score = 0;
+    const results = offlineQs.map(q => {
+      const sel = state.quizUserAnswers[q.id];
+      const isCorrect = sel === q.correct;
+      if (isCorrect) score += 1;
+      return {
+        id: q.id,
+        selected: sel,
+        correct: q.correct,
+        is_correct: isCorrect,
+        explanation: q.explanation
+      };
+    });
+    const passed = score >= 4;
+    const payload = {
+      score: score,
+      total: offlineQs.length,
+      percentage: Math.round((score / offlineQs.length) * 100),
+      passed: passed,
+      message: passed ? 'Congratulations! You passed the Readiness Assessment.' : 'Score was below 80%. Review the handbook and try again.',
+      results: results
+    };
+    if (state.user) {
+      state.user.quiz_passed = passed;
+      state.user.quiz_score = score;
+      localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    }
+    renderQuizResults(payload);
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -3559,9 +3654,25 @@ async function loadProblemsBank() {
         renderProblemDetail(state.activeProblemId || state.problemsList[0].id);
       }
       updateProblemsSolvedCounter();
+      return;
     }
   } catch (err) {
-    console.error('Failed to load problems:', err);
+    console.warn('Backend problems API unreachable, loading offline problem bank:', err);
+  }
+
+  if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS) {
+    const savedProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    state.problemsList = window.PRAXIS_OFFLINE_DATA.PROBLEMS.map(p => ({
+      ...p,
+      status: savedProgress[p.id] ? savedProgress[p.id].status : 'pending',
+      score: savedProgress[p.id] ? savedProgress[p.id].score : 0,
+      feedback: savedProgress[p.id] ? savedProgress[p.id].feedback : null
+    }));
+    renderProblemsList(state.problemsFilter);
+    if (state.problemsList.length > 0) {
+      renderProblemDetail(state.activeProblemId || state.problemsList[0].id);
+    }
+    updateProblemsSolvedCounter();
   }
 }
 
@@ -3734,7 +3845,58 @@ async function submitProblemSolution(problemId) {
       showToast(err.detail || 'Evaluation failed.', 'error');
     }
   } catch (err) {
-    showToast('Network error during solution submission.', 'error');
+    console.warn('Backend problem submission offline, evaluating locally:', err);
+    const match = (window.PRAXIS_OFFLINE_DATA ? window.PRAXIS_OFFLINE_DATA.PROBLEMS : state.problemsList).find(p => p.id === problemId);
+    if (match) {
+      const solLower = input.value.trim().toLowerCase();
+      const keywords = match.expected_keywords || [];
+      const hits = keywords.filter(k => solLower.includes(k.toLowerCase()));
+      const scoreRatio = keywords.length > 0 ? (hits.length / keywords.length) : 1.0;
+      const score = Math.round(scoreRatio * 100);
+      const passed = score >= (match.passing_score || 70);
+      const feedback = passed
+        ? `Solution accepted! (${score}%). Addressed required concepts: ${hits.join(', ')}.`
+        : `Needs refinement (${score}%). Ensure you address: ${keywords.filter(k => !hits.includes(k)).join(', ')}.`;
+
+      const evalData = {
+        problem_id: problemId,
+        status: passed ? 'completed' : 'in_progress',
+        score: score,
+        passed: passed,
+        feedback: feedback
+      };
+
+      const savedProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+      savedProgress[problemId] = evalData;
+      localStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
+
+      const evalCard = document.getElementById('problem-eval-result');
+      if (evalCard) {
+        evalCard.style.display = 'flex';
+        evalCard.style.background = passed ? '#f0fdf4' : '#fffbeb';
+        evalCard.style.borderColor = passed ? '#bbf7d0' : '#fde68a';
+        evalCard.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: ${passed ? '#166534' : '#92400e'}; font-size: 1rem;">
+              ${passed ? '✓ Solution Accepted' : '⚠ Revisions Recommended'}
+            </strong>
+            <span class="badge ${passed ? 'badge-emerald' : 'badge-amber'}">${score} / 100</span>
+          </div>
+          <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(feedback)}</p>
+        `;
+      }
+
+      const prob = state.problemsList.find(p => p.id === problemId);
+      if (prob) {
+        prob.status = evalData.status;
+        prob.score = evalData.score;
+      }
+      renderProblemsList(state.problemsFilter);
+      updateProblemsSolvedCounter();
+      showToast(passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', passed ? 'success' : 'info');
+    } else {
+      showToast('Network error during solution submission.', 'error');
+    }
   } finally {
     btn.disabled = false;
     btn.textContent = 'Run & Submit Solution';
