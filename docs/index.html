@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Praxis | Practical Engineering Simulation Platform</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'><polygon points='16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5' stroke='%236366f1' stroke-width='2.2' fill='%23111827'/><line x1='16' y1='2' x2='16' y2='16' stroke='%2306b6d4' stroke-width='1.8'/><line x1='16' y1='16' x2='29' y2='22.5' stroke='%233b82f6' stroke-width='1.8'/><line x1='16' y1='16' x2='3' y2='22.5' stroke='%2310b981' stroke-width='1.8'/><circle cx='16' cy='16' r='3.2' fill='%23a855f7'/></svg>">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- AUTHENTICATION OVERLAY (Shown if not logged in) -->
+  <div id="auth-overlay" class="auth-overlay" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5" stroke="#ffffff" stroke-width="2.2" stroke-linejoin="round" fill="rgba(255, 255, 255, 0.15)"/>
+            <line x1="16" y1="2" x2="16" y2="16" stroke="#ffffff" stroke-width="1.8"/>
+            <line x1="16" y1="16" x2="29" y2="22.5" stroke="#ffffff" stroke-width="1.8"/>
+            <line x1="16" y1="16" x2="3" y2="22.5" stroke="#ffffff" stroke-width="1.8"/>
+            <circle cx="16" cy="16" r="3.2" fill="#38bdf8"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title" style="color: #0f172a;">Praxis</span>
+          <span class="brand-subtitle" style="color: #64748b;">Workplace Simulation Platform</span>
+        </div>
+      </div>
+      <div class="auth-header">
+        <h2 class="auth-title" id="auth-header-title">Sign In to Praxis</h2>
+        <p class="auth-subtitle" id="auth-header-desc">Enter your credentials to access your workplace simulation dashboard.</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="auth-tab-signin" type="button">Sign In</button>
+        <button class="auth-tab" id="auth-tab-signup" type="button">Create Account</button>
+      </div>
+      <div class="auth-error-banner" id="auth-error-msg"></div>
+      <form class="auth-form" id="auth-form">
+        <div class="auth-field" id="auth-fullname-field" style="display: none;">
+          <label for="auth-fullname">Full Name</label>
+          <input type="text" id="auth-fullname" class="auth-input" placeholder="e.g. Alex Mercer" autocomplete="name">
+        </div>
+        <div class="auth-field">
+          <label for="auth-username">Username</label>
+          <input type="text" id="auth-username" class="auth-input" placeholder="e.g. alexdev" required autocomplete="username">
+        </div>
+        <div class="auth-field">
+          <label for="auth-password">Password</label>
+          <input type="password" id="auth-password" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="auth-submit-btn" id="auth-submit-btn">Sign In to Praxis</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ROLE ONBOARDING MODAL (Locked Once Selected) -->
+  <div id="role-onboard-overlay" class="auth-overlay" style="display: none;">
+    <div class="role-onboard-card">
+      <div class="auth-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <polygon points="16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5" stroke="#ffffff" stroke-width="2.2" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="16" cy="16" r="3.2" fill="#38bdf8"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title" style="color: #0f172a;">Praxis Onboarding</span>
+          <span class="brand-subtitle" style="color: #64748b;">Step 1: Choose Your Career Track</span>
+        </div>
+      </div>
+      <div class="role-lock-warning">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span><b>Permanent Commitment:</b> Once confirmed, your chosen career track is permanently locked to your account and cannot be modified.</span>
+      </div>
+      <div class="role-cards-grid" id="role-selection-grid">
+        <!-- Rendered dynamically via JS -->
+      </div>
+      <button class="auth-submit-btn" id="confirm-role-lock-btn" disabled>Select a Role Track Above</button>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <!-- Dark Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="brand-emblem-svg">
+              <defs>
+                <linearGradient id="praxis-grad-primary" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="50%" stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="#10b981"/>
+                </linearGradient>
+                <linearGradient id="praxis-grad-inner" x1="16" y1="8" x2="16" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#a855f7"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+              <polygon points="16,2 29,9.5 29,22.5 16,30 3,22.5 3,9.5" stroke="url(#praxis-grad-primary)" stroke-width="2.2" stroke-linejoin="round" fill="rgba(99, 102, 241, 0.12)"/>
+              <line x1="16" y1="2" x2="16" y2="16" stroke="url(#praxis-grad-primary)" stroke-width="1.8"/>
+              <line x1="16" y1="16" x2="29" y2="22.5" stroke="url(#praxis-grad-primary)" stroke-width="1.8"/>
+              <line x1="16" y1="16" x2="3" y2="22.5" stroke="url(#praxis-grad-primary)" stroke-width="1.8"/>
+              <circle cx="16" cy="16" r="3.2" fill="url(#praxis-grad-inner)"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Praxis</span>
+            <span class="brand-subtitle">Workplace Simulation Platform</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Your Workspace</div>
+        <button class="nav-item active" id="nav-dashboard" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9"></rect>
+            <rect x="14" y="3" width="7" height="5"></rect>
+            <rect x="14" y="12" width="7" height="9"></rect>
+            <rect x="3" y="16" width="7" height="5"></rect>
+          </svg>
+          <span>Dashboard</span>
+          <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Hub</span>
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 1.25rem;">Your Foundation</div>
+        <button class="nav-item" id="nav-handbook" data-view="handbook">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>Industry Handbook</span>
+          <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">12p PDF</span>
+        </button>
+        <button class="nav-item" id="nav-quiz" data-view="quiz">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Readiness Check</span>
+          <span class="nav-pill" id="quiz-sidebar-pill">5 MEQs</span>
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 1.25rem;">Problem Bank</div>
+        <button class="nav-item" id="nav-problems" data-view="problems">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>40 Production Probs</span>
+          <span class="nav-pill" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;" id="problems-count-pill">0/40</span>
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 1.25rem;">Simulations</div>
+        <button class="nav-item" id="nav-catalog" data-view="catalog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Incident Catalog</span>
+          <span class="nav-pill" id="catalog-count-pill">9 Labs</span>
+        </button>
+        <button class="nav-item" id="nav-workspace" data-view="workspace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+          <span>Mission Lab</span>
+        </button>
+
+        <div class="nav-section-label" style="margin-top: 1.25rem;">Governance</div>
+        <button class="nav-item" id="nav-admin" data-view="admin">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Reviewer Portal</span>
+          <span class="nav-pill" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">Review</span>
+        </button>
+        <button class="nav-item" id="nav-profile" data-view="profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="5"></circle>
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+          </svg>
+          <span>Learner Progress</span>
+          <span class="nav-pill" id="nav-streak-pill">Active</span>
+        </button>
+        <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Rubric Dimensions</span>
+        </button>
+      </nav>
+
+      <!-- Active Track Card in Sidebar -->
+      <div class="sidebar-track-widget">
+        <div class="track-widget-header">
+          <span class="widget-label">Active Track</span>
+          <span class="status-indicator-dot"></span>
+        </div>
+        <div class="track-widget-content">
+          <div class="widget-track-title" id="sidebar-active-track-name">Cloud Engineer & SRE</div>
+          <div class="widget-track-mission" id="sidebar-active-mission-name">Incident 1402 (Guided)</div>
+        </div>
+        <button class="btn btn-sidebar-outline" id="sidebar-quick-switch-btn">Switch Role Track</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sandbox-status">
+          <span class="status-dot"></span>
+          <span>Simulation Engine v1.0.0</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      <!-- Top Header Bar -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="breadcrumbs">
+            <span class="breadcrumb-item" id="bc-root">Praxis</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item" id="bc-track">Cloud Engineer</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-item current" id="bc-mission">Incident 1402</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- User Profile Badge & Sign Out -->
+          <div class="user-profile-badge" id="header-user-badge">
+            <div class="user-avatar" id="header-user-avatar">JD</div>
+            <div class="user-meta">
+              <span class="user-name" id="header-user-name">Learner</span>
+              <span class="user-role-pill" id="header-user-role">Cloud & SRE</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="header-signout-btn" style="padding: 2px 8px; font-size: 0.72rem; color: #ef4444;" title="Sign out of Praxis">Sign Out</button>
+          </div>
+
+          <!-- Quick Actions: Handbook & Quiz -->
+          <button class="btn btn-outline btn-sm" id="header-role-guide-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            12p Handbook (PDF)
+          </button>
+
+          <button class="btn btn-outline btn-sm" id="header-quiz-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Readiness Check (5 Qs)
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Scrollable Content -->
+      <main class="content-container">
+
+        <!-- VIEW: Learner Operations Dashboard (3 Incomplete Problem Sections + 1 Visit Handbook) -->
+        <section class="view-section" id="view-dashboard" style="display: none;">
+          <div class="dashboard-container">
+            <!-- Welcome Banner -->
+            <div class="dashboard-welcome-banner">
+              <div class="dashboard-welcome-text">
+                <div class="badge badge-emerald" style="background: rgba(16, 185, 129, 0.25); color: #34d399; margin-bottom: 0.5rem; width: fit-content;">
+                  Readiness Assessment: Passed (5/5) ✓
+                </div>
+                <h1 id="dash-welcome-user">Welcome to Your Engineering Dashboard</h1>
+                <p id="dash-welcome-track">Active Career Track: 🔒 Cloud & Platform SRE</p>
+              </div>
+              <div class="dashboard-stats-row">
+                <div class="dashboard-stat-pill">
+                  <span class="dashboard-stat-val" id="dash-stat-incomplete-count">40</span>
+                  <span class="dashboard-stat-lbl">Incomplete Probs</span>
+                </div>
+                <div class="dashboard-stat-pill">
+                  <span class="dashboard-stat-val" id="dash-stat-solved-count">0</span>
+                  <span class="dashboard-stat-lbl">Solved</span>
+                </div>
+                <div class="dashboard-stat-pill">
+                  <span class="dashboard-stat-val" id="dash-stat-labs-count">9</span>
+                  <span class="dashboard-stat-lbl">Incident Labs</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- The 4 Main Action Sections: 3 Incomplete Problem Sections + 1 Visit Handbook -->
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Engineering Curriculum & Resources</h2>
+                <span style="font-size: 0.8rem; color: #64748b;">Click any section below to jump directly</span>
+              </div>
+
+              <div class="dashboard-grid-4">
+                <!-- Section 1: Incomplete Basic Problems (1 - 20) -->
+                <div class="dashboard-section-card" id="dash-card-basic-problems">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Phase 01 • Basic</span>
+                    <span class="dashboard-card-badge-incomplete" id="dash-badge-basic">
+                      ● <span id="dash-badge-basic-text">20 Incomplete</span>
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Basic Production Problems</div>
+                  <div class="dashboard-card-desc">
+                    20 fundamental production challenges covering OOM container crashes, connection pool leaks, unindexed foreign keys, and rate limiters. Features SOP reference & syntax guidance.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Solve Incomplete Problems ➔
+                  </div>
+                </div>
+
+                <!-- Section 2: Incomplete Intermediate Problems (21 - 40) -->
+                <div class="dashboard-section-card" id="dash-card-inter-problems">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Phase 02 • Intermediate</span>
+                    <span class="dashboard-card-badge-incomplete" id="dash-badge-inter">
+                      ● <span id="dash-badge-inter-text">20 Incomplete</span>
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Intermediate Production Problems</div>
+                  <div class="dashboard-card-desc">
+                    20 advanced distributed systems challenges: cascading thread pool exhaustion, distributed lock lease expiry, multi-region replication lag, and saga rollbacks without help statements.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Tackle Incomplete Problems ➔
+                  </div>
+                </div>
+
+                <!-- Section 3: Incomplete Full Incident Simulation Labs -->
+                <div class="dashboard-section-card" id="dash-card-simulation-labs">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Guided & Independent Labs</span>
+                    <span class="dashboard-card-badge-incomplete" id="dash-badge-labs">
+                      ● <span id="dash-badge-labs-text">20 Guided Missions</span>
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Practical Simulation Missions</div>
+                  <div class="dashboard-card-desc">
+                    20 Guided Missions per role with structured submission forms & rubric-based evaluations, plus independent production missions (up to 200 per role). Triage logs, metrics, and architecture.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Explore Role Missions ➔
+                  </div>
+                </div>
+
+                <!-- Section 4: Visit Handbook (12-Page Field Manual) -->
+                <div class="dashboard-section-card" id="dash-card-visit-handbook">
+                  <div class="dashboard-card-top">
+                    <span class="dashboard-card-tag">Field Manual</span>
+                    <span class="dashboard-card-badge-handbook">
+                      ✓ Field Manual Ready
+                    </span>
+                  </div>
+                  <div class="dashboard-card-title">Visit Foundations Handbook</div>
+                  <div class="dashboard-card-desc">
+                    Revisit the publication-grade 12-page industry guide anytime. Review organizational topologies, agile ceremonies, Git etiquette, CI/CD, observability, and 40+ industry keywords.
+                  </div>
+                  <div class="dashboard-card-link">
+                    Visit Handbook & Reader (12p PDF) ➔
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Priority Incomplete Problems Queue -->
+            <div class="dashboard-queue-box">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Up Next: 3 Incomplete Problems</h3>
+                  <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Immediate production tickets waiting for your triage and solution.</p>
+                </div>
+                <span class="badge badge-indigo">Priority Queue</span>
+              </div>
+
+              <div id="dashboard-queue-list" style="display: flex; flex-direction: column; gap: 0.65rem;">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: 12-Page Industry Foundations Handbook -->
+        <section class="view-section" id="view-handbook" style="display: none;">
+          <div class="handbook-container">
+            <div class="handbook-hero-card">
+              <div class="handbook-hero-text">
+                <div class="badge badge-indigo" style="background: rgba(255,255,255,0.2); color: #ffffff; width: fit-content; margin-bottom: 0.5rem;">Mandatory Field Manual</div>
+                <h1 id="handbook-hero-title">Industry Foundations & Production Handbook</h1>
+                <p>Master corporate engineering topologies, agile rituals, PR etiquette, environment isolation, CI/CD, observability, SRE error budgets, zero-trust security, and 40+ vital keywords.</p>
+              </div>
+              <div class="handbook-hero-actions">
+                <a href="/api/handbook/download" id="btn-download-handbook-pdf" class="btn btn-primary" download="Praxis_Industry_Foundations_Handbook.pdf" style="text-align: center; text-decoration: none; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Download 12-Page PDF
+                </a>
+                <button type="button" class="btn btn-secondary" id="btn-read-online" style="text-align: center; justify-content: center; background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); cursor: pointer;">
+                  Read Online in Browser
+                </button>
+              </div>
+            </div>
+
+            
+            <!-- Chapters Preview (Clickable to jump directly to section) -->
+            <div class="card" style="padding: 1.5rem;" id="handbook-syllabus-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Handbook Syllabus (Click to Jump Directly)</h2>
+                  <p style="font-size: 0.825rem; color: #64748b; margin-top: 2px;">Click any section below to read its in-depth production guide instantly.</p>
+                </div>
+                <span class="badge badge-indigo">11 Core Sections</span>
+              </div>
+
+              <div class="handbook-chapters-grid">
+                <div class="chapter-card" data-target="sec-01">
+                  <span class="chapter-card-num">Section 01</span>
+                  <span class="chapter-card-title">Engineering Org Topology</span>
+                  <span class="chapter-card-desc">Roles (EM, PM, Staff, SRE, QA), decision ownership, and RACI matrix.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-02">
+                  <span class="chapter-card-num">Section 02</span>
+                  <span class="chapter-card-title">Agile Delivery Lifecycle</span>
+                  <span class="chapter-card-desc">Sprint ceremonies, standups, Fibonacci story points, and Jira ticket states.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-03">
+                  <span class="chapter-card-num">Section 03</span>
+                  <span class="chapter-card-title">Version Control & PRs</span>
+                  <span class="chapter-card-desc">Trunk-based development, semantic commits, PR anatomy, and review etiquette.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-04">
+                  <span class="chapter-card-num">Section 04</span>
+                  <span class="chapter-card-title">Environment Tiers</span>
+                  <span class="chapter-card-desc">Dev, Preview, Staging, Production parity, and secret vault management.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-05">
+                  <span class="chapter-card-num">Section 05</span>
+                  <span class="chapter-card-title">CI/CD & Deployments</span>
+                  <span class="chapter-card-desc">Automated test gates, Canary releases, Blue/Green, and feature flags.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-06">
+                  <span class="chapter-card-num">Section 06</span>
+                  <span class="chapter-card-title">Observability Pillars</span>
+                  <span class="chapter-card-desc">Metrics, structured JSON logs, distributed trace IDs, and p95/p99 tail latency.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-07">
+                  <span class="chapter-card-num">Section 07</span>
+                  <span class="chapter-card-title">SRE & Incident Triage</span>
+                  <span class="chapter-card-desc">SLIs, SLOs, SLAs, error budget policies, SEV-1 to SEV-3, and postmortems.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-08">
+                  <span class="chapter-card-num">Section 08</span>
+                  <span class="chapter-card-title">Zero Trust Security</span>
+                  <span class="chapter-card-desc">Least Privilege (PoLP), input sanitization, PII masking, and SOC2 compliance.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-09">
+                  <span class="chapter-card-num">Section 09</span>
+                  <span class="chapter-card-title">Architectural Lexicon</span>
+                  <span class="chapter-card-desc">Idempotency, Circuit Breakers, CQRS, DLQ, Connection Pooling, WAL, etc.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-10">
+                  <span class="chapter-card-num">Section 10</span>
+                  <span class="chapter-card-title">Operational Lexicon</span>
+                  <span class="chapter-card-desc">Tech Debt, Yak Shaving, Bike-Shedding, Bus Factor, MTTR/MTTD, and RCA.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+                <div class="chapter-card" data-target="sec-11">
+                  <span class="chapter-card-num">Section 11</span>
+                  <span class="chapter-card-title">The First 90 Days</span>
+                  <span class="chapter-card-desc">30-min rule for being stuck, PR frequency, and building team credibility.</span>
+                  <span class="chapter-card-link">Read Section ➔</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- IN-APP COMPREHENSIVE ONLINE READER -->
+            <div id="handbook-reader-view" style="margin-top: 1rem;">
+              <!-- Sticky Section Quick Jump Bar -->
+              <div class="reader-nav-pills">
+                <span style="font-size: 0.72rem; font-weight: 800; color: #6366f1; text-transform: uppercase; align-self: center; margin-right: 4px;">Jump to:</span>
+                <button class="reader-nav-pill-btn" data-target="sec-01">01. Org Topology</button>
+                <button class="reader-nav-pill-btn" data-target="sec-02">02. Agile Lifecycle</button>
+                <button class="reader-nav-pill-btn" data-target="sec-03">03. Git & PRs</button>
+                <button class="reader-nav-pill-btn" data-target="sec-04">04. Environments</button>
+                <button class="reader-nav-pill-btn" data-target="sec-05">05. CI/CD</button>
+                <button class="reader-nav-pill-btn" data-target="sec-06">06. Observability</button>
+                <button class="reader-nav-pill-btn" data-target="sec-07">07. SRE & Incidents</button>
+                <button class="reader-nav-pill-btn" data-target="sec-08">08. Security</button>
+                <button class="reader-nav-pill-btn" data-target="sec-09">09. Arch Lexicon</button>
+                <button class="reader-nav-pill-btn" data-target="sec-10">10. Ops Lexicon</button>
+                <button class="reader-nav-pill-btn" data-target="sec-11">11. First 90 Days</button>
+              </div>
+
+              <!-- SECTION 01: Engineering Org Topology -->
+              <article class="reader-section-block" id="sec-01">
+                <span class="reader-section-tag">Section 01 • Organizational Structure</span>
+                <h2 class="reader-section-title">Modern Engineering Organization Topology & Decision Ownership</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Software in modern tech companies is built by cross-functional teams rather than isolated individuals. Understanding who owns which decisions prevents friction, accelerates feature delivery, and ensures operational accountability.
+                </p>
+
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 200px;">Engineering Role</th>
+                      <th>Primary Mandate & Scope of Decision</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Engineering Manager (EM)</strong></td>
+                      <td>People manager focused on career progression, sprint velocity, unblocking cross-team bottlenecks, performance reviews, and psychological safety.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Product Manager (PM)</strong></td>
+                      <td>Owns the "Why" and "What". Researches customer pain points, writes Product Requirement Documents (PRDs), defines acceptance criteria, and manages feature roadmaps.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Product Designer (UI/UX)</strong></td>
+                      <td>Designs user flows, Figma component libraries, user journey wireframes, and ensures accessibility (a11y) and design consistency.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Tech Lead / Staff Engineer</strong></td>
+                      <td>Owns the "How" and long-term technical architecture. Authors Architecture Decision Records (ADRs), guides engineers on scalability, and guards system health.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Software Engineer (SWE)</strong></td>
+                      <td>Writes modular, tested, clean application code, authors pull requests, designs database schemas, and participates in peer code reviews.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Site Reliability Engineer (SRE)</strong></td>
+                      <td>Ensures production availability, latency, performance monitoring, and capacity planning. Builds automated infrastructure and manages deployment pipelines.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>QA / SDET</strong></td>
+                      <td>Automates end-to-end regression, integration, and load test suites, verifying releases meet business and SLA standards before rollout.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Security Operations (SecOps)</strong></td>
+                      <td>Performs vulnerability scans, static/dynamic code analysis (SAST/DAST), code audits, secret rotation, and incident triage.</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div class="reader-callout">
+                  <strong>The RACI Framework in Production Decisions:</strong> Engineering teams use RACI to prevent confusion:
+                  <strong>R (Responsible)</strong> = Engineer writing the code;
+                  <strong>A (Accountable)</strong> = Tech Lead who approves and signs off;
+                  <strong>C (Consulted)</strong> = SMEs (DBA, Security, SRE) who provide feedback;
+                  <strong>I (Informed)</strong> = Stakeholders notified upon release.
+                </div>
+              </article>
+
+              <!-- SECTION 02: Agile Delivery Lifecycle -->
+              <article class="reader-section-block" id="sec-02">
+                <span class="reader-section-tag">Section 02 • Agile Operations</span>
+                <h2 class="reader-section-title">The Agile Delivery Engine & Work Tracking</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Engineering teams work in 1- to 2-week iterations known as <strong>Sprints</strong>. Work is organized into backlogs and tracked in tools like Jira, Linear, or GitHub Projects.
+                </p>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">Core Scrum Ceremonies</h3>
+                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Sprint Planning:</strong> At the start of each cycle, the team breaks backlog user stories into engineering tasks and commits to a specific deliverable scope.</li>
+                  <li><strong>Daily Standup (15 mins):</strong> Three concise updates: (1) What was completed yesterday, (2) What is planned for today, and (3) Any blockers preventing progress.</li>
+                  <li><strong>Backlog Refinement (Grooming):</strong> Engineers and PMs review upcoming proposals, clarify ambiguous acceptance criteria, identify dependencies, and assign story points.</li>
+                  <li><strong>Sprint Retrospective:</strong> A blameless review at sprint end: What went well? What slowed us down? What concrete action items will we implement next cycle?</li>
+                </ul>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1.25rem 0 0.5rem;">Story Pointing & Estimation (Fibonacci Scale)</h3>
+                <p style="color: #334155; line-height: 1.6;">
+                  Story points measure relative complexity and uncertainty, not literal calendar hours. Common scale:
+                  <strong>1 point</strong> (trivial change, e.g. text copy or config bump),
+                  <strong>2 points</strong> (routine task with clear patterns),
+                  <strong>3 points</strong> (moderate feature with unit tests),
+                  <strong>5 points</strong> (significant logic spanning multiple components),
+                  <strong>8+ points</strong> (too large; must be decomposed into smaller sub-tasks).
+                </p>
+
+                <div class="reader-callout">
+                  <strong>Pro-Tip on Standups:</strong> Never say "I worked on tickets." State your specific technical goal, such as: <em>"Yesterday I finished the Redis token cache migration; today I am writing integration tests for the rate limiter. I need a review from @Alex on PR #214."</em>
+                </div>
+              </article>
+
+              <!-- SECTION 03: Version Control & PR Etiquette -->
+              <article class="reader-section-block" id="sec-03">
+                <span class="reader-section-tag">Section 03 • Code Hygiene</span>
+                <h2 class="reader-section-title">Version Control Hygiene & Pull Request Etiquette</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  In production teams, Git is not just backup storage; it is the official audit trail of why, when, and how your software evolved.
+                </p>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">Trunk-Based Development vs. Long-Lived Branches</h3>
+                <p style="color: #334155; line-height: 1.6;">
+                  High-performing teams practice <strong>Trunk-Based Development</strong>: engineers create short-lived feature branches (lasting hours to 2 days maximum), rebase frequently onto <code>main</code>, and merge often via automated CI checks. Long-lived feature branches lead to painful merge conflicts ("merge hell") and risky, high-blast-radius releases.
+                </p>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1.25rem 0 0.5rem;">Conventional Commit Standards</h3>
+                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 4px;">
+                  <li><code>feat(auth): add stripe webhook handler</code> — Adds a new user-facing capability.</li>
+                  <li><code>fix(db): handle connection pool timeout</code> — Patches an unexpected bug or error.</li>
+                  <li><code>refactor(api): extract validation middleware</code> — Modifies code structure without altering external behavior.</li>
+                  <li><code>test(gateway): add rate limiting integration tests</code> — Adds missing unit or integration tests.</li>
+                  <li><code>chore(deps): bump pydantic to v2.14.1</code> — Routine maintenance or dependency upgrades.</li>
+                </ul>
+
+                <div class="reader-callout">
+                  <strong>The Anatomy of a World-Class PR:</strong> (1) <strong>Problem & Context:</strong> What Jira ticket does this resolve? (2) <strong>Solution Approach:</strong> High-level architecture of changes, (3) <strong>Verification & Testing:</strong> CLI test output or screenshots proving it works, and (4) <strong>Rollback Plan:</strong> What flag or command undoes this if an alert fires in production?
+                </div>
+              </article>
+
+              <!-- SECTION 04: Environment Tiers & Isolation -->
+              <article class="reader-section-block" id="sec-04">
+                <span class="reader-section-tag">Section 04 • Infrastructure</span>
+                <h2 class="reader-section-title">Environment Tiers & Infrastructure Parity</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Code progresses through distinct, isolated runtime environments before reaching paying users. Never test or debug experimental logic in production.
+                </p>
+
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 180px;">Environment Tier</th>
+                      <th>Purpose, Access & Data Boundaries</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Localhost / Dev</strong></td>
+                      <td>Developer workstation running local servers, mock databases, and unit tests. Fast feedback loop, zero risk to external data.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Ephemeral / Preview</strong></td>
+                      <td>On-demand environments spun up automatically for each PR (e.g. Vercel preview or Kubernetes namespace). Enables PMs and designers to test the branch before merge.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Staging / UAT</strong></td>
+                      <td>Near-replica of production architecture with sanitised test data, external sandbox APIs (e.g. Stripe test keys), and realistic network latencies. Final gate for regression testing.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Production (Prod)</strong></td>
+                      <td>Live environment serving real customer traffic and real financial transactions. Strictly locked down; access requires multi-factor authentication (MFA) and audit logging.</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div class="reader-callout">
+                  <strong>The Twelve-Factor App & Config Parity:</strong> Never hardcode environment-specific URLs, API keys, or credentials into source code. Store configuration in environment variables injected at runtime. Code that runs in Staging should be identical (same Docker container image tag) to code deployed to Production.
+                </div>
+              </article>
+
+              <!-- SECTION 05: CI/CD & Safe Deployments -->
+              <article class="reader-section-block" id="sec-05">
+                <span class="reader-section-tag">Section 05 • Deployment Engineering</span>
+                <h2 class="reader-section-title">CI/CD Pipelines & Modern Deployment Strategies</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  High-performing engineering teams deploy multiple times per day using automated delivery pipelines that eliminate manual human error.
+                </p>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">Zero-Downtime Deployment Patterns</h3>
+                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+                  <li><strong>Rolling Update:</strong> Containers are incrementally replaced one-by-one. The load balancer stops routing to old instances as new healthy instances pass health check probes.</li>
+                  <li><strong>Blue/Green Deployment:</strong> Two identical production environments exist. "Blue" serves live traffic. You deploy new version to "Green". Once verified, the load balancer router instantly flips traffic from Blue to Green.</li>
+                  <li><strong>Canary Release:</strong> Route 2% of live traffic to the new version while 98% remains on stable. Monitor error rates, memory usage, and latency for 15 minutes. If metrics remain healthy, ramp to 10%, 50%, and 100%.</li>
+                  <li><strong>Feature Flags (Dark Launching):</strong> Code is merged and deployed to production with functionality hidden behind a dynamic toggle (e.g. LaunchDarkly). Allows testing in prod with internal users before turning on globally.</li>
+                </ul>
+
+                <div class="reader-callout">
+                  <strong>SOP Standard:</strong> Always decouple deployment from feature release. Deploying code (shipping the bytes) should be a low-risk non-event; releasing features to users is controlled independently via feature toggles.
+                </div>
+              </article>
+
+              <!-- SECTION 06: Production Observability -->
+              <article class="reader-section-block" id="sec-06">
+                <span class="reader-section-tag">Section 06 • Telemetry</span>
+                <h2 class="reader-section-title">Production Observability: Telemetry in the Wild</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  You cannot fix what you cannot measure. When an incident occurs at 2:00 AM, observability is the only lens through which engineers understand internal system state.
+                </p>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">The Three Pillars of Observability</h3>
+                <ol style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+                  <li><strong>Metrics (Aggregated Numerics):</strong> Numeric measurements collected over time intervals. Key primitives include <strong>Counters</strong> (monotonically increasing requests), <strong>Gauges</strong> (current memory in MB), and <strong>Histograms</strong> (latency distributions). Fast to query, cheap to store.</li>
+                  <li><strong>Structured Logs (Events & Context):</strong> Structured JSON log entries containing contextual metadata: timestamp, log level (DEBUG, INFO, WARN, ERROR), service name, customer ID, and trace ID. Human-readable and indexable in Datadog, Elasticsearch, or Loki.</li>
+                  <li><strong>Distributed Tracing (Request Journeys):</strong> Tracks a single user request as it traverses 10+ microservices. Propagates a <code>Trace-ID</code> and child <code>Span-IDs</code> across HTTP/gRPC boundaries to pinpoint exact millisecond bottlenecks.</li>
+                </ol>
+
+                <div class="reader-callout">
+                  <strong>Why Average Latency is a Trap (p50 vs p95 vs p99):</strong> Never report "average latency is 40ms". Averages hide catastrophic outliers. If 99 requests take 10ms but 1 request stalls for 10,000ms, the average is 109ms (which looks acceptable), but 1% of your highest-value customers experienced a total freeze. Production teams monitor <strong>p95</strong> and <strong>p99 percentiles</strong>.
+                </div>
+              </article>
+
+              <!-- SECTION 07: SRE & Incident Triage -->
+              <article class="reader-section-block" id="sec-07">
+                <span class="reader-section-tag">Section 07 • Reliability Engineering</span>
+                <h2 class="reader-section-title">Reliability Engineering, SLAs & Incident Triage</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  No distributed system achieves 100% uptime. SRE is the discipline of treating operational reliability as a software problem with mathematically defined boundaries.
+                </p>
+
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">SLI, SLO, SLA & Error Budgets</h3>
+                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Service Level Indicator (SLI):</strong> A quantifiable metric of service performance (e.g. "% of HTTP requests returning &lt; 200ms without 5xx errors").</li>
+                  <li><strong>Service Level Objective (SLO):</strong> Target reliability goal agreed upon by engineering and product (e.g. "99.9% of requests succeed over rolling 30-day window").</li>
+                  <li><strong>Service Level Agreement (SLA):</strong> Formal legal contract specifying financial penalties if reliability breaches thresholds (e.g. 99.5%).</li>
+                  <li><strong>Error Budget:</strong> Permissible downtime (100% - SLO). For a 99.9% SLO, you have an error budget of 0.1% (approx. 43 minutes/month). When exhausted, feature deployments freeze and all focus shifts to reliability.</li>
+                </ul>
+
+                <div class="reader-callout">
+                  <strong>The Blameless Postmortem (5 Whys):</strong> When things break, never ask "Who caused this?" Ask "What systemic failure allowed a human error to bypass our safeguards?" Human error is never the root cause; lack of automated validation, poor runbooks, or missing rollback safety is.
+                </div>
+              </article>
+
+              <!-- SECTION 08: Zero Trust Security -->
+              <article class="reader-section-block" id="sec-08">
+                <span class="reader-section-tag">Section 08 • Application Security</span>
+                <h2 class="reader-section-title">Enterprise Security, Zero Trust & Compliance</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Security is not a department; it is a fundamental property of every line of code you commit. Modern architectures assume the network is already hostile.
+                </p>
+
+                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+                  <li><strong>Principle of Least Privilege (PoLP):</strong> A service, database user, or engineer should possess only the absolute minimum permissions necessary to perform their specific job—nothing more. Avoid granting <code>admin</code> or <code>root</code> roles.</li>
+                  <li><strong>Zero Trust Architecture:</strong> Never trust internal network boundaries. Authenticate and authorize every single inter-service request using mutual TLS (mTLS) and cryptographically signed tokens (JWTs).</li>
+                  <li><strong>Defense in Depth:</strong> Layer multiple defenses: WAF rate limiting at the edge, input sanitization in the API layer, parameterized queries at the ORM layer, and disk encryption at rest.</li>
+                  <li><strong>Sanitize All Inputs (OWASP Top 10):</strong> Never concatenate strings into SQL queries. Always use parameterized queries or trusted ORMs. Sanitize user-generated content to prevent Cross-Site Scripting (XSS).</li>
+                </ul>
+
+                <div class="reader-callout">
+                  <strong>Security Incident Escalation:</strong> If you discover a security vulnerability or active exploit in production, do not discuss it in public Slack channels. Immediately escalate to your company's dedicated incident response team (#sec-ops-private) according to your security handbook.
+                </div>
+              </article>
+
+              <!-- SECTION 09: Architectural Lexicon -->
+              <article class="reader-section-block" id="sec-09">
+                <span class="reader-section-tag">Section 09 • Architecture Lexicon</span>
+                <h2 class="reader-section-title">The Essential Industry Lexicon (Architectural Terms)</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Master these 10 architectural and infrastructure terms to navigate technical design reviews with confidence:
+                </p>
+
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 220px;">Term</th>
+                      <th>Engineering Definition & Production Impact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>Idempotency</code></td>
+                      <td>Property where an operation can be applied multiple times without changing the result beyond the initial application (crucial for payment APIs and webhook retries).</td>
+                    </tr>
+                    <tr>
+                      <td><code>Circuit Breaker</code></td>
+                      <td>Design pattern that halts requests to a failing downstream service after an error threshold, preventing cascading thread exhaustion across the cluster.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Eventual Consistency</code></td>
+                      <td>Database consistency model where all replicas will eventually yield the same value, but immediate reads right after write may return slightly stale data.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Dead Letter Queue (DLQ)</code></td>
+                      <td>A secondary queue holding messages that failed processing after maximum retry attempts, allowing manual inspection and replay without losing data.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Backpressure</code></td>
+                      <td>Mechanism where a downstream consumer signals an upstream producer to slow down message rate when internal buffers are nearing capacity.</td>
+                    </tr>
+                    <tr>
+                      <td><code>CDN (Content Delivery)</code></td>
+                      <td>Geographically distributed network of edge proxy servers caching static assets (images, JS) near end-users to reduce origin server load.</td>
+                    </tr>
+                    <tr>
+                      <td><code>WAF (Web App Firewall)</code></td>
+                      <td>Edge security filter protecting APIs against common web exploits such as SQL injection, cross-site scripting, and bot scraping floods.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Rate Limiting</code></td>
+                      <td>Restricting the number of requests a client can make in a given timeframe (e.g. Token Bucket algorithm allowing max 100 req/min).</td>
+                    </tr>
+                    <tr>
+                      <td><code>Connection Pooling</code></td>
+                      <td>Maintaining a cache of open database connections (e.g. HikariCP, PgBouncer) so queries reuse connections rather than paying TCP handshake costs.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Write-Ahead Log (WAL)</code></td>
+                      <td>Technique where database modifications are recorded to append-only disk logs before writing to data files, guaranteeing ACID durability upon crash.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </article>
+
+              <!-- SECTION 10: Operational Lexicon -->
+              <article class="reader-section-block" id="sec-10">
+                <span class="reader-section-tag">Section 10 • Operations Lexicon</span>
+                <h2 class="reader-section-title">The Essential Industry Lexicon (Operations & Culture)</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Engineering culture has its own operational vernacular. Understanding these terms helps decode everyday team communication:
+                </p>
+
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 220px;">Term</th>
+                      <th>Engineering Definition & Cultural Context</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>Technical Debt</code></td>
+                      <td>The implied cost of additional rework caused by choosing an easy or shortcut solution now instead of a better, scalable approach.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Yak Shaving</code></td>
+                      <td>A chain of seemingly unrelated, tedious micro-tasks you must complete before you can make progress on your original engineering goal.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Bike-Shedding</code></td>
+                      <td>The tendency of teams to spend disproportionate time debating minor details (like button color) while ignoring difficult architectural issues.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Bus Factor</code></td>
+                      <td>The minimum number of team members that, if suddenly unavailable, would stall the project due to undocumented institutional knowledge.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Runbook / SOP</code></td>
+                      <td>A step-by-step Standard Operating Procedure document detailing exact commands to diagnose, mitigate, and resolve common production outages.</td>
+                    </tr>
+                    <tr>
+                      <td><code>MTTR & MTTD</code></td>
+                      <td><strong>Mean Time to Detect (MTTD):</strong> Time between incident onset and alert firing. <strong>Mean Time to Resolve (MTTR):</strong> Time from alert to full restoration.</td>
+                    </tr>
+                    <tr>
+                      <td><code>RCA</code></td>
+                      <td>Root Cause Analysis: Formal investigation determining the foundational systemic vulnerabilities that triggered an incident.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Feature Freeze</code></td>
+                      <td>A temporary policy period (e.g. Black Friday or holiday peak) where no non-critical code changes are deployed to minimize outage risks.</td>
+                    </tr>
+                    <tr>
+                      <td><code>Graceful Degradation</code></td>
+                      <td>System architecture that continues operating with limited functionality when components fail (e.g. Netflix showing default recommendations if ML service dies).</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </article>
+
+              <!-- SECTION 11: The First 90 Days Survival Guide -->
+              <article class="reader-section-block" id="sec-11">
+                <span class="reader-section-tag">Section 11 • Career Acceleration</span>
+                <h2 class="reader-section-title">The First 90 Days Survival & Acceleration Guide</h2>
+                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                  Transitioning from academic coursework to corporate production engineering can feel overwhelming. Follow these five high-leverage principles to establish credibility quickly:
+                </p>
+
+                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+                  <li><strong>The 30-Minute Rule for Being Stuck:</strong> Spend 30 minutes researching logs, searching the codebase, and reading internal documentation. If still stuck, ask for help! When asking, document: (1) What you are trying to accomplish, (2) What you tried, (3) The exact error message, and (4) Your current hypothesis.</li>
+                  <li><strong>Improve Documentation as You Onboard:</strong> When you encounter out-of-date README steps or broken local setup scripts, submit a PR fixing them immediately. Your teammates will appreciate it.</li>
+                  <li><strong>Read Code 3x More Than You Write:</strong> Before implementing a new endpoint, inspect how three existing endpoints handle error validation, database transactions, and logging. Follow established project conventions.</li>
+                  <li><strong>Ship Small, High-Frequency Pull Requests:</strong> Avoid working in isolation for two weeks and dumping a 2,000-line PR on your teammates. Break tasks into clean, logical PRs of 150-300 lines. They get reviewed in minutes and carry much lower deployment risk.</li>
+                  <li><strong>Own Your Outages and Mistakes:</strong> If your PR triggers an alert, don't hide it or make excuses. Acknowledge it immediately in the incident channel, trigger a rollback, and assist in authoring the blameless postmortem.</li>
+                </ul>
+
+                <div class="reader-callout" style="background: #eef2ff; border-left-color: #4f46e5; margin-top: 1.5rem;">
+                  <strong>You are ready!</strong> You have reviewed the complete engineering handbook. Proceed to the 5-question Readiness Assessment to test your knowledge and unlock the 40 production problems.
+                </div>
+
+                <div style="text-align: center; margin-top: 1.5rem;">
+                  <button class="btn btn-primary btn-lg" id="reader-proceed-to-quiz-btn" style="padding: 0.85rem 2rem; border-radius: 10px;">
+                    Take Industry Readiness Assessment (5 Qs) ➔
+                  </button>
+                </div>
+              </article>
+            </div>
+
+
+            <!-- Proceed to Quiz Action -->
+            <div style="text-align: center; padding: 1rem 0;">
+              <button class="btn btn-primary btn-lg" id="proceed-to-quiz-btn" style="padding: 0.9rem 2rem; font-size: 1rem; border-radius: 10px;">
+                I've Read the Handbook ➔ Proceed to Readiness Assessment (5 Qs)
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: 5 MEQ Readiness Assessment Quiz -->
+        <section class="view-section" id="view-quiz" style="display: none;">
+          <div class="quiz-container">
+            <div class="card" style="padding: 1.5rem; text-align: center;">
+              <div class="badge badge-indigo" style="margin: 0 auto 0.5rem;">Pre-Flight Evaluation</div>
+              <h1 style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">Industry Readiness Assessment</h1>
+              <p style="color: #64748b; font-size: 0.9rem; max-width: 580px; margin: 0.25rem auto 0;">
+                Test your understanding of corporate engineering operations, incident triage, and reliability standards. Score 80% (4 of 5) to unlock the production problem bank.
+              </p>
+            </div>
+
+            <div id="quiz-questions-list" style="display: flex; flex-direction: column; gap: 1rem;">
+              <!-- Rendered via JS -->
+            </div>
+
+            <div id="quiz-results-banner" class="card" style="display: none; padding: 1.5rem; text-align: center;">
+              <div id="quiz-score-display" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;"></div>
+              <p id="quiz-status-message" style="font-size: 0.95rem; color: #475569; margin-bottom: 1rem;"></p>
+              <button class="btn btn-primary" id="quiz-unlock-problems-btn" style="display: none; margin: 0 auto;">
+                Start Production Problem Bank (40 Problems) ➔
+              </button>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+              <button class="btn btn-primary btn-lg" id="submit-readiness-quiz-btn">Submit Readiness Assessment</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW: 40 Production Problems Workspace -->
+        <section class="view-section" id="view-problems">
+          <div class="problems-workspace-layout">
+            <!-- Sidebar with Problem List -->
+            <div class="problems-sidebar-panel">
+              <div class="problems-list-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.825rem; font-weight: 800; color: #0f172a; text-transform: uppercase;">Problem Bank</span>
+                  <span class="badge badge-indigo" id="prob-solved-count-badge">0 / 40 Solved</span>
+                </div>
+                <div class="problems-filter-tabs">
+                  <button class="prob-filter-btn active" data-filter="all">All (40)</button>
+                  <button class="prob-filter-btn" data-filter="basic">Phase 1: Basic (20)</button>
+                  <button class="prob-filter-btn" data-filter="inter">Phase 2: Inter (20)</button>
+                </div>
+              </div>
+
+              <div class="problems-scroll-list" id="problems-scroll-container">
+                <!-- 40 problems rendered dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Main Problem Details & Code Editor -->
+            <div class="problem-detail-panel" id="problem-detail-container">
+              <!-- Rendered dynamically via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 1: Career Track Selector View -->
+        <section class="view-section" id="view-tracks" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge">Career Track Catalog</div>
+            <h1 class="view-title">Choose Your Practical Engineering Simulation</h1>
+            <p class="view-description">
+              Step into real production incidents, broken webhooks, and analytics anomalies. Test your role readiness with a 5-question pre-check, then triage evidence and submit structured mitigations.
+            </p>
+          </div>
+
+          <div class="tracks-grid" id="tracks-cards-container">
+            <!-- Track cards will be rendered dynamically by JavaScript -->
+          </div>
+
+          <!-- Track Glossary & Learning Objectives Section -->
+          <div class="glossary-section card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">Industry Glossary & Production Terminology</h2>
+                <p class="card-subtitle">Foundational vocabulary used across our real-world mission scenarios.</p>
+              </div>
+              <span class="badge badge-indigo">Role Primer</span>
+            </div>
+            <div class="glossary-grid" id="glossary-items-container">
+              <!-- Glossary items rendered dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 2: Interactive Mission Workspace View -->
+        <section class="view-section" id="view-workspace">
+          <!-- Mission Header Banner -->
+          <div class="mission-banner card">
+            <div class="mission-banner-top">
+              <div class="mission-tags">
+                <span class="badge badge-track" id="mission-track-badge">Cloud Engineer & SRE</span>
+                <span class="badge badge-difficulty" id="mission-difficulty-badge">Junior SRE / Cloud Associate</span>
+                <span class="badge badge-time" id="mission-time-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span id="mission-time-text">30 mins</span>
+                </span>
+                <span class="badge badge-tier" id="mission-tier-badge">Tier-1 Mission Critical</span>
+              </div>
+
+              <div class="mission-actions">
+                <button class="btn btn-ghost btn-sm" id="btn-prefill-good" title="Prefill exemplary answer to test rubric grading">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                  </svg>
+                  Prefill Model Response
+                </button>
+                <button class="btn btn-ghost btn-sm btn-danger-hover" id="btn-clear-submission">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  Clear Form
+                </button>
+              </div>
+            </div>
+
+            <h1 class="mission-title" id="mission-title">Incident 1402: Latency & 5xx Spike After Release v2.4.0</h1>
+
+            <div class="problem-brief-box">
+              <div class="brief-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+              <div class="brief-content">
+                <div class="brief-title">Problem Brief</div>
+                <p class="brief-text" id="mission-problem-brief">
+                  At 14:15 UTC, the Payments API automated paging alert triggered. p99 response times spiked from 110ms to 4,850ms, and 504 Gateway Timeout errors rose from 0.01% to 8.7% of all checkout traffic. Investigate the timeline, telemetry, logs, release notes, and runbook. Determine the trigger, distinguish facts from assumptions, recommend a safe immediate action, define verification criteria, and propose one preventative improvement.
+                </p>
+              </div>
+            </div>
+
+            <!-- Service context metadata bar -->
+            <div class="mission-meta-bar" id="mission-meta-bar">
+              <div class="meta-item">
+                <span class="meta-label">Target Service:</span>
+                <span class="meta-value" id="meta-service">checkout-payments-api</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Cluster:</span>
+                <span class="meta-value" id="meta-cluster">prod-us-east-1</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Simulation Type:</span>
+                <span class="meta-value" id="meta-type">Guided Incident Response</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Two-Column Workspace Layout -->
+          <div class="workspace-grid">
+            <!-- Left Column: Interactive Evidence Workbench -->
+            <div class="workspace-col evidence-col">
+              <div class="card evidence-card">
+                <div class="evidence-tabs-header">
+                  <div class="tabs-nav" id="evidence-tabs-nav" role="tablist">
+                    <!-- Tab buttons rendered dynamically -->
+                  </div>
+                </div>
+
+                <div class="evidence-tab-body" id="evidence-tab-body">
+                  <!-- Tab content dynamically populated -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Structured Submission Form -->
+            <div class="workspace-col submission-col">
+              <div class="card submission-card">
+                <div class="submission-header">
+                  <div class="submission-title-group">
+                    <h2 class="submission-card-title">Structured Mitigation Submission</h2>
+                    <p class="submission-card-subtitle">Document evidence, isolate root cause, and specify verified remediations.</p>
+                  </div>
+                  <div class="submission-autosave-badge" id="form-autosave-status">
+                    <span class="dot"></span>
+                    <span class="text">Auto-saving enabled</span>
+                  </div>
+                </div>
+
+                <form id="mission-submission-form" class="submission-form" novalidate>
+                  <div class="form-fields-container" id="form-fields-container">
+                    <!-- 5 Submission Fields rendered dynamically -->
+                  </div>
+
+                  <div class="submission-footer">
+                    <div class="footer-left">
+                      <button type="button" class="btn btn-outline" id="btn-save-draft">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                          <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Local Draft
+                      </button>
+                    </div>
+                    <div class="footer-right">
+                      <button type="submit" class="btn btn-primary btn-submit" id="btn-submit-rubric">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Submit for Rubric Evaluation
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 3: Mission Catalog View (Guided vs Independent Sequence) -->
+        <section class="view-section" id="view-catalog" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge">Simulation Curriculum</div>
+            <h1 class="view-title">Mission Learning Sequence: Guided & Independent Practice</h1>
+            <p class="view-description">
+              Follow our sequential curriculum: first <strong>20 guided missions</strong> with checkpoints, hints, and standard operating procedures, followed by <strong>independent missions</strong> featuring raw workplace evidence without hand-holding.
+            </p>
+          </div>
+
+          <!-- Catalog Filter Toolbar -->
+          <div class="catalog-toolbar card">
+            <div class="toolbar-filters">
+              <div class="filter-group">
+                <span class="filter-label">Track:</span>
+                <div class="pill-group" id="catalog-track-pills">
+                  <button class="pill-btn active" data-track="all">All Tracks</button>
+                  <button class="pill-btn" data-track="cloud-engineer">Cloud Engineer & SRE</button>
+                  <button class="pill-btn" data-track="software-developer">Software Developer</button>
+                  <button class="pill-btn" data-track="data-analyst">Data Analyst</button>
+                </div>
+              </div>
+
+              <div class="filter-group">
+                <span class="filter-label">Sequence:</span>
+                <div class="pill-group" id="catalog-sequence-pills">
+                  <button class="pill-btn active" data-seq="all">All Types</button>
+                  <button class="pill-btn" data-seq="guided">Guided (With Hints)</button>
+                  <button class="pill-btn" data-seq="independent">Independent (Raw Briefs)</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="toolbar-search">
+              <input type="text" id="catalog-search-input" class="search-field" placeholder="Search by title, service, bug or symptom...">
+            </div>
+          </div>
+
+          <!-- Mission Cards Grid -->
+          <div class="catalog-grid" id="catalog-missions-grid">
+            <!-- Dynamic mission cards will be rendered here -->
+          </div>
+        </section>
+
+        <!-- VIEW 4: Reviewer / Admin Portal View -->
+        <section class="view-section" id="view-admin" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge badge-amber">Staff Reviewer Portal</div>
+            <h1 class="view-title">Assessment & Human-in-the-Loop Review Dashboard</h1>
+            <p class="view-description">
+              Inspect candidate incident investigations, review deterministic rubric scores, calibrate alternative defensible solutions, and issue official Staff Engineer approvals.
+            </p>
+          </div>
+
+          <!-- Live Google Sheet Registration Sync Card -->
+          <div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1px solid #bbf7d0;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="width: 40px; height: 40px; background: #16a34a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.2rem; font-weight: 800;">
+                📊
+              </div>
+              <div>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #166534;">Live Google Sheet: Registered Users Master Ledger</div>
+                <div style="font-size: 0.8rem; color: #15803d;">Active sync with Google Drive. Records all user signups, locked career tracks, and readiness assessment scores in real time.</div>
+              </div>
+            </div>
+            <a href="https://docs.google.com/spreadsheets/d/1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0/edit?usp=drivesdk" target="_blank" class="btn btn-primary" style="background: #16a34a; border-color: #15803d; text-decoration: none;">
+              Open Google Sheet ➔
+            </a>
+          </div>
+
+          <!-- Admin Metric Cards -->
+          <div class="admin-metrics-row">
+            <div class="metric-card card">
+              <div class="metric-icon bg-indigo">📋</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-total-subs">0</div>
+                <div class="metric-label">Total Submissions</div>
+              </div>
+            </div>
+            <div class="metric-card card">
+              <div class="metric-icon bg-emerald">✓</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-approved-rate">0%</div>
+                <div class="metric-label">Production Ready Rate</div>
+              </div>
+            </div>
+            <div class="metric-card card">
+              <div class="metric-icon bg-amber">⏳</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-pending-count">0</div>
+                <div class="metric-label">Pending Review</div>
+              </div>
+            </div>
+            <div class="metric-card card">
+              <div class="metric-icon bg-purple">🎯</div>
+              <div class="metric-info">
+                <div class="metric-val" id="admin-avg-score">--</div>
+                <div class="metric-label">Average Rubric Score</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submissions Table Card -->
+          <div class="admin-table-card card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">Candidate Submissions Ledger</h2>
+                <p class="card-subtitle">Real-time submissions evaluated and persisted to Praxis SQLite database.</p>
+              </div>
+              <button class="btn btn-outline btn-sm" id="admin-refresh-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                Refresh
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table" id="admin-submissions-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Mission / Incident</th>
+                    <th>Track</th>
+                    <th>Rubric Score</th>
+                    <th>Automated Verdict</th>
+                    <th>Reviewer Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-submissions-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: Learner Progress & Transcript View -->
+        <section class="view-section" id="view-profile" style="display: none;">
+          <div class="view-header">
+            <div class="view-badge badge-emerald">Learner Dashboard</div>
+            <h1 class="view-title">Practical Engineering Competency Profile</h1>
+            <p class="view-description">
+              Verified record of realistic workplace simulations triaged, investigated, and remediated by this learner.
+            </p>
+          </div>
+
+          <div class="profile-layout">
+            <div class="profile-left-col">
+              <!-- Learner Identity Card -->
+              <div class="profile-card card">
+                <div class="profile-avatar">👨‍💻</div>
+                <h2 class="profile-name">Learner Practitioner</h2>
+                <div class="profile-role-badge">Fresher / Candidate</div>
+                <p class="profile-tagline">Simulating real work problems across Cloud, Backend, and Analytics.</p>
+
+                <div class="profile-stats-grid">
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-completed">0</div>
+                    <div class="pstat-label">Missions Completed</div>
+                  </div>
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-avg-score">--</div>
+                    <div class="pstat-label">Avg Rubric Score</div>
+                  </div>
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-quizzes">0/3</div>
+                    <div class="pstat-label">Readiness Pre-Checks</div>
+                  </div>
+                  <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-readiness">In Training</div>
+                    <div class="pstat-label">Industry Readiness</div>
+                  </div>
+                </div>
+
+                <div class="profile-actions">
+                  <button class="btn btn-outline btn-block" id="btn-export-transcript">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Export Verified Transcript (Markdown)
+                  </button>
+                  <button class="btn btn-sidebar-outline btn-block" id="btn-reset-progress">
+                    Clear Local Progress
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-right-col">
+              <!-- Competency Skills Card -->
+              <div class="skills-card card">
+                <h3 class="card-title">Demonstrated Workplace Competencies</h3>
+                <p class="card-subtitle">Validated through multi-dimensional rubric evaluations:</p>
+
+                <div class="competencies-checklist" id="profile-competencies-list">
+                  <!-- Dynamic competencies checklist -->
+                </div>
+              </div>
+
+              <!-- Completed Missions History -->
+              <div class="history-card card">
+                <h3 class="card-title">Completed Simulation History</h3>
+                <div class="history-list" id="profile-history-list">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL 1: 5-Question Readiness Check Modal -->
+  <div class="modal-backdrop" id="quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-modal-title" style="display: none;">
+    <div class="modal-dialog modal-quiz">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-indigo" id="quiz-role-badge">Role Readiness Check</span>
+          <h2 class="modal-title" id="quiz-modal-title">Cloud Engineer & SRE Assessment</h2>
+        </div>
+        <div class="modal-header-right">
+          <div class="quiz-score-badge" id="quiz-score-indicator">Score: 0 / 5</div>
+          <button class="btn-close-modal" id="quiz-close-btn" aria-label="Close Quiz">&times;</button>
+        </div>
+      </div>
+
+      <!-- Quiz Progress Bar -->
+      <div class="quiz-progress-bar-container">
+        <div class="quiz-progress-bar" id="quiz-progress-bar" style="width: 20%;"></div>
+      </div>
+
+      <div class="modal-body quiz-body" id="quiz-modal-body">
+        <!-- Interactive Question Container -->
+        <div class="quiz-question-container" id="quiz-question-container">
+          <div class="question-header">
+            <span class="question-number" id="quiz-question-num">Question 1 of 5</span>
+            <span class="question-guidance">Select the safest, industry-standard engineering action</span>
+          </div>
+
+          <h3 class="question-prompt" id="quiz-question-prompt">
+            When latency spikes immediately after a deployment, what should be your immediate first instinct?
+          </h3>
+
+          <div class="quiz-options-list" id="quiz-options-list">
+            <!-- Options A, B, C, D generated dynamically -->
+          </div>
+
+          <!-- Immediate Feedback / Explanation Card -->
+          <div class="quiz-explanation-box" id="quiz-explanation-box" style="display: none;">
+            <div class="explanation-status" id="quiz-feedback-status">
+              <!-- Correct / Incorrect badge -->
+            </div>
+            <div class="explanation-text" id="quiz-feedback-explanation">
+              <!-- Explanation text -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Completed Summary View (hidden until quiz finished) -->
+        <div class="quiz-completed-container" id="quiz-completed-container" style="display: none;">
+          <div class="completed-hero">
+            <div class="completed-trophy-icon" id="completed-icon">🎯</div>
+            <h3 class="completed-title" id="completed-title">Assessment Completed!</h3>
+            <p class="completed-score-message" id="completed-score-text">You scored 5 out of 5 (100%).</p>
+            <div class="completed-badge" id="completed-badge">Ready for Production Incidents</div>
+          </div>
+
+          <div class="completed-recap" id="completed-recap-list">
+            <!-- Recap of answered questions with tags -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer quiz-footer">
+        <div class="quiz-footer-left">
+          <button class="btn btn-ghost" id="quiz-prev-btn" style="display: none;">Previous Question</button>
+        </div>
+        <div class="quiz-footer-right">
+          <button class="btn btn-outline" id="quiz-retake-btn" style="display: none;">Retake Quiz</button>
+          <button class="btn btn-primary" id="quiz-next-btn">Next Question</button>
+          <button class="btn btn-primary btn-success" id="quiz-proceed-mission-btn" style="display: none;">
+            Proceed to Mission Workspace &rarr;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Rubric Evaluation Modal -->
+  <div class="modal-backdrop" id="rubric-modal" role="dialog" aria-modal="true" aria-labelledby="rubric-modal-title" style="display: none;">
+    <div class="modal-dialog modal-rubric">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-emerald">Simulation Evaluation</span>
+          <h2 class="modal-title" id="rubric-modal-title">Engineering Rubric Assessment</h2>
+        </div>
+        <button class="btn-close-modal" id="rubric-close-btn" aria-label="Close Evaluation">&times;</button>
+      </div>
+
+      <div class="modal-body rubric-body">
+        <!-- Overall Score Card -->
+        <div class="rubric-hero-card">
+          <div class="score-circle-container">
+            <div class="score-number" id="rubric-total-score">92</div>
+            <div class="score-max">/ 100</div>
+          </div>
+          <div class="score-hero-info">
+            <div class="score-status-pill" id="rubric-status-pill">Production Ready (Meets Expectations)</div>
+            <h3 class="score-hero-title" id="rubric-hero-title">Strong Operational Triage & Remediation</h3>
+            <p class="score-hero-summary" id="rubric-hero-summary">
+              Your submission demonstrates grounded evidence citation, clear distinction between factual HikariPool metrics and unverified assumptions, and adherence to safe runbook rollback procedures.
+            </p>
+          </div>
+        </div>
+
+        <!-- 4 Rubric Dimensions Breakdown -->
+        <div class="rubric-dimensions-section">
+          <h3 class="section-title">Dimensional Scoring Breakdown</h3>
+          <div class="dimensions-list" id="rubric-dimensions-container">
+            <!-- 4 Dimensions rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Qualitative Coaching & Actionable Recommendations -->
+        <div class="coaching-feedback-card card">
+          <div class="coaching-header">
+            <div class="coaching-icon">💡</div>
+            <h4 class="coaching-title">Senior Staff Engineer Coaching Feedback</h4>
+          </div>
+          <div class="coaching-content" id="rubric-coaching-content">
+            <!-- Dynamic coaching advice -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer rubric-footer">
+        <div class="footer-left">
+          <button class="btn btn-outline" id="rubric-export-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export Report (Markdown)
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-outline" id="rubric-revise-btn">Revise Submission</button>
+          <button class="btn btn-primary" id="rubric-done-btn">Acknowledge & Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ROLE KNOWLEDGE HANDBOOK (PDF / GUIDE) MODAL -->
+  <div class="modal-backdrop" id="role-guide-modal" style="display: none;">
+    <div class="modal-dialog role-guide-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="role-guide-modal-title">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-emerald" id="role-guide-badge">Role Knowledge Handbook</span>
+          <h2 class="modal-title" id="role-guide-modal-title">Role Industry Guide</h2>
+        </div>
+        <button class="btn-close-modal" id="role-guide-close-btn" aria-label="Close Handbook">&times;</button>
+      </div>
+
+      <div class="modal-body role-guide-body" id="role-guide-content">
+        <!-- Content dynamically injected from active track -->
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left">
+          <button class="btn btn-outline" id="role-guide-print-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print / Save as PDF
+          </button>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-primary" id="role-guide-done-btn">Back to Workspace</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. HUMAN REVIEWER CALIBRATION MODAL -->
+  <div class="modal-backdrop" id="reviewer-modal" style="display: none;">
+    <div class="modal-dialog role-guide-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="reviewer-modal-title">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-amber" id="reviewer-modal-badge">Staff Reviewer Assessment</span>
+          <h2 class="modal-title" id="reviewer-modal-title">Candidate Submission Inspection</h2>
+        </div>
+        <button class="btn-close-modal" id="reviewer-modal-close-btn" aria-label="Close Inspection">&times;</button>
+      </div>
+
+      <div class="modal-body reviewer-body" id="reviewer-modal-content">
+        <!-- Candidate answers & rubric scores loaded dynamically -->
+      </div>
+
+      <div class="modal-footer">
+        <div class="footer-left">
+          <span class="text-muted" id="reviewer-modal-ts" style="font-size: 0.85rem;">Submitted: ...</span>
+        </div>
+        <div class="footer-right">
+          <button class="btn btn-outline" id="reviewer-action-revise">Request Revisions</button>
+          <button class="btn btn-primary" id="reviewer-action-approve">Issue Staff Approval</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Curriculum & Offline Bank Data -->
+  <script src="problems_data.js"></script>
+
+  <!-- Main JavaScript File -->
+  <script src="app.js"></script>
+</body>
+</html>
