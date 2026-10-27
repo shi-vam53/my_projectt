@@ -3263,23 +3263,87 @@ html, body {
   letter-spacing: 0.05em;
 }
 
-.problem-code-textarea {
-  width: 100%;
-  min-height: 240px;
-  background: #1e293b;
+/* Enhanced Code Editor with Line Numbers Gutter */
+.code-editor-wrapper {
+  display: flex;
+  background: #0f172a;
   border: 1px solid #334155;
   border-radius: 8px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.code-editor-gutter {
+  width: 44px;
+  padding: 1rem 0.5rem 1rem 0.25rem;
+  background: #1e293b;
+  border-right: 1px solid #334155;
+  color: #64748b;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.55;
+  text-align: right;
+  user-select: none;
+  overflow: hidden;
+  white-space: pre-line;
+}
+
+.problem-code-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 240px;
+  background: #0f172a;
+  border: none;
+  border-radius: 0;
   color: #f8fafc;
   font-family: var(--font-mono);
   font-size: 0.875rem;
   padding: 1rem;
-  line-height: 1.5;
+  line-height: 1.55;
   resize: vertical;
+  tab-size: 2;
+  outline: none;
 }
 
 .problem-code-textarea:focus {
   outline: none;
-  border-color: #6366f1;
+  border: none;
+}
+
+/* Certificate Card in Profile */
+.cert-banner-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border: 1px solid #d97706;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15);
+}
+
+.cert-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.cert-seal-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fde68a 0%, #d97706 100%);
+  color: #78350f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
 }
 
 .problem-eval-card {
