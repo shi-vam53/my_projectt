@@ -3745,3 +3745,119 @@ html, body {
   padding: 2px 8px;
   border-radius: 6px;
 }
+
+/* ==========================================================================
+   Dark Mode Theme Overrides
+   ========================================================================== */
+body.dark-mode {
+  --bg-main: #0b0f17;
+  --bg-card: #151d2a;
+  --bg-subtle: #1e293b;
+  --bg-input: #1e293b;
+  --border-color: #334155;
+  --border-subtle: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  background-color: #0b0f17;
+  color: #f8fafc;
+}
+
+body.dark-mode .card,
+body.dark-mode .dashboard-queue-box,
+body.dark-mode .problems-sidebar-panel,
+body.dark-mode .problem-detail-panel,
+body.dark-mode .reader-section-block,
+body.dark-mode .auth-card,
+body.dark-mode .role-onboard-card,
+body.dark-mode .modal-dialog {
+  background-color: #151d2a;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+body.dark-mode .top-header {
+  background-color: #111827;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .dashboard-queue-item,
+body.dark-mode .handbook-search-bar {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .dash-queue-title,
+body.dark-mode .card-title,
+body.dark-mode .reader-section-title,
+body.dark-mode .modal-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .reader-table th {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+body.dark-mode .reader-table td {
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* ==========================================================================
+   Responsive Mobile Drawer & Backdrop
+   ========================================================================== */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+  .sidebar {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: -280px;
+    width: 270px;
+    z-index: 1000;
+    transition: left 0.25s ease-in-out;
+  }
+  .sidebar.mobile-open {
+    left: 0 !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+  }
+  .mobile-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+  }
+  .mobile-sidebar-backdrop.active {
+    display: block;
+  }
+}
+
+/* Highlight search matches */
+mark.search-highlight {
+  background-color: #fef08a;
+  color: #0f172a;
+  padding: 1px 3px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+/* Pre-check Console Output */
+.precheck-console {
+  margin-top: 1rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  border: 1px solid #334155;
+}
+

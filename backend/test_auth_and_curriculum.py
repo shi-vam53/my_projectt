@@ -196,3 +196,47 @@ def test_certificate_download_endpoint(client):
     assert "application/pdf" in res.headers.get("content-type", "")
     assert len(res.content) > 1000
     assert res.content[:5] == b"%PDF-"
+
+
+def test_auth_logout_flow(client):
+    reg = client.post(
+        "/api/auth/register",
+        json={"username": "logoutuser", "password": "password123", "full_name": "Logout Tester"},
+    )
+    assert reg.status_code == 201
+    token = reg.json()["token"]
+
+    # Verify token works for /api/auth/me
+    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me.status_code == 200
+
+    # Logout
+    logout = client.post("/api/auth/logout", headers={"Authorization": f"Bearer {token}"})
+    assert logout.status_code == 200
+    assert logout.json()["status"] == "ok"
+
+    # Token should now be invalid
+    me_after = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me_after.status_code == 401
+
+
+def test_problem_precheck_flow(client):
+    reg = client.post(
+        "/api/auth/register",
+        json={"username": "precheckuser", "password": "password123", "full_name": "Precheck Tester"},
+    )
+    token = reg.json()["token"]
+
+    # Call precheck with a solution
+    res = client.post(
+        "/api/problems/prob-01/precheck",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"solution": "def test_solution():\n    return 'valid'"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["problem_id"] == "prob-01"
+    assert data["is_precheck"] is True
+    assert "status" in data
+    assert "score" in data
+

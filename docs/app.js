@@ -740,6 +740,12 @@ function initApp() {
   bindHandbookAndQuizControls();
   checkAuthAndSession();
 
+  // Suite features: Theme, Mobile Drawer, Hotkeys, PWA
+  initTheme();
+  initMobileDrawer();
+  initHotkeys();
+  initPwaServiceWorker();
+
   loadMissionsCatalog();
   renderTracksView();
   renderMissionWorkspace(state.activeMissionId);
@@ -3106,6 +3112,22 @@ function exportLearnerTranscript() {
     });
   }
 
+  // Append solved problems to transcript portfolio
+  try {
+    const probProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const solvedEntries = Object.entries(probProgress).filter(([_, d]) => d.status === 'completed');
+    if (solvedEntries.length > 0) {
+      md += `\n## Solved Production Engineering Problems (${solvedEntries.length} Solved)\n\n`;
+      solvedEntries.forEach(([pid, pdata], idx) => {
+        const prob = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS ? window.PRAXIS_OFFLINE_DATA.PROBLEMS.find(p => p.id === pid) : null) || { title: pid.toUpperCase(), category: 'Production' };
+        md += `### ${idx + 1}. [${pid.toUpperCase()}] ${prob.title}\n`;
+        md += `- **Track/Category:** ${prob.category || 'Engineering'}\n`;
+        md += `- **Score:** ${pdata.score || 100} / 100\n`;
+        md += `- **Evaluated Status:** ✓ Accepted\n\n`;
+      });
+    }
+  } catch (e) {}
+
   const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3454,16 +3476,43 @@ function bindAuthControls() {
     });
   }
 
+  const handleLogoutAction = async () => {
+    try {
+      if (state.token) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+      }
+    } catch (e) {
+      // offline fallback
+    }
+    localStorage.removeItem('praxis_token');
+    localStorage.removeItem('praxis_active_user');
+    localStorage.removeItem('praxis_offline_user');
+    state.token = null;
+    state.user = null;
+    updateUserHeaderUI();
+    showAuthOverlay(true);
+    showToast('Logged out successfully.', 'info');
+  };
+
   if (signoutBtn) {
-    signoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('praxis_token');
-      localStorage.removeItem('praxis_active_user');
-      localStorage.removeItem('praxis_offline_user');
-      state.token = null;
-      state.user = null;
-      updateUserHeaderUI();
-      showAuthOverlay(true);
-      showToast('Signed out successfully.', 'info');
+    signoutBtn.addEventListener('click', handleLogoutAction);
+  }
+
+  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', handleLogoutAction);
+  }
+
+  const togglePasswordBtn = document.getElementById('toggle-auth-password');
+  const passwordInput = document.getElementById('auth-password');
+  if (togglePasswordBtn && passwordInput) {
+    togglePasswordBtn.addEventListener('click', () => {
+      const isPass = passwordInput.type === 'password';
+      passwordInput.type = isPass ? 'text' : 'password';
+      togglePasswordBtn.textContent = isPass ? '🙈' : '👁️';
     });
   }
 
@@ -3654,6 +3703,14 @@ function bindHandbookAndQuizControls() {
     });
   }
 
+  const probSearchInput = document.getElementById('prob-search-input');
+  if (probSearchInput) {
+    probSearchInput.addEventListener('input', () => {
+      currentProbSearch = probSearchInput.value;
+      renderProblemsList(currentProbFilter);
+    });
+  }
+
   const filterBtns = document.querySelectorAll('.prob-filter-btn');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3663,6 +3720,42 @@ function bindHandbookAndQuizControls() {
       renderProblemsList(state.problemsFilter);
     });
   });
+
+  const handbookSearchInput = document.getElementById('handbook-search-input');
+  const handbookSearchCount = document.getElementById('handbook-search-count');
+  if (handbookSearchInput) {
+    handbookSearchInput.addEventListener('input', () => {
+      const q = handbookSearchInput.value.trim().toLowerCase();
+      const sections = document.querySelectorAll('.reader-section-block');
+      let matches = 0;
+      sections.forEach(sec => {
+        const text = sec.textContent.toLowerCase();
+        if (!q || text.includes(q)) {
+          sec.style.display = 'block';
+          if (q) matches++;
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+      if (handbookSearchCount) {
+        handbookSearchCount.textContent = q ? `${matches} chapter(s) found` : '';
+      }
+    });
+  }
+
+  const quizReviewCloseBtn = document.getElementById('quiz-review-modal-close-btn');
+  const quizReviewDoneBtn = document.getElementById('quiz-review-done-btn');
+  const quizReviewModal = document.getElementById('quiz-review-modal');
+  if (quizReviewCloseBtn && quizReviewModal) {
+    quizReviewCloseBtn.addEventListener('click', () => {
+      quizReviewModal.style.display = 'none';
+    });
+  }
+  if (quizReviewDoneBtn && quizReviewModal) {
+    quizReviewDoneBtn.addEventListener('click', () => {
+      quizReviewModal.style.display = 'none';
+    });
+  }
 }
 
 function highlightSection(el) {
@@ -4066,13 +4159,38 @@ function updateProblemsSolvedCounter() {
   if (badge) badge.textContent = `${solved} / ${total} Solved`;
 }
 
+let currentProbSearch = '';
+let currentProbFilter = 'all';
+
 function renderProblemsList(filter = 'all') {
+  currentProbFilter = filter;
+  state.problemsFilter = filter;
   const container = document.getElementById('problems-scroll-container');
   if (!container) return;
 
   let filtered = state.problemsList;
-  if (filter === 'basic') filtered = state.problemsList.filter(p => p.phase === 1);
-  if (filter === 'inter') filtered = state.problemsList.filter(p => p.phase === 2);
+  if (filter === 'basic') filtered = filtered.filter(p => p.phase === 1);
+  if (filter === 'inter') filtered = filtered.filter(p => p.phase === 2);
+  if (filter === 'solved') filtered = filtered.filter(p => p.status === 'completed');
+  if (filter === 'unsolved') filtered = filtered.filter(p => p.status !== 'completed');
+
+  if (currentProbSearch && currentProbSearch.trim()) {
+    const q = currentProbSearch.trim().toLowerCase();
+    filtered = filtered.filter(p =>
+      p.title.toLowerCase().includes(q) ||
+      p.id.toLowerCase().includes(q) ||
+      (p.category && p.category.toLowerCase().includes(q))
+    );
+  }
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 2rem 1rem; text-align: center; color: #64748b; font-size: 0.85rem;">
+        No problems match your search criteria.
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = filtered.map(p => `
     <div class="prob-list-item ${state.activeProblemId === p.id ? 'active' : ''}" data-problem-id="${p.id}">
@@ -4089,10 +4207,74 @@ function renderProblemsList(filter = 'all') {
   container.querySelectorAll('.prob-list-item').forEach(item => {
     item.addEventListener('click', () => {
       state.activeProblemId = item.dataset.problemId;
-      renderProblemsList(state.problemsFilter);
+      renderProblemsList(currentProbFilter);
       renderProblemDetail(state.activeProblemId);
     });
   });
+}
+
+async function runProblemPrecheck(problemId) {
+  const inputEl = document.getElementById('problem-solution-input');
+  const precheckBtn = document.getElementById('btn-precheck-problem');
+  const consoleEl = document.getElementById('problem-precheck-console');
+  if (!inputEl || !precheckBtn) return;
+
+  precheckBtn.disabled = true;
+  precheckBtn.textContent = 'Checking...';
+
+  try {
+    const res = await fetch(`/api/problems/${problemId}/precheck`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+      },
+      body: JSON.stringify({ solution: inputEl.value })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (consoleEl) {
+        consoleEl.style.display = 'block';
+        consoleEl.innerHTML = `
+          <div style="color: ${data.passed ? '#34d399' : '#f59e0b'}; font-weight: bold; margin-bottom: 4px;">
+            [PRE-CHECK ${data.passed ? 'PASS' : 'WARN'}] Score: ${data.score}/100
+          </div>
+          <div>${escapeHtml(data.feedback)}</div>
+          <div style="margin-top: 6px; font-size: 0.75rem; color: #94a3b8;">${escapeHtml(data.message)}</div>
+        `;
+      }
+      showToast(data.passed ? 'Pre-check passed!' : 'Pre-check found issues.', data.passed ? 'success' : 'info');
+      return;
+    }
+  } catch (err) {
+    // Offline precheck fallback
+  } finally {
+    precheckBtn.disabled = false;
+    precheckBtn.textContent = 'Run Pre-Check';
+  }
+
+  // Client-side offline precheck
+  const match = (window.PRAXIS_OFFLINE_DATA ? window.PRAXIS_OFFLINE_DATA.PROBLEMS : state.problemsList).find(p => p.id === problemId);
+  if (match) {
+    const solLower = inputEl.value.trim().toLowerCase();
+    const keywords = match.expected_keywords || [];
+    const hits = keywords.filter(k => solLower.includes(k.toLowerCase()));
+    const scoreRatio = keywords.length > 0 ? (hits.length / keywords.length) : 1.0;
+    const score = Math.round(scoreRatio * 100);
+    const passed = score >= (match.passing_score || 70);
+    if (consoleEl) {
+      consoleEl.style.display = 'block';
+      consoleEl.innerHTML = `
+        <div style="color: ${passed ? '#34d399' : '#f59e0b'}; font-weight: bold; margin-bottom: 4px;">
+          [OFFLINE PRE-CHECK ${passed ? 'PASS' : 'WARN'}] Syntax & Concept Score: ${score}/100
+        </div>
+        <div>Matched concepts: ${hits.length ? hits.join(', ') : 'None'}</div>
+        <div>Missing concepts: ${keywords.filter(k => !hits.includes(k)).join(', ') || 'None'}</div>
+        <div style="margin-top: 6px; font-size: 0.75rem; color: #94a3b8;">${passed ? 'All required criteria addressed. Ready to submit.' : 'Address missing concepts before submitting.'}</div>
+      `;
+    }
+    showToast(passed ? 'Pre-check passed!' : 'Pre-check found issues.', data.passed ? 'success' : 'info');
+  }
 }
 
 function renderProblemDetail(problemId) {
@@ -4150,6 +4332,7 @@ function renderProblemDetail(problemId) {
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Production Solution & Code Editor</span>
           <span class="badge badge-indigo" style="font-size: 0.68rem; padding: 1px 6px;">Syntax Assisted</span>
+          <span id="problem-draft-chip" class="badge badge-emerald" style="display: none; font-size: 0.68rem; padding: 1px 6px;">Draft Restored</span>
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-ghost btn-sm" id="btn-reset-prob-template" style="color: #94a3b8; font-size: 0.72rem;">Reset Template</button>
@@ -4159,11 +4342,17 @@ function renderProblemDetail(problemId) {
         <div class="code-editor-gutter" id="code-editor-gutter">1</div>
         <textarea class="problem-code-textarea" id="problem-solution-input" spellcheck="false" placeholder="Write your production diagnosis, code fix, or configuration update here...">${escapeHtml(problem.starter_template || '')}</textarea>
       </div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <span style="font-size: 0.75rem; color: #64748b;" id="editor-line-col-status">Lines: 1 | Tab inserts 2 spaces</span>
-        <button class="btn btn-primary" id="btn-submit-problem">Run & Submit Solution</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" id="btn-precheck-problem" style="font-size: 0.85rem;">Run Pre-Check</button>
+          <button class="btn btn-primary" id="btn-submit-problem" style="font-size: 0.85rem;">Run & Submit Solution</button>
+        </div>
       </div>
     </div>
+
+    <!-- Pre-Check Console Output -->
+    <div class="precheck-console" id="problem-precheck-console" style="display: none;"></div>
 
     <!-- Live Evaluation Result Card -->
     <div class="problem-eval-card" id="problem-eval-result"></div>
@@ -4172,6 +4361,15 @@ function renderProblemDetail(problemId) {
   const inputEl = document.getElementById('problem-solution-input');
   const gutterEl = document.getElementById('code-editor-gutter');
   const statusEl = document.getElementById('editor-line-col-status');
+  const draftChip = document.getElementById('problem-draft-chip');
+  const draftKey = 'praxis_draft_prob_' + problem.id;
+
+  // Restore saved draft if exists
+  const savedDraft = localStorage.getItem(draftKey);
+  if (savedDraft && inputEl) {
+    inputEl.value = savedDraft;
+    if (draftChip) draftChip.style.display = 'inline-block';
+  }
 
   function syncLineNumbers() {
     if (!inputEl || !gutterEl) return;
@@ -4188,7 +4386,10 @@ function renderProblemDetail(problemId) {
   }
 
   if (inputEl) {
-    inputEl.addEventListener('input', syncLineNumbers);
+    inputEl.addEventListener('input', () => {
+      syncLineNumbers();
+      localStorage.setItem(draftKey, inputEl.value);
+    });
     inputEl.addEventListener('scroll', () => {
       if (gutterEl) gutterEl.scrollTop = inputEl.scrollTop;
     });
@@ -4200,6 +4401,7 @@ function renderProblemDetail(problemId) {
         inputEl.value = inputEl.value.substring(0, start) + '  ' + inputEl.value.substring(end);
         inputEl.selectionStart = inputEl.selectionEnd = start + 2;
         syncLineNumbers();
+        localStorage.setItem(draftKey, inputEl.value);
       }
     });
     syncLineNumbers();
@@ -4208,9 +4410,18 @@ function renderProblemDetail(problemId) {
   document.getElementById('btn-reset-prob-template').addEventListener('click', () => {
     if (inputEl) {
       inputEl.value = problem.starter_template || '';
+      localStorage.removeItem(draftKey);
+      if (draftChip) draftChip.style.display = 'none';
       syncLineNumbers();
     }
   });
+
+  const precheckBtn = document.getElementById('btn-precheck-problem');
+  if (precheckBtn) {
+    precheckBtn.addEventListener('click', () => {
+      runProblemPrecheck(problem.id);
+    });
+  }
 
   document.getElementById('btn-submit-problem').addEventListener('click', () => {
     submitProblemSolution(problem.id);
@@ -4319,6 +4530,10 @@ async function submitProblemSolution(problemId) {
       `;
     }
 
+    if (passed) {
+      localStorage.removeItem('praxis_draft_prob_' + problemId);
+    }
+
     const prob = state.problemsList.find(p => p.id === problemId);
     if (prob) {
       prob.status = evalData.status;
@@ -4329,5 +4544,179 @@ async function submitProblemSolution(problemId) {
     showToast(passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', passed ? 'success' : 'info');
   } else {
     showToast('Network error during solution submission.', 'error');
+  }
+}
+
+// ============================================================================
+// SUITE ENHANCEMENTS: THEME, MOBILE DRAWER, HOTKEYS, PWA, ADMIN FILTERS
+// ============================================================================
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('praxis_theme') || 'light';
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
+  updateThemeIcon();
+
+  const themeBtn = document.getElementById('theme-toggle-btn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      localStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
+      updateThemeIcon();
+      showToast(isDark ? 'Dark theme enabled' : 'Light theme enabled', 'info');
+    });
+  }
+}
+
+function updateThemeIcon() {
+  const icon = document.getElementById('theme-toggle-icon');
+  if (icon) {
+    const isDark = document.body.classList.contains('dark-mode');
+    icon.textContent = isDark ? '☀️' : '🌙';
+  }
+}
+
+function initMobileDrawer() {
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('mobile-sidebar-backdrop');
+
+  if (mobileMenuBtn && sidebar && backdrop) {
+    mobileMenuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('mobile-open');
+      backdrop.classList.toggle('active');
+    });
+
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('mobile-open');
+      backdrop.classList.remove('active');
+    });
+
+    sidebar.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        backdrop.classList.remove('active');
+      });
+    });
+  }
+}
+
+function initHotkeys() {
+  const hotkeysModalBtn = document.getElementById('hotkeys-modal-btn');
+  const hotkeysModal = document.getElementById('hotkeys-modal');
+  const closeBtn = document.getElementById('hotkeys-modal-close-btn');
+  const doneBtn = document.getElementById('hotkeys-done-btn');
+
+  function openHotkeys() {
+    if (hotkeysModal) hotkeysModal.style.display = 'flex';
+  }
+  function closeHotkeys() {
+    if (hotkeysModal) hotkeysModal.style.display = 'none';
+  }
+
+  if (hotkeysModalBtn) hotkeysModalBtn.addEventListener('click', openHotkeys);
+  if (closeBtn) closeBtn.addEventListener('click', closeHotkeys);
+  if (doneBtn) doneBtn.addEventListener('click', closeHotkeys);
+
+  window.addEventListener('keydown', (e) => {
+    // Ctrl+K / Cmd+K opens hotkeys
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openHotkeys();
+    }
+    // Esc closes all modals
+    if (e.key === 'Escape') {
+      closeHotkeys();
+      const reviewModal = document.getElementById('quiz-review-modal');
+      if (reviewModal) reviewModal.style.display = 'none';
+      const roleOverlay = document.getElementById('role-onboard-overlay');
+      if (roleOverlay && state.user && state.user.role_locked) roleOverlay.style.display = 'none';
+      const reviewerModal = document.getElementById('reviewer-modal');
+      if (reviewerModal) reviewerModal.style.display = 'none';
+      const sidebar = document.querySelector('.sidebar');
+      const backdrop = document.getElementById('mobile-sidebar-backdrop');
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('active');
+    }
+    // Ctrl+Enter / Cmd+Enter runs solution
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      const submitProbBtn = document.getElementById('btn-submit-problem');
+      if (submitProbBtn && state.activeProblemId && state.currentView === 'problems') {
+        e.preventDefault();
+        submitProblemSolution(state.activeProblemId);
+      }
+    }
+  });
+}
+
+function openQuizReviewModal(data) {
+  const modal = document.getElementById('quiz-review-modal');
+  const content = document.getElementById('quiz-review-modal-content');
+  if (!modal || !content) return;
+
+  const questions = state.quizQuestions.length > 0
+    ? state.quizQuestions
+    : ((window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || []);
+
+  content.innerHTML = questions.map((q, idx) => {
+    const userAnsId = state.quizUserAnswers[q.id];
+    const isCorrect = userAnsId === q.correct_option_id;
+    return `
+      <div class="card" style="padding: 1rem; border-left: 4px solid ${isCorrect ? '#10b981' : '#f59e0b'};">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <strong style="font-size: 0.95rem; color: #0f172a;">Q${idx + 1}: ${escapeHtml(q.prompt || q.question)}</strong>
+          <span class="badge ${isCorrect ? 'badge-emerald' : 'badge-amber'}">${isCorrect ? 'Correct ✓' : 'Incorrect ✗'}</span>
+        </div>
+        <div style="font-size: 0.85rem; color: #475569; margin-bottom: 0.5rem;">
+          ${(q.options || []).map(opt => `
+            <div style="padding: 4px 8px; margin: 3px 0; border-radius: 4px; ${opt.id === q.correct_option_id ? 'background: #dcfce7; color: #166534; font-weight: bold;' : (opt.id === userAnsId ? 'background: #fee2e2; color: #991b1b;' : '')}">
+              ${opt.id === q.correct_option_id ? '✓ ' : (opt.id === userAnsId ? '✗ ' : '• ')}${escapeHtml(opt.text)}
+            </div>
+          `).join('')}
+        </div>
+        <div style="background: #f8fafc; padding: 0.5rem; border-radius: 6px; font-size: 0.8rem; color: #334155; line-height: 1.4;">
+          <strong>Concept Explanation:</strong> ${escapeHtml(q.explanation || 'Review industry standard best practices for this role.')}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  modal.style.display = 'flex';
+}
+
+function filterAdminTables() {
+  const searchInput = document.getElementById('admin-search-input');
+  const trackFilter = document.getElementById('admin-track-filter');
+  const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+  const track = trackFilter ? trackFilter.value : 'all';
+
+  const subRows = document.querySelectorAll('#admin-submissions-tbody tr');
+  subRows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const matchesQuery = !q || text.includes(q);
+    const matchesTrack = track === 'all' || text.includes(track.replace('-', ' '));
+    row.style.display = (matchesQuery && matchesTrack) ? '' : 'none';
+  });
+
+  const userRows = document.querySelectorAll('#admin-users-tbody tr');
+  userRows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const matchesQuery = !q || text.includes(q);
+    const matchesTrack = track === 'all' || text.includes(track.replace('-', ' '));
+    row.style.display = (matchesQuery && matchesTrack) ? '' : 'none';
+  });
+}
+
+function initPwaServiceWorker() {
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.log('SW registration skipped:', err);
+      });
+    });
   }
 }

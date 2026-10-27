@@ -21,7 +21,7 @@ import sqlite3
 from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI, Header, HTTPException, Query
+from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -360,6 +360,28 @@ class SubmissionStore:
                 "quiz_score": row["quiz_score"],
                 "created_at": row["created_at"],
             }
+        finally:
+            connection.close()
+
+    def revoke_session(self, token: str) -> bool:
+        if not token:
+            return False
+        connection = self._connect()
+        try:
+            cursor = connection.execute("DELETE FROM sessions WHERE token = ?", (token,))
+            connection.commit()
+            return cursor.rowcount > 0
+        finally:
+            connection.close()
+
+    def cleanup_expired_sessions(self, max_age_days: int = 30) -> int:
+        connection = self._connect()
+        try:
+            cursor = connection.execute(
+                f"DELETE FROM sessions WHERE datetime(created_at) < datetime('now', '-{max_age_days} days')"
+            )
+            connection.commit()
+            return cursor.rowcount
         finally:
             connection.close()
 
@@ -707,8 +729,24 @@ def create_app(
     # --------------------------------------------------------------------------
     # AUTHENTICATION & ROLE LOCKING
     # --------------------------------------------------------------------------
+    _AUTH_RATE_LIMITS: dict[str, list[float]] = {}
+
+    def _check_rate_limit(client_ip: str, max_requests: int = 60, window_secs: float = 60.0) -> None:
+        now = datetime.now(timezone.utc).timestamp()
+        timestamps = _AUTH_RATE_LIMITS.setdefault(client_ip, [])
+        _AUTH_RATE_LIMITS[client_ip] = [t for t in timestamps if now - t < window_secs]
+        if len(_AUTH_RATE_LIMITS[client_ip]) >= max_requests:
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded. Please wait a minute before retrying.",
+                headers={"Retry-After": "60"},
+            )
+        _AUTH_RATE_LIMITS[client_ip].append(now)
+
     @application.post("/api/auth/register", status_code=201, tags=["auth"])
-    def register(payload: RegisterRequest) -> dict[str, Any]:
+    def register(payload: RegisterRequest, request: Request) -> dict[str, Any]:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        _check_rate_limit(client_ip)
         try:
             user, token = store.create_user(payload.username, payload.password, payload.full_name)
             return {"user": user, "token": token}
@@ -716,12 +754,25 @@ def create_app(
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @application.post("/api/auth/login", tags=["auth"])
-    def login(payload: LoginRequest) -> dict[str, Any]:
+    def login(payload: LoginRequest, request: Request) -> dict[str, Any]:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        _check_rate_limit(client_ip)
         try:
             user, token = store.authenticate_user(payload.username, payload.password)
             return {"user": user, "token": token}
         except ValueError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+    @application.post("/api/auth/logout", tags=["auth"])
+    def logout(authorization: str | None = Header(default=None)) -> dict[str, Any]:
+        token = ""
+        if authorization and authorization.startswith("Bearer "):
+            token = authorization[7:].strip()
+        elif authorization:
+            token = authorization.strip()
+        if token:
+            store.revoke_session(token)
+        return {"status": "ok", "message": "Logged out successfully."}
 
     @application.get("/api/auth/me", tags=["auth"])
     def get_me(authorization: str | None = Header(default=None)) -> dict[str, Any]:
@@ -1029,6 +1080,28 @@ def create_app(
             "score": evaluation["score"],
             "passed": evaluation["passed"],
             "feedback": evaluation["feedback"],
+        }
+
+    @application.post("/api/problems/{problem_id}/precheck", tags=["problems"])
+    def precheck_problem(
+        problem_id: str,
+        payload: ProblemSubmitRequest,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
+        user = _require_user(authorization)
+        match = next((p for p in PROBLEMS if p["id"] == problem_id), None)
+        if match is None:
+            raise HTTPException(status_code=404, detail=f"Problem '{problem_id}' was not found")
+
+        evaluation = evaluate_problem_submission(match, payload.solution)
+        return {
+            "problem_id": problem_id,
+            "is_precheck": True,
+            "status": evaluation["status"],
+            "score": evaluation["score"],
+            "passed": evaluation["passed"],
+            "feedback": evaluation["feedback"],
+            "message": "Pre-check passed! Ready for final submission." if evaluation["passed"] else "Pre-check highlighted issues with your solution.",
         }
 
     # --------------------------------------------------------------------------
