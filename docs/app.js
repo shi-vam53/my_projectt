@@ -1,3 +1,37 @@
+// Safe storage abstraction (prevents SecurityError in restricted iframes, private browsing, or third-party cookies)
+const safeStorage = (() => {
+  const mem = {};
+  return {
+    getItem(k) {
+      try {
+        const v = window.localStorage.getItem(k);
+        return v !== null ? v : (mem[k] || null);
+      } catch (e) {
+        return mem[k] || null;
+      }
+    },
+    setItem(k, v) {
+      const s = String(v);
+      mem[k] = s;
+      try {
+        window.localStorage.setItem(k, s);
+      } catch (e) {}
+    },
+    removeItem(k) {
+      delete mem[k];
+      try {
+        window.localStorage.removeItem(k);
+      } catch (e) {}
+    },
+    clear() {
+      for (const k in mem) delete mem[k];
+      try {
+        window.localStorage.clear();
+      } catch (e) {}
+    }
+  };
+})();
+
 /**
  * WorkSim Frontend Application
  * Practical-work simulation platform: dashboard, evidence tabs, readiness quiz, and rubric evaluation.
@@ -1681,7 +1715,7 @@ function saveDraftToStorage(missionId, showToastNotification) {
 
   const storageKey = `worksim_draft_${missionId}`;
   try {
-    localStorage.setItem(storageKey, JSON.stringify({
+    safeStorage.setItem(storageKey, JSON.stringify({
       missionId,
       timestamp: Date.now(),
       draft
@@ -1700,7 +1734,7 @@ function loadDraftFromStorage(missionId) {
 
   const storageKey = `worksim_draft_${missionId}`;
   try {
-    const raw = localStorage.getItem(storageKey);
+    const raw = safeStorage.getItem(storageKey);
     if (!raw) return;
 
     const parsed = JSON.parse(raw);
@@ -1740,7 +1774,7 @@ function clearDraft(missionId) {
   });
 
   try {
-    localStorage.removeItem(`worksim_draft_${missionId}`);
+    safeStorage.removeItem(`worksim_draft_${missionId}`);
   } catch (e) {}
 
   const formStatus = document.getElementById('form-autosave-status');
@@ -2154,9 +2188,9 @@ function handleSubmitRubric() {
       dimensions: evalResult.dimensions
     };
     try {
-      const existingSubs = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+      const existingSubs = JSON.parse(safeStorage.getItem('praxis_offline_submissions') || '[]');
       existingSubs.unshift(offlineSub);
-      localStorage.setItem('praxis_offline_submissions', JSON.stringify(existingSubs));
+      safeStorage.setItem('praxis_offline_submissions', JSON.stringify(existingSubs));
     } catch (e) {}
 
     displayRubricResults(mission, evalResult);
@@ -2726,7 +2760,7 @@ async function renderAdminView() {
 
   if (!loadedFromBackend) {
     try {
-      state.submissionsLedger = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+      state.submissionsLedger = JSON.parse(safeStorage.getItem('praxis_offline_submissions') || '[]');
     } catch (e) {
       state.submissionsLedger = [];
     }
@@ -2915,12 +2949,12 @@ async function submitReviewerDecision(status) {
   sub.reviewer_status = status;
   sub.reviewer_notes = notes;
   try {
-    const offlineSubs = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+    const offlineSubs = JSON.parse(safeStorage.getItem('praxis_offline_submissions') || '[]');
     const match = offlineSubs.find(s => s.submission_id === sub.submission_id);
     if (match) {
       match.reviewer_status = status;
       match.reviewer_notes = notes;
-      localStorage.setItem('praxis_offline_submissions', JSON.stringify(offlineSubs));
+      safeStorage.setItem('praxis_offline_submissions', JSON.stringify(offlineSubs));
     }
   } catch (e) {}
 
@@ -2941,9 +2975,9 @@ function bindProfileControls() {
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
       if (confirm('Clear simulation problem and mission progress? (Your login and locked track will be preserved)')) {
-        localStorage.removeItem('praxis_offline_submissions');
-        localStorage.removeItem('praxis_offline_problem_progress');
-        localStorage.removeItem('praxis_drafts');
+        safeStorage.removeItem('praxis_offline_submissions');
+        safeStorage.removeItem('praxis_offline_problem_progress');
+        safeStorage.removeItem('praxis_drafts');
         showToast('Simulation progress reset.', 'info');
         renderProfileView();
       }
@@ -2955,7 +2989,7 @@ function renderProfileView() {
   let completedMissions = state.submissionsLedger || [];
   if (completedMissions.length === 0) {
     try {
-      completedMissions = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+      completedMissions = JSON.parse(safeStorage.getItem('praxis_offline_submissions') || '[]');
     } catch (e) {
       completedMissions = [];
     }
@@ -2964,7 +2998,7 @@ function renderProfileView() {
   // Solved problems count
   let solvedProblemsCount = 0;
   try {
-    const probProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
     solvedProblemsCount = Object.values(probProgress).filter(p => p.status === 'completed').length;
   } catch (e) {}
 
@@ -3066,7 +3100,7 @@ function renderProfileView() {
 
       // Add solved problems
       try {
-        const probProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+        const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
         Object.entries(probProgress).forEach(([pid, pdata]) => {
           if (pdata.status === 'completed') {
             const prob = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS ? window.PRAXIS_OFFLINE_DATA.PROBLEMS.find(p => p.id === pid) : null) || { title: pid.toUpperCase() };
@@ -3114,7 +3148,7 @@ function exportLearnerTranscript() {
 
   // Append solved problems to transcript portfolio
   try {
-    const probProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
     const solvedEntries = Object.entries(probProgress).filter(([_, d]) => d.status === 'completed');
     if (solvedEntries.length > 0) {
       md += `\n## Solved Production Engineering Problems (${solvedEntries.length} Solved)\n\n`;
@@ -3142,7 +3176,7 @@ function exportLearnerTranscript() {
 // CURRICULUM, AUTH & PROBLEM BANK CONTROLLER
 // ============================================================================
 
-state.token = localStorage.getItem('praxis_token') || null;
+state.token = safeStorage.getItem('praxis_token') || null;
 state.user = null;
 state.rolesList = [];
 state.selectedRoleForOnboarding = null;
@@ -3153,8 +3187,8 @@ state.activeProblemId = 'prob-01';
 state.problemsFilter = 'all';
 
 async function checkAuthAndSession() {
-  const token = localStorage.getItem('praxis_token');
-  const activeUserStr = localStorage.getItem('praxis_active_user') || localStorage.getItem('praxis_offline_user');
+  const token = safeStorage.getItem('praxis_token');
+  const activeUserStr = safeStorage.getItem('praxis_active_user') || safeStorage.getItem('praxis_offline_user');
 
   if (!token && !activeUserStr) {
     showAuthOverlay(true);
@@ -3180,12 +3214,12 @@ async function checkAuthAndSession() {
         if (res.ok) {
           const data = await res.json();
           state.user = data.user;
-          localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+          safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
         } else if (res.status === 401) {
           // Explicit token rejection from real backend API
-          localStorage.removeItem('praxis_token');
-          localStorage.removeItem('praxis_active_user');
-          localStorage.removeItem('praxis_offline_user');
+          safeStorage.removeItem('praxis_token');
+          safeStorage.removeItem('praxis_active_user');
+          safeStorage.removeItem('praxis_offline_user');
           state.token = null;
           state.user = null;
           showAuthOverlay(true);
@@ -3261,14 +3295,14 @@ function getRoleDisplayName(roleId) {
 function saveSessionAndProceed(user, token) {
   state.token = token;
   state.user = user;
-  localStorage.setItem('praxis_token', token);
-  localStorage.setItem('praxis_active_user', JSON.stringify(user));
-  localStorage.setItem('praxis_offline_user', JSON.stringify(user));
+  safeStorage.setItem('praxis_token', token);
+  safeStorage.setItem('praxis_active_user', JSON.stringify(user));
+  safeStorage.setItem('praxis_offline_user', JSON.stringify(user));
 
   try {
-    const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+    const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
     usersDb[user.username.toLowerCase()] = user;
-    localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+    safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
   } catch (e) {}
 
   showAuthOverlay(false);
@@ -3413,14 +3447,27 @@ function bindAuthControls() {
             if (submitBtn) submitBtn.disabled = false;
             saveSessionAndProceed(data.user, data.token);
             return;
-          } else if (res.status === 400 && isSignup && data.detail && data.detail.includes('already registered')) {
+          }
+
+          let detailMsg = '';
+          if (typeof data.detail === 'string') {
+            detailMsg = data.detail;
+          } else if (Array.isArray(data.detail)) {
+            detailMsg = data.detail.map(d => d.msg || (d.loc ? `${d.loc.join('.')}: ${d.msg}` : JSON.stringify(d))).join(', ');
+          } else if (data.message && typeof data.message === 'string') {
+            detailMsg = data.message;
+          } else {
+            detailMsg = 'Authentication request could not be completed.';
+          }
+
+          if (res.status === 400 && isSignup && detailMsg.toLowerCase().includes('already registered')) {
             // Already registered - allow user to easily switch to sign in
             if (submitBtn) {
               submitBtn.disabled = false;
               submitBtn.textContent = 'Create Free Account';
             }
             if (errorMsg) {
-              errorMsg.innerHTML = `${escapeHtml(data.detail)} <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Click to Sign In with this Email</button>`;
+              errorMsg.innerHTML = `${escapeHtml(detailMsg)} <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Click to Sign In with this Email</button>`;
               errorMsg.style.display = 'block';
               document.getElementById('btn-quick-signin')?.addEventListener('click', () => {
                 switchToSignIn();
@@ -3435,7 +3482,7 @@ function bindAuthControls() {
               submitBtn.textContent = 'Sign In to Praxis';
             }
             if (errorMsg) {
-              errorMsg.innerHTML = `Invalid username or password. <br>New to Praxis? <button type="button" class="btn btn-outline btn-sm" id="btn-quick-signup" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Create Free Account with this Email</button>`;
+              errorMsg.innerHTML = `${escapeHtml(detailMsg)} <br>New to Praxis? <button type="button" class="btn btn-outline btn-sm" id="btn-quick-signup" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Create Free Account with this Email</button>`;
               errorMsg.style.display = 'block';
               document.getElementById('btn-quick-signup')?.addEventListener('click', () => {
                 switchToSignUp();
@@ -3449,7 +3496,7 @@ function bindAuthControls() {
               submitBtn.textContent = isSignup ? 'Create Free Account' : 'Sign In to Praxis';
             }
             if (errorMsg) {
-              errorMsg.textContent = data.detail || 'Authentication failed. Please verify your credentials.';
+              errorMsg.textContent = detailMsg;
               errorMsg.style.display = 'block';
             }
             return;
@@ -3467,7 +3514,7 @@ function bindAuthControls() {
       // Local client-side user database fallback (for GitHub Pages / Serverless)
       let usersDb = {};
       try {
-        usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+        usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
       } catch (e) {
         usersDb = {};
       }
@@ -3498,7 +3545,7 @@ function bindAuthControls() {
         };
 
         usersDb[username] = newUser;
-        localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+        safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
         const localToken = 'praxis-token-' + newUser.user_id;
         saveSessionAndProceed(newUser, localToken);
       } else {
@@ -3528,7 +3575,7 @@ function bindAuthControls() {
             created_at: new Date().toISOString()
           };
           usersDb[username] = newUser;
-          localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+          safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
           const localToken = 'praxis-token-' + newUser.user_id;
           saveSessionAndProceed(newUser, localToken);
         }
@@ -3547,9 +3594,9 @@ function bindAuthControls() {
     } catch (e) {
       // offline fallback
     }
-    localStorage.removeItem('praxis_token');
-    localStorage.removeItem('praxis_active_user');
-    localStorage.removeItem('praxis_offline_user');
+    safeStorage.removeItem('praxis_token');
+    safeStorage.removeItem('praxis_active_user');
+    safeStorage.removeItem('praxis_offline_user');
     state.token = null;
     state.user = null;
     updateUserHeaderUI();
@@ -3580,12 +3627,25 @@ function bindAuthControls() {
   if (confirmRoleBtn) {
     confirmRoleBtn.addEventListener('click', confirmRoleLock);
   }
+
+  const skipRoleBtn = document.getElementById('skip-role-onboard-btn');
+  if (skipRoleBtn) {
+    skipRoleBtn.addEventListener('click', () => {
+      closeRoleOnboardingModal();
+      switchView('handbook');
+      showToast('Viewing Handbook Foundations. You can confirm your role track anytime before taking the quiz.', 'info');
+    });
+  }
 }
 
 function openRoleOnboardingModal() {
   const overlay = document.getElementById('role-onboard-overlay');
   if (!overlay) return;
   overlay.style.display = 'flex';
+
+  if (!state.selectedRoleForOnboarding) {
+    state.selectedRoleForOnboarding = 'software-developer';
+  }
 
   // Synchronously load default/offline roles so the grid is NEVER blank
   if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.ROLES) {
@@ -3614,9 +3674,19 @@ function renderRoleSelectionGrid() {
   const grid = document.getElementById('role-selection-grid');
   if (!grid) return;
 
-  grid.innerHTML = state.rolesList.map(r => `
+  if (!state.rolesList || state.rolesList.length === 0) {
+    if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.ROLES) {
+      state.rolesList = window.PRAXIS_OFFLINE_DATA.ROLES;
+    }
+  }
+
+  if (!state.selectedRoleForOnboarding && state.rolesList && state.rolesList.length > 0) {
+    state.selectedRoleForOnboarding = state.rolesList[0].id;
+  }
+
+  grid.innerHTML = (state.rolesList || []).map(r => `
     <div class="role-select-item ${state.selectedRoleForOnboarding === r.id ? 'selected' : ''}" data-role-id="${r.id}">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
         <div class="role-item-title">${escapeHtml(r.title)}</div>
         <span class="role-item-badge">${escapeHtml(r.badge)}</span>
       </div>
@@ -3631,13 +3701,14 @@ function renderRoleSelectionGrid() {
     card.addEventListener('click', () => {
       state.selectedRoleForOnboarding = card.dataset.roleId;
       renderRoleSelectionGrid();
-      const btn = document.getElementById('confirm-role-lock-btn');
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = `Confirm & Lock Role: ${getRoleDisplayName(state.selectedRoleForOnboarding)}`;
-      }
     });
   });
+
+  const btn = document.getElementById('confirm-role-lock-btn');
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = `Confirm & Enter Platform as ${getRoleDisplayName(state.selectedRoleForOnboarding || 'software-developer')} ➔`;
+  }
 }
 
 async function confirmRoleLock() {
@@ -3674,12 +3745,12 @@ async function confirmRoleLock() {
   }
 
   if (state.user) {
-    localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
-    localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
     try {
-      const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+      const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
       usersDb[state.user.username.toLowerCase()] = state.user;
-      localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+      safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
     } catch (e) {}
   }
 
@@ -3981,12 +4052,12 @@ async function submitReadinessQuiz() {
   if (state.user) {
     state.user.quiz_passed = passed;
     state.user.quiz_score = score;
-    localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
-    localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
     try {
-      const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+      const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
       usersDb[state.user.username.toLowerCase()] = state.user;
-      localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+      safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
     } catch (e) {}
   }
   renderQuizResults(payload);
@@ -4022,12 +4093,12 @@ function renderQuizResults(data) {
     if (state.user) {
       state.user.quiz_passed = true;
       state.user.quiz_score = data.score;
-      localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
-      localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+      safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+      safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
       try {
-        const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+        const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
         usersDb[state.user.username.toLowerCase()] = state.user;
-        localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+        safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
       } catch (e) {}
     }
     const sidebarPill = document.getElementById('quiz-sidebar-pill');
@@ -4195,7 +4266,7 @@ async function loadProblemsBank() {
   }
 
   if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS) {
-    const savedProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const savedProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
     state.problemsList = window.PRAXIS_OFFLINE_DATA.PROBLEMS.map(p => ({
       ...p,
       status: savedProgress[p.id] ? savedProgress[p.id].status : 'pending',
@@ -4425,7 +4496,7 @@ function renderProblemDetail(problemId) {
   const draftKey = 'praxis_draft_prob_' + problem.id;
 
   // Restore saved draft if exists
-  const savedDraft = localStorage.getItem(draftKey);
+  const savedDraft = safeStorage.getItem(draftKey);
   if (savedDraft && inputEl) {
     inputEl.value = savedDraft;
     if (draftChip) draftChip.style.display = 'inline-block';
@@ -4448,7 +4519,7 @@ function renderProblemDetail(problemId) {
   if (inputEl) {
     inputEl.addEventListener('input', () => {
       syncLineNumbers();
-      localStorage.setItem(draftKey, inputEl.value);
+      safeStorage.setItem(draftKey, inputEl.value);
     });
     inputEl.addEventListener('scroll', () => {
       if (gutterEl) gutterEl.scrollTop = inputEl.scrollTop;
@@ -4461,7 +4532,7 @@ function renderProblemDetail(problemId) {
         inputEl.value = inputEl.value.substring(0, start) + '  ' + inputEl.value.substring(end);
         inputEl.selectionStart = inputEl.selectionEnd = start + 2;
         syncLineNumbers();
-        localStorage.setItem(draftKey, inputEl.value);
+        safeStorage.setItem(draftKey, inputEl.value);
       }
     });
     syncLineNumbers();
@@ -4470,7 +4541,7 @@ function renderProblemDetail(problemId) {
   document.getElementById('btn-reset-prob-template').addEventListener('click', () => {
     if (inputEl) {
       inputEl.value = problem.starter_template || '';
-      localStorage.removeItem(draftKey);
+      safeStorage.removeItem(draftKey);
       if (draftChip) draftChip.style.display = 'none';
       syncLineNumbers();
     }
@@ -4570,9 +4641,9 @@ async function submitProblemSolution(problemId) {
       feedback: feedback
     };
 
-    const savedProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const savedProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
     savedProgress[problemId] = evalData;
-    localStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
+    safeStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
 
     const evalCard = document.getElementById('problem-eval-result');
     if (evalCard) {
@@ -4591,7 +4662,7 @@ async function submitProblemSolution(problemId) {
     }
 
     if (passed) {
-      localStorage.removeItem('praxis_draft_prob_' + problemId);
+      safeStorage.removeItem('praxis_draft_prob_' + problemId);
     }
 
     const prob = state.problemsList.find(p => p.id === problemId);
@@ -4612,7 +4683,7 @@ async function submitProblemSolution(problemId) {
 // ============================================================================
 
 function initTheme() {
-  const savedTheme = localStorage.getItem('praxis_theme') || 'light';
+  const savedTheme = safeStorage.getItem('praxis_theme') || 'light';
   if (savedTheme === 'dark') {
     document.body.classList.add('dark-mode');
   } else {
@@ -4625,7 +4696,7 @@ function initTheme() {
     themeBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
       const isDark = document.body.classList.contains('dark-mode');
-      localStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
+      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
       updateThemeIcon();
       showToast(isDark ? 'Dark theme enabled' : 'Light theme enabled', 'info');
     });
