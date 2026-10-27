@@ -9,7 +9,7 @@
 </head>
 <body>
   <!-- AUTHENTICATION OVERLAY (Shown if not logged in) -->
-  <div id="auth-overlay" class="auth-overlay" style="display: none;">
+  <div id="auth-overlay" class="auth-overlay" style="display: flex;">
     <div class="auth-card">
       <div class="auth-brand">
         <div class="brand-icon">
@@ -49,6 +49,9 @@
           <input type="password" id="auth-password" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
         </div>
         <button type="submit" class="auth-submit-btn" id="auth-submit-btn">Sign In to Praxis</button>
+        <div style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center; line-height: 1.4;">
+          New learner? Click <strong>Create Account</strong> above to register and start your simulation.
+        </div>
       </form>
     </div>
   </div>
