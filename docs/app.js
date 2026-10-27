@@ -2980,6 +2980,38 @@ function renderProfileView() {
     if (readinessEl) readinessEl.textContent = 'In Training';
   }
 
+  // Official Certificate of Completion Banner
+  const certBanner = document.getElementById('profile-certificate-banner');
+  if (certBanner) {
+    const learnerName = state.user ? (state.user.full_name || state.user.username) : 'Learner Practitioner';
+    const roleKey = state.user ? (state.user.role || 'software-developer') : 'software-developer';
+    const roleTitle = getRoleDisplayName(roleKey);
+    const certId = `PX-CERT-${(state.user && state.user.user_id ? state.user.user_id : 'DEMO').substring(0, 8).toUpperCase()}`;
+
+    certBanner.innerHTML = `
+      <div class="cert-banner-card">
+        <div class="cert-banner-left">
+          <div class="cert-seal-icon">🏆</div>
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em;">Verified Credential</div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin: 0.15rem 0;">Praxis Certificate of Workplace Readiness</h3>
+            <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0;">Recipient: <strong>${escapeHtml(learnerName)}</strong> • Track: <span style="color: #6ee7b7;">${escapeHtml(roleTitle)}</span> (${certId})</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap;">
+          <a href="/api/certificate/download?learner_name=${encodeURIComponent(learnerName)}&role=${encodeURIComponent(roleKey)}" 
+             id="btn-download-cert-pdf" 
+             download="Praxis_Certificate_${learnerName.replace(/\s+/g, '_')}.pdf" 
+             class="btn btn-primary" 
+             style="background: #d97706; border-color: #b45309; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download PDF Certificate
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
   // Competencies list
   const compList = document.getElementById('profile-competencies-list');
   if (compList) {
@@ -4112,14 +4144,23 @@ function renderProblemDetail(problemId) {
       </div>
     `}
 
-    <!-- Solution Editor -->
+    <!-- Enhanced Solution Editor with Line Numbers Gutter -->
     <div class="problem-editor-container">
       <div class="problem-editor-header">
-        <span>Production Solution & Code Editor</span>
-        <button class="btn btn-ghost btn-sm" id="btn-reset-prob-template" style="color: #94a3b8; font-size: 0.72rem;">Reset Template</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>Production Solution & Code Editor</span>
+          <span class="badge badge-indigo" style="font-size: 0.68rem; padding: 1px 6px;">Syntax Assisted</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-ghost btn-sm" id="btn-reset-prob-template" style="color: #94a3b8; font-size: 0.72rem;">Reset Template</button>
+        </div>
       </div>
-      <textarea class="problem-code-textarea" id="problem-solution-input" placeholder="Write your production diagnosis, code fix, or configuration update here...">${escapeHtml(problem.starter_template || '')}</textarea>
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+      <div class="code-editor-wrapper">
+        <div class="code-editor-gutter" id="code-editor-gutter">1</div>
+        <textarea class="problem-code-textarea" id="problem-solution-input" spellcheck="false" placeholder="Write your production diagnosis, code fix, or configuration update here...">${escapeHtml(problem.starter_template || '')}</textarea>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+        <span style="font-size: 0.75rem; color: #64748b;" id="editor-line-col-status">Lines: 1 | Tab inserts 2 spaces</span>
         <button class="btn btn-primary" id="btn-submit-problem">Run & Submit Solution</button>
       </div>
     </div>
@@ -4128,8 +4169,47 @@ function renderProblemDetail(problemId) {
     <div class="problem-eval-card" id="problem-eval-result"></div>
   `;
 
+  const inputEl = document.getElementById('problem-solution-input');
+  const gutterEl = document.getElementById('code-editor-gutter');
+  const statusEl = document.getElementById('editor-line-col-status');
+
+  function syncLineNumbers() {
+    if (!inputEl || !gutterEl) return;
+    const lines = (inputEl.value || '').split('\n').length;
+    let numbers = '';
+    for (let i = 1; i <= Math.max(lines, 1); i++) {
+      numbers += i + '\n';
+    }
+    gutterEl.textContent = numbers;
+    gutterEl.scrollTop = inputEl.scrollTop;
+    if (statusEl) {
+      statusEl.textContent = `Lines: ${lines} | Tab key inserts 2 spaces`;
+    }
+  }
+
+  if (inputEl) {
+    inputEl.addEventListener('input', syncLineNumbers);
+    inputEl.addEventListener('scroll', () => {
+      if (gutterEl) gutterEl.scrollTop = inputEl.scrollTop;
+    });
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = inputEl.selectionStart;
+        const end = inputEl.selectionEnd;
+        inputEl.value = inputEl.value.substring(0, start) + '  ' + inputEl.value.substring(end);
+        inputEl.selectionStart = inputEl.selectionEnd = start + 2;
+        syncLineNumbers();
+      }
+    });
+    syncLineNumbers();
+  }
+
   document.getElementById('btn-reset-prob-template').addEventListener('click', () => {
-    document.getElementById('problem-solution-input').value = problem.starter_template || '';
+    if (inputEl) {
+      inputEl.value = problem.starter_template || '';
+      syncLineNumbers();
+    }
   });
 
   document.getElementById('btn-submit-problem').addEventListener('click', () => {

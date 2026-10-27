@@ -173,3 +173,26 @@ def test_google_sheet_info_endpoint(client):
     assert "web_view_link" in data
     assert "total_users" in data
     assert data["sheet_id"] == "1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0"
+
+
+def test_certificate_download_endpoint(client):
+    # Test certificate download with auth token and query parameters
+    reg = client.post(
+        "/api/auth/register",
+        json={"username": "certuser", "password": "password123", "full_name": "Certified Learner"},
+    )
+    token = reg.json()["token"]
+    client.post(
+        "/api/auth/select-role",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"role": "cloud-engineer"},
+    )
+
+    res = client.get(
+        "/api/certificate/download",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 200
+    assert "application/pdf" in res.headers.get("content-type", "")
+    assert len(res.content) > 1000
+    assert res.content[:5] == b"%PDF-"

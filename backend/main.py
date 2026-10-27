@@ -29,6 +29,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .generate_handbook import build_handbook_pdf
 from .generate_role_handbooks import build_role_handbook_pdf, ROLE_CONFIGS
+from .certificate import generate_certificate_pdf
 from .problems import ROLES, QUIZ_QUESTIONS, PROBLEMS, evaluate_problem_submission
 from .rubric import evaluate_submission
 from .sheet_sync import GOOGLE_SHEET_ID, GOOGLE_SHEET_URL, generate_users_csv, sync_users_to_workspace_file
@@ -858,6 +859,40 @@ def create_app(
                 for ch in cfg["chapters"]
             ],
         }
+
+    # --------------------------------------------------------------------------
+    # COMPLETION CERTIFICATE GENERATION (PDF)
+    # --------------------------------------------------------------------------
+    @application.get("/api/certificate/download", tags=["certificate"])
+    def download_certificate(
+        authorization: str | None = Header(default=None),
+        learner_name: str | None = Query(default=None),
+        role: str | None = Query(default=None),
+    ):
+        user = _resolve_user(authorization) if authorization else None
+        name = learner_name or (user.get("full_name") if user else None) or (user.get("username") if user else "Engineering Practitioner")
+        user_role = role or (user.get("role") if user else None) or "Software Developer"
+        role_display = {
+            "software-developer": "Software Developer & Systems Specialist",
+            "cloud-engineer": "Cloud Engineer & SRE Specialist",
+            "data-analyst": "Data Analyst & Analytics Specialist",
+            "cloud-sre": "Cloud Engineer & SRE Specialist",
+            "backend-eng": "Software Developer & Systems Specialist",
+            "data-ai": "Data Analyst & Analytics Specialist",
+        }.get(user_role, user_role)
+
+        cert_id = f"PX-CERT-{(user.get('user_id') if user else 'DEMO')[:8].upper()}"
+        today_str = datetime.now(timezone.utc).strftime("%B %d, %Y")
+
+        assets_dir = PROJECT_ROOT / "frontend" / "assets"
+        cert_path = assets_dir / f"Praxis_Certificate_{cert_id}.pdf"
+        generate_certificate_pdf(cert_path, name, role_display, cert_id, today_str)
+
+        return FileResponse(
+            cert_path,
+            media_type="application/pdf",
+            filename=f"Praxis_Certificate_{name.replace(' ', '_')}.pdf",
+        )
 
     # --------------------------------------------------------------------------
     # 5-QUESTION READINESS QUIZ
