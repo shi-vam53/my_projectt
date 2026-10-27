@@ -62,13 +62,13 @@ def _now_utc() -> str:
 # ==============================================================================
 
 class RegisterRequest(BaseModel):
-    username: str = Field(min_length=3, max_length=50)
+    username: str = Field(min_length=3, max_length=100)
     password: str = Field(min_length=6, max_length=100)
-    full_name: str = Field(min_length=2, max_length=100)
+    full_name: str | None = Field(default=None, max_length=100)
 
 
 class LoginRequest(BaseModel):
-    username: str = Field(min_length=1, max_length=50)
+    username: str = Field(min_length=1, max_length=100)
     password: str = Field(min_length=1, max_length=100)
 
 
@@ -251,13 +251,14 @@ class SubmissionStore:
         finally:
             connection.close()
 
-    def create_user(self, username: str, password: str, full_name: str) -> tuple[dict[str, Any], str]:
+    def create_user(self, username: str, password: str, full_name: str | None = None) -> tuple[dict[str, Any], str]:
         uname = username.strip().casefold()
         if not uname or len(uname) < 3:
-            raise ValueError("Username must be at least 3 characters")
+            raise ValueError("Email or username must be at least 3 characters")
         if len(password) < 6:
             raise ValueError("Password must be at least 6 characters")
 
+        display_name = full_name.strip() if (full_name and len(full_name.strip()) >= 2) else uname.split('@')[0].replace('.', ' ').replace('_', ' ').title()
         user_id = str(uuid4())
         pwd_hash, pwd_salt = _hash_password(password)
         now = _now_utc()
@@ -269,7 +270,7 @@ class SubmissionStore:
                 INSERT INTO users (user_id, username, full_name, password_hash, password_salt, role, role_locked, quiz_passed, quiz_score, created_at)
                 VALUES (?, ?, ?, ?, ?, NULL, 0, 0, 0, ?)
                 """,
-                (user_id, uname, full_name.strip(), pwd_hash, pwd_salt, now),
+                (user_id, uname, display_name, pwd_hash, pwd_salt, now),
             )
             token = secrets.token_hex(24)
             connection.execute(
@@ -278,7 +279,7 @@ class SubmissionStore:
             )
             connection.commit()
         except sqlite3.IntegrityError:
-            raise ValueError(f"Username '{uname}' is already registered.")
+            raise ValueError(f"Account '{uname}' is already registered. Please sign in or use another email.")
         finally:
             connection.close()
 
@@ -290,7 +291,7 @@ class SubmissionStore:
         user = {
             "user_id": user_id,
             "username": uname,
-            "full_name": full_name.strip(),
+            "full_name": display_name,
             "role": None,
             "role_locked": False,
             "quiz_passed": False,
@@ -731,7 +732,7 @@ def create_app(
     # --------------------------------------------------------------------------
     _AUTH_RATE_LIMITS: dict[str, list[float]] = {}
 
-    def _check_rate_limit(client_ip: str, max_requests: int = 60, window_secs: float = 60.0) -> None:
+    def _check_rate_limit(client_ip: str, max_requests: int = 1000, window_secs: float = 60.0) -> None:
         now = datetime.now(timezone.utc).timestamp()
         timestamps = _AUTH_RATE_LIMITS.setdefault(client_ip, [])
         _AUTH_RATE_LIMITS[client_ip] = [t for t in timestamps if now - t < window_secs]

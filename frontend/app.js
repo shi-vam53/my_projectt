@@ -3296,31 +3296,62 @@ function bindAuthControls() {
   const desc = document.getElementById('auth-header-desc');
   const authForm = document.getElementById('auth-form');
   const signoutBtn = document.getElementById('header-signout-btn');
+  const linkSwitch = document.getElementById('auth-link-switch');
+  const userLabel = document.getElementById('auth-username-label');
   let isSignup = false;
 
-  if (tabSignin && tabSignup) {
-    tabSignin.addEventListener('click', () => {
-      isSignup = false;
-      tabSignin.classList.add('active');
-      tabSignup.classList.remove('active');
-      if (fullnameField) fullnameField.style.display = 'none';
-      if (submitBtn) submitBtn.textContent = 'Sign In to Praxis';
-      if (title) title.textContent = 'Sign In to Praxis';
-      if (desc) desc.textContent = 'Enter your credentials to access your workplace simulation dashboard.';
-      const errorMsg = document.getElementById('auth-error-msg');
-      if (errorMsg) errorMsg.style.display = 'none';
-    });
+  function switchToSignIn() {
+    isSignup = false;
+    if (tabSignin) tabSignin.classList.add('active');
+    if (tabSignup) tabSignup.classList.remove('active');
+    if (fullnameField) fullnameField.style.display = 'none';
+    if (userLabel) userLabel.textContent = 'Email or Username';
+    if (submitBtn) submitBtn.textContent = 'Sign In to Praxis';
+    if (title) title.textContent = 'Sign In to Praxis';
+    if (desc) desc.textContent = 'Enter your email or username to access your simulation dashboard.';
+    const promptEl = document.getElementById('auth-footer-prompt');
+    if (promptEl) {
+      promptEl.innerHTML = `Don't have an account? <a href="#" id="auth-link-switch" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Create a Free Account</a>`;
+      document.getElementById('auth-link-switch')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchToSignUp();
+      });
+    }
+    const errorMsg = document.getElementById('auth-error-msg');
+    if (errorMsg) errorMsg.style.display = 'none';
+  }
 
-    tabSignup.addEventListener('click', () => {
-      isSignup = true;
-      tabSignup.classList.add('active');
-      tabSignin.classList.remove('active');
-      if (fullnameField) fullnameField.style.display = 'flex';
-      if (submitBtn) submitBtn.textContent = 'Create Free Account';
-      if (title) title.textContent = 'Create Praxis Account';
-      if (desc) desc.textContent = 'Create your account to unlock industry handbooks and production problems.';
-      const errorMsg = document.getElementById('auth-error-msg');
-      if (errorMsg) errorMsg.style.display = 'none';
+  function switchToSignUp() {
+    isSignup = true;
+    if (tabSignup) tabSignup.classList.add('active');
+    if (tabSignin) tabSignin.classList.remove('active');
+    if (fullnameField) fullnameField.style.display = 'flex';
+    if (userLabel) userLabel.textContent = 'Choose Email or Username';
+    if (submitBtn) submitBtn.textContent = 'Create Free Account';
+    if (title) title.textContent = 'Create Praxis Account';
+    if (desc) desc.textContent = 'Register with your email to unlock your role track and production problems.';
+    const promptEl = document.getElementById('auth-footer-prompt');
+    if (promptEl) {
+      promptEl.innerHTML = `Already have an account? <a href="#" id="auth-link-switch" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Sign In here</a>`;
+      document.getElementById('auth-link-switch')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchToSignIn();
+      });
+    }
+    const errorMsg = document.getElementById('auth-error-msg');
+    if (errorMsg) errorMsg.style.display = 'none';
+  }
+
+  if (tabSignin && tabSignup) {
+    tabSignin.addEventListener('click', switchToSignIn);
+    tabSignup.addEventListener('click', switchToSignUp);
+  }
+
+  if (linkSwitch) {
+    linkSwitch.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isSignup) switchToSignIn();
+      else switchToSignUp();
     });
   }
 
@@ -3337,14 +3368,15 @@ function bindAuthControls() {
         errorMsg.textContent = '';
       }
 
-      const rawUsername = usernameInput.value.trim();
+      const rawUsername = (usernameInput ? usernameInput.value : '').trim();
       const username = rawUsername.toLowerCase();
-      const password = passwordInput.value.trim();
-      const full_name = fullnameInput && fullnameInput.value.trim() ? fullnameInput.value.trim() : rawUsername;
+      const password = (passwordInput ? passwordInput.value : '').trim();
+      const rawFullName = fullnameInput && fullnameInput.value ? fullnameInput.value.trim() : '';
+      const full_name = rawFullName || (rawUsername.includes('@') ? rawUsername.split('@')[0] : rawUsername).replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
       if (!username || username.length < 3) {
         if (errorMsg) {
-          errorMsg.textContent = 'Username must be at least 3 characters long.';
+          errorMsg.textContent = 'Please enter an email or username with at least 3 characters.';
           errorMsg.style.display = 'block';
         }
         return;
@@ -3352,13 +3384,6 @@ function bindAuthControls() {
       if (!password || password.length < 6) {
         if (errorMsg) {
           errorMsg.textContent = 'Password must be at least 6 characters long.';
-          errorMsg.style.display = 'block';
-        }
-        return;
-      }
-      if (isSignup && (!full_name || full_name.length < 2)) {
-        if (errorMsg) {
-          errorMsg.textContent = 'Please enter your full name.';
           errorMsg.style.display = 'block';
         }
         return;
@@ -3372,6 +3397,7 @@ function bindAuthControls() {
       const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignup ? { username, password, full_name } : { username, password };
 
+      let backendSuccess = false;
       try {
         const res = await fetch(endpoint, {
           method: 'POST',
@@ -3381,26 +3407,56 @@ function bindAuthControls() {
 
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
-          if (res.ok) {
-            const data = await res.json();
+          const data = await res.json();
+          if (res.ok && data.user && data.token) {
+            backendSuccess = true;
             if (submitBtn) submitBtn.disabled = false;
             saveSessionAndProceed(data.user, data.token);
             return;
+          } else if (res.status === 400 && isSignup && data.detail && data.detail.includes('already registered')) {
+            // Already registered - allow user to easily switch to sign in
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Create Free Account';
+            }
+            if (errorMsg) {
+              errorMsg.innerHTML = `${escapeHtml(data.detail)} <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Click to Sign In with this Email</button>`;
+              errorMsg.style.display = 'block';
+              document.getElementById('btn-quick-signin')?.addEventListener('click', () => {
+                switchToSignIn();
+                if (passwordInput) passwordInput.focus();
+              });
+            }
+            return;
+          } else if (res.status === 401 && !isSignup) {
+            // Account not found or wrong password
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign In to Praxis';
+            }
+            if (errorMsg) {
+              errorMsg.innerHTML = `Invalid username or password. <br>New to Praxis? <button type="button" class="btn btn-outline btn-sm" id="btn-quick-signup" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Create Free Account with this Email</button>`;
+              errorMsg.style.display = 'block';
+              document.getElementById('btn-quick-signup')?.addEventListener('click', () => {
+                switchToSignUp();
+                if (passwordInput) passwordInput.focus();
+              });
+            }
+            return;
           } else {
-            const err = await res.json();
             if (submitBtn) {
               submitBtn.disabled = false;
               submitBtn.textContent = isSignup ? 'Create Free Account' : 'Sign In to Praxis';
             }
             if (errorMsg) {
-              errorMsg.textContent = err.detail || 'Authentication failed.';
+              errorMsg.textContent = data.detail || 'Authentication failed. Please verify your credentials.';
               errorMsg.style.display = 'block';
             }
             return;
           }
         }
       } catch (networkErr) {
-        // Backend offline, fallback to client-side database
+        // Backend offline / static GitHub Pages host
       }
 
       if (submitBtn) {
@@ -3419,8 +3475,12 @@ function bindAuthControls() {
       if (isSignup) {
         if (usersDb[username]) {
           if (errorMsg) {
-            errorMsg.textContent = `Username "${rawUsername}" is already registered. Please choose another username or sign in.`;
+            errorMsg.innerHTML = `Account "${escapeHtml(rawUsername)}" is already registered locally. <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin-off" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Sign in with this account</button>`;
             errorMsg.style.display = 'block';
+            document.getElementById('btn-quick-signin-off')?.addEventListener('click', () => {
+              switchToSignIn();
+              if (passwordInput) passwordInput.focus();
+            });
           }
           return;
         }
@@ -3447,7 +3507,7 @@ function bindAuthControls() {
         if (existing) {
           if (existing.password && existing.password !== password) {
             if (errorMsg) {
-              errorMsg.textContent = 'Incorrect password for this username. Please try again.';
+              errorMsg.textContent = 'Incorrect password for this account. Please verify and try again.';
               errorMsg.style.display = 'block';
             }
             return;
@@ -3455,11 +3515,11 @@ function bindAuthControls() {
           const localToken = 'praxis-token-' + existing.user_id;
           saveSessionAndProceed(existing, localToken);
         } else {
-          // Automatic seamless enrollment for new visitor
+          // Automatic seamless enrollment for visitor on static host
           const newUser = {
             user_id: 'usr_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
             username: username,
-            full_name: full_name || rawUsername,
+            full_name: full_name,
             password: password,
             role: null,
             role_locked: false,
@@ -3522,27 +3582,27 @@ function bindAuthControls() {
   }
 }
 
-async function openRoleOnboardingModal() {
+function openRoleOnboardingModal() {
   const overlay = document.getElementById('role-onboard-overlay');
   if (!overlay) return;
   overlay.style.display = 'flex';
 
-  try {
-    const res = await fetch('/api/roles');
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('application/json') && res.ok) {
-      state.rolesList = await res.json();
-      renderRoleSelectionGrid();
-      return;
-    }
-  } catch (err) {
-    console.warn('Backend roles API unreachable, loading offline roles:', err);
-  }
-
+  // Synchronously load default/offline roles so the grid is NEVER blank
   if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.ROLES) {
     state.rolesList = window.PRAXIS_OFFLINE_DATA.ROLES;
     renderRoleSelectionGrid();
   }
+
+  // Optionally fetch updated roles in background
+  fetch('/api/roles')
+    .then(res => res.ok && res.headers.get('content-type')?.includes('application/json') ? res.json() : null)
+    .then(data => {
+      if (data && Array.isArray(data) && data.length > 0) {
+        state.rolesList = data;
+        renderRoleSelectionGrid();
+      }
+    })
+    .catch(() => {});
 }
 
 function closeRoleOnboardingModal() {

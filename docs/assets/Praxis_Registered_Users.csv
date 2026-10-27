@@ -1,2 +1,5 @@
 User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform
-fc255f7b-c6ac-4f8a-9696-357089f877be,fresher_rohit,Rohit Verma,Unassigned,No,Pending,0/5,2026-10-27T14:17:15Z,Praxis Workplace Simulation
+d6f3c45f-8cd5-4d13-955a-e8a5594eaec4,charliedev,Charlie Engineer,Backend & API Systems Engineer,Yes (Permanent),Passed (5/5),5/5,2026-10-22T06:40:04Z,Praxis Workplace Simulation
+347b88b0-68ff-4f84-afaf-fb7fedc05a9d,arjun_verma,Arjun Verma,Data & AI Systems Engineer,Yes (Permanent),Passed (5/5),5/5,2026-10-22T07:25:46Z,Praxis Workplace Simulation
+647dff44-8213-4272-a301-b5c4c2c45611,testuser_1793087524,Test Learner,cloud-engineer,Yes (Permanent),Passed (5/5),5/5,2026-10-27T07:52:04Z,Praxis Workplace Simulation
+10c895e7-2849-4943-aaa9-1f38af953867,shivam@example.com,Shivam,Unassigned,No,Pending,0/5,2026-10-27T15:40:14Z,Praxis Workplace Simulation

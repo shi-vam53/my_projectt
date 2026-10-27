@@ -37,23 +37,23 @@
       <div class="auth-error-banner" id="auth-error-msg"></div>
       <form class="auth-form" id="auth-form">
         <div class="auth-field" id="auth-fullname-field" style="display: none;">
-          <label for="auth-fullname">Full Name</label>
+          <label for="auth-fullname">Full Name (Optional)</label>
           <input type="text" id="auth-fullname" class="auth-input" placeholder="e.g. Alex Mercer" autocomplete="name">
         </div>
         <div class="auth-field">
-          <label for="auth-username">Username</label>
-          <input type="text" id="auth-username" class="auth-input" placeholder="e.g. alexdev" required autocomplete="username">
+          <label for="auth-username" id="auth-username-label">Email or Username</label>
+          <input type="text" id="auth-username" class="auth-input" placeholder="e.g. yourname@gmail.com or username" required autocomplete="username">
         </div>
         <div class="auth-field">
           <label for="auth-password">Password</label>
           <div style="position: relative; display: flex; align-items: center;">
-            <input type="password" id="auth-password" class="auth-input" placeholder="••••••••" required autocomplete="current-password" style="padding-right: 40px; width: 100%;">
+            <input type="password" id="auth-password" class="auth-input" placeholder="At least 6 characters" required autocomplete="current-password" style="padding-right: 40px; width: 100%;">
             <button type="button" id="toggle-auth-password" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; font-size: 1rem; color: #64748b;" title="Show/Hide Password" aria-label="Toggle Password Visibility">👁️</button>
           </div>
         </div>
         <button type="submit" class="auth-submit-btn" id="auth-submit-btn">Sign In to Praxis</button>
-        <div style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center; line-height: 1.4;">
-          New learner? Click <strong>Create Account</strong> above to register and start your simulation.
+        <div id="auth-footer-prompt" style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center; line-height: 1.4;">
+          Don't have an account? <a href="#" id="auth-link-switch" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Create a Free Account</a>
         </div>
       </form>
     </div>
