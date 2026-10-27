@@ -758,34 +758,34 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-  bindNavigation();
-  bindHeaderControls();
-  bindQuizModal();
-  bindRubricModal();
-  bindRoleGuideModal();
-  bindReviewerModal();
-  bindCatalogControls();
-  bindAdminControls();
-  bindProfileControls();
-  bindFormEvents();
+  // Curriculum & Auth controls initialized first to ensure forms are active immediately
+  try { bindAuthControls(); } catch (e) { console.error('Error binding auth:', e); }
+  try { bindHandbookAndQuizControls(); } catch (e) { console.error('Error binding handbook/quiz:', e); }
+  try { checkAuthAndSession(); } catch (e) { console.error('Error checking auth session:', e); }
 
-  // Curriculum & Auth controls
-  bindAuthControls();
-  bindHandbookAndQuizControls();
-  checkAuthAndSession();
+  try { bindNavigation(); } catch (e) { console.error('Error binding navigation:', e); }
+  try { bindHeaderControls(); } catch (e) { console.error('Error binding header controls:', e); }
+  try { bindQuizModal(); } catch (e) { console.error('Error binding quiz modal:', e); }
+  try { bindRubricModal(); } catch (e) { console.error('Error binding rubric modal:', e); }
+  try { bindRoleGuideModal(); } catch (e) { console.error('Error binding role guide:', e); }
+  try { bindReviewerModal(); } catch (e) { console.error('Error binding reviewer modal:', e); }
+  try { bindCatalogControls(); } catch (e) { console.error('Error binding catalog controls:', e); }
+  try { bindAdminControls(); } catch (e) { console.error('Error binding admin controls:', e); }
+  try { bindProfileControls(); } catch (e) { console.error('Error binding profile controls:', e); }
+  try { bindFormEvents(); } catch (e) { console.error('Error binding form events:', e); }
 
   // Suite features: Theme, Mobile Drawer, Hotkeys, PWA
-  initTheme();
-  initMobileDrawer();
-  initHotkeys();
-  initPwaServiceWorker();
+  try { initTheme(); } catch (e) { console.error('Error initializing theme:', e); }
+  try { initMobileDrawer(); } catch (e) { console.error('Error initializing mobile drawer:', e); }
+  try { initHotkeys(); } catch (e) { console.error('Error initializing hotkeys:', e); }
+  try { initPwaServiceWorker(); } catch (e) { console.error('Error initializing service worker:', e); }
 
-  loadMissionsCatalog();
-  renderTracksView();
-  renderMissionWorkspace(state.activeMissionId);
+  try { loadMissionsCatalog(); } catch (e) { console.error('Error loading missions catalog:', e); }
+  try { renderTracksView(); } catch (e) { console.error('Error rendering tracks view:', e); }
+  try { renderMissionWorkspace(state.activeMissionId); } catch (e) { console.error('Error rendering mission workspace:', e); }
 
   // Load saved draft if present
-  loadDraftFromStorage(state.activeMissionId);
+  try { loadDraftFromStorage(state.activeMissionId); } catch (e) { console.error('Error loading draft from storage:', e); }
 }
 
 // Navigation between Career Tracks and Mission Workspace
@@ -928,14 +928,18 @@ function bindHeaderControls() {
   const headerQuizBtn = document.getElementById('header-quiz-btn');
   const headerRoleGuideBtn = document.getElementById('header-role-guide-btn');
 
-  trackDropdown.value = state.activeTrackId;
-  trackDropdown.addEventListener('change', (e) => {
-    selectTrack(e.target.value);
-  });
+  if (trackDropdown) {
+    trackDropdown.value = state.activeTrackId;
+    trackDropdown.addEventListener('change', (e) => {
+      selectTrack(e.target.value);
+    });
+  }
 
-  headerQuizBtn.addEventListener('click', () => {
-    openReadinessQuiz(state.activeTrackId);
-  });
+  if (headerQuizBtn) {
+    headerQuizBtn.addEventListener('click', () => {
+      openReadinessQuiz(state.activeTrackId);
+    });
+  }
 
   if (headerRoleGuideBtn) {
     headerRoleGuideBtn.addEventListener('click', () => {
@@ -1817,43 +1821,53 @@ function bindQuizModal() {
   const retakeBtn = document.getElementById('quiz-retake-btn');
   const proceedBtn = document.getElementById('quiz-proceed-mission-btn');
 
-  closeBtn.addEventListener('click', closeQuizModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeQuizModal();
-  });
+  if (closeBtn) closeBtn.addEventListener('click', closeQuizModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeQuizModal();
+    });
+  }
 
-  prevBtn.addEventListener('click', () => {
-    if (state.quiz.currentIndex > 0) {
-      state.quiz.currentIndex--;
-      renderQuizQuestion();
-    }
-  });
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (state.quiz.currentIndex > 0) {
+        state.quiz.currentIndex--;
+        renderQuizQuestion();
+      }
+    });
+  }
 
-  nextBtn.addEventListener('click', () => {
-    const track = TRACKS_DATA[state.quiz.trackId];
-    const questions = track.readiness_quiz || [];
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      const track = TRACKS_DATA[state.quiz.trackId];
+      const questions = track ? (track.readiness_quiz || []) : [];
 
-    if (state.quiz.currentIndex < questions.length - 1) {
-      state.quiz.currentIndex++;
-      renderQuizQuestion();
-    } else {
-      finishQuiz();
-    }
-  });
+      if (state.quiz.currentIndex < questions.length - 1) {
+        state.quiz.currentIndex++;
+        renderQuizQuestion();
+      } else {
+        finishQuiz();
+      }
+    });
+  }
 
-  retakeBtn.addEventListener('click', () => {
-    openReadinessQuiz(state.quiz.trackId);
-  });
+  if (retakeBtn) {
+    retakeBtn.addEventListener('click', () => {
+      openReadinessQuiz(state.quiz.trackId);
+    });
+  }
 
-  proceedBtn.addEventListener('click', () => {
-    closeQuizModal();
-    selectTrack(state.quiz.trackId);
-    switchView('workspace');
-  });
+  if (proceedBtn) {
+    proceedBtn.addEventListener('click', () => {
+      closeQuizModal();
+      selectTrack(state.quiz.trackId);
+      switchView('workspace');
+    });
+  }
 
   // Keyboard escape
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.style.display !== 'none') {
+    if (e.key === 'Escape' && modal && modal.style.display !== 'none') {
       closeQuizModal();
     }
   });
@@ -2094,22 +2108,26 @@ function bindRubricModal() {
   const reviseBtn = document.getElementById('rubric-revise-btn');
   const exportBtn = document.getElementById('rubric-export-btn');
 
-  closeBtn.addEventListener('click', closeRubricModal);
-  doneBtn.addEventListener('click', closeRubricModal);
-  reviseBtn.addEventListener('click', () => {
-    closeRubricModal();
-    const firstTextarea = document.querySelector('.field-textarea');
-    if (firstTextarea) firstTextarea.focus();
-  });
+  if (closeBtn) closeBtn.addEventListener('click', closeRubricModal);
+  if (doneBtn) doneBtn.addEventListener('click', closeRubricModal);
+  if (reviseBtn) {
+    reviseBtn.addEventListener('click', () => {
+      closeRubricModal();
+      const firstTextarea = document.querySelector('.field-textarea');
+      if (firstTextarea) firstTextarea.focus();
+    });
+  }
 
-  exportBtn.addEventListener('click', exportRubricMarkdown);
+  if (exportBtn) exportBtn.addEventListener('click', exportRubricMarkdown);
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeRubricModal();
-  });
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeRubricModal();
+    });
+  }
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.style.display !== 'none') {
+    if (e.key === 'Escape' && modal && modal.style.display !== 'none') {
       closeRubricModal();
     }
   });
@@ -3236,8 +3254,6 @@ async function checkAuthAndSession() {
     updateUserHeaderUI();
     if (!state.user.role_locked) {
       openRoleOnboardingModal();
-    } else if (!state.user.quiz_passed) {
-      switchView('handbook');
     } else {
       switchView('dashboard');
     }
@@ -3313,11 +3329,7 @@ function saveSessionAndProceed(user, token) {
     openRoleOnboardingModal();
   } else {
     closeRoleOnboardingModal();
-    if (!user.quiz_passed) {
-      switchView('handbook');
-    } else {
-      switchView('dashboard');
-    }
+    switchView('dashboard');
   }
 }
 
@@ -3415,9 +3427,9 @@ function bindAuthControls() {
         }
         return;
       }
-      if (!password || password.length < 6) {
+      if (!password || password.length < 4) {
         if (errorMsg) {
-          errorMsg.textContent = 'Password must be at least 6 characters long.';
+          errorMsg.textContent = 'Password must be at least 4 characters long.';
           errorMsg.style.display = 'block';
         }
         return;
@@ -3707,16 +3719,18 @@ function renderRoleSelectionGrid() {
   const btn = document.getElementById('confirm-role-lock-btn');
   if (btn) {
     btn.disabled = false;
-    btn.textContent = `Confirm & Enter Platform as ${getRoleDisplayName(state.selectedRoleForOnboarding || 'software-developer')} ➔`;
+    btn.textContent = `Confirm Track & Go to Dashboard as ${getRoleDisplayName(state.selectedRoleForOnboarding || 'software-developer')} ➔`;
   }
 }
 
 async function confirmRoleLock() {
-  if (!state.selectedRoleForOnboarding) return;
+  if (!state.selectedRoleForOnboarding) {
+    state.selectedRoleForOnboarding = 'software-developer';
+  }
   const btn = document.getElementById('confirm-role-lock-btn');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Locking Track...';
+    btn.textContent = 'Locking Track & Loading Dashboard...';
   }
 
   let backendSuccess = false;
@@ -3756,8 +3770,8 @@ async function confirmRoleLock() {
 
   closeRoleOnboardingModal();
   updateUserHeaderUI();
-  showToast(`Track permanently locked to ${getRoleDisplayName(state.user ? state.user.role : state.selectedRoleForOnboarding)}.`, 'success');
-  switchView('handbook');
+  showToast(`Career track locked to ${getRoleDisplayName(state.user ? state.user.role : state.selectedRoleForOnboarding)}. Welcome to your dashboard!`, 'success');
+  switchView('dashboard');
 }
 
 // ----------------------------------------------------------------------------
@@ -4843,7 +4857,7 @@ function filterAdminTables() {
 }
 
 function initPwaServiceWorker() {
-  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && typeof window !== 'undefined' && window.location && window.location.protocol && window.location.protocol.startsWith('http')) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => {
         console.log('SW registration skipped:', err);
