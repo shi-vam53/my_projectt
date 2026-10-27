@@ -3,7 +3,7 @@
 [![Live on GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://shi-vam53.github.io/my_projectt/)
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)](https://fastapi.tiangolo.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
-[![Tests Passing](https://img.shields.io/badge/Tests-30%2F30%20Passing-brightgreen?style=for-the-badge&logo=pytest)](./backend)
+[![Tests Passing](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen?style=for-the-badge&logo=pytest)](./backend)
 [![ReportLab 12p PDF](https://img.shields.io/badge/Handbook-12%20Pages%20PDF-indigo?style=for-the-badge)](./docs/assets)
 
 ---
@@ -106,51 +106,61 @@ Before accessing the production problem bank, learners take a 5-question multipl
 
 ---
 
-## 💻 40 Production Engineering Problems
+## 💻 Production Engineering Problem Bank
 
-The problem bank provides 40 real-world engineering challenges split into two distinct learning phases:
+### What is the Problem Bank?
+Instead of abstract algorithmic riddles or puzzle questions, the Praxis Problem Bank simulates genuine production engineering tickets and on-call scenarios encountered by real engineering squads.
 
-### Phase 1: 20 Basic Problems (`prob-01` to `prob-20`) — *With Reference & Help Statements*
-Each problem features a scenario, an expected task, starter code/template, and an explicit **Reference / Help Statement** offering standard syntax, operating commands, and SOP advice.
-* `prob-01`: Kubernetes Exit Code 137 (OOMKilled) container memory limits
-* `prob-02`: PostgreSQL composite B-Tree index optimization on `(org_id, created_at)`
-* `prob-03`: Redis connection pool exhaustion & connection cleanup
-* `prob-04`: Sliding window rate limiter middleware implementation
-* `prob-05`: Kafka consumer group rebalance storm mitigation
-* `prob-06` to `prob-20`: CORS preflights, Docker multi-stage builds, idempotency keys, JWT rotation, and cache stampede defenses.
+The problems are structured into a progressive two-phase learning model:
 
-### Phase 2: 20 Intermediate Problems (`prob-21` to `prob-40`) — *Without Help Statements*
-Advanced distributed systems and incident scenarios where learners apply independent engineering reasoning without reference hints (`help_statement: None`).
-* `prob-21`: Cascading failure & thread pool exhaustion across microservices
-* `prob-22`: Distributed lock lease expiration race condition during long GC pauses
-* `prob-23`: Multi-region database replication lag & read-your-own-writes consistency
-* `prob-24`: Database transaction deadlock detection and deterministic lock ordering
-* `prob-25`: Saga pattern compensations & rollback handling across distributed payments
-* `prob-26` to `prob-40`: WebSocket memory leaks, schema migration lockouts, circuit breakers, and zero-downtime blue/green switchovers.
+* **Phase 1: Basic Production Problems (with Reference & Help Statements)**  
+  Designed for onboarding engineers and freshers. Each problem features a realistic workplace scenario, expected requirements, a starter code template, and an explicit **Reference / Help Statement**. This statement provides immediate access to standard syntax patterns, operational commands, and standard operating procedures (SOPs) to guide the learner.
+* **Phase 2: Intermediate Production Problems (Standalone & Autonomous)**  
+  Advanced production challenges representing distributed systems regressions, data pipeline anomalies, and multi-tier infrastructure incidents. In this phase, learners apply independent engineering reasoning and diagnostic skills without reference hints.
+* **Integrated In-Browser Code Workspace:**  
+  Problems are worked directly inside an interactive code editor featuring line numbering, indentation support, template resets, auto-saving drafts, pre-submission syntax checks, and automated rubric evaluations.
+
+### How Can a User Access the Problems?
+Learners access and progress through the problem bank following a guided workflow:
+
+1. **Create an Account or Sign In:**  
+   Open the platform at [https://shi-vam53.github.io/my_projectt/](https://shi-vam53.github.io/my_projectt/) and register or sign in with your email.
+2. **Confirm Career Track:**  
+   Choose your desired specialization (*Software Developer*, *Cloud Engineer*, or *Data Analyst*). Your chosen track is permanently locked to your profile to simulate team squad ownership.
+3. **Review Handbook & Complete Readiness Assessment:**  
+   Read through the 12-page Industry Foundations Handbook (available for download or online reading) and take the 5-question readiness check (MEQs) to verify foundational operational knowledge.
+4. **Access via Learner Dashboard:**  
+   Upon passing the assessment, your **Operations Dashboard** opens automatically. The dashboard features:
+   * **Up Next: 3 Incomplete Problems:** A priority queue showcasing the next pending tickets with direct **"Solve ➔"** buttons.
+   * **Curriculum Summary Cards:** Quick overview of completed, pending, and total challenges.
+5. **Explore Full Problem Bank:**  
+   Click **"Production Problems"** in the sidebar navigation or select any ticket from the dashboard queue to open the problem bank, filter by category or phase, write your solution in the editor, and submit for automated rubric evaluation.
 
 ---
 
-## 🚨 210 Practical Simulation Missions
+## 🚨 Workplace Simulation Missions
 
-Beyond isolated problems, Praxis provides comprehensive workplace simulation labs:
+### What are Simulation Missions?
+Praxis Simulation Missions are end-to-end incident response and systems architecture simulations that train learners on complete engineering lifecycles beyond individual code snippets:
 
-* **60 Guided Missions (20 per Role):**
-  * `swe-01` to `swe-20` (Software Developer)
-  * `cloud-sre-01` to `cloud-sre-20` (Cloud Engineer)
-  * `data-analyst-01` to `data-analyst-20` (Data Analyst)
-  * *Features:* Multi-tab evidence viewer (Incident Timeline, Telemetry & APM graphs, Application Logs, Git Diffs, Runbook SOPs).
-* **150 Independent Missions (50 per Role):**
-  * `swe-indep-01` to `swe-indep-50`
-  * `cloud-indep-01` to `cloud-indep-50`
-  * `data-indep-01` to `data-indep-50`
-  * *Features:* Autonomous incident triage and production system audits.
-* **Structured Submission Form:** Every mission requires 5 structured fields:
+* **Guided Incident Labs:**  
+  Scaffolded workplace investigations with rich multi-tab evidence, including incident timelines, telemetry & APM latency/error graphs, application log streams, Git diffs, and runbook procedures.
+* **Independent Incident Labs:**  
+  Autonomous scenarios where learners audit system alerts, isolate breaking changes, and diagnose root causes independently.
+* **Industry-Standard Handoff Reports:**  
+  Learners draft structured 5-part engineering handoffs covering:
   1. *Timeline & Impact Assessment*
-  2. *Root Cause Hypothesis (Facts vs Assumptions)*
-  3. *Immediate Safe Mitigation Plan (Runbook SOP)*
+  2. *Root Cause Hypothesis*
+  3. *Safe Mitigation Plan*
   4. *Verification & Health Confirmation*
-  5. *Preventative Hardening / Architectural Fix*
-* **Multi-Dimensional Rubric Evaluator:** Scores submissions against 4 weighted criteria (*Evidence Accuracy*, *Root Cause Plausibility*, *Safe Mitigation*, *Verification & Prevention*), providing numerical marks, strengths, and actionable feedback.
+  5. *Preventative Hardening / Postmortem Fix*
+* **Multi-Dimensional Rubric Evaluator:**  
+  Automated evaluations grade submissions across evidence accuracy, root cause plausibility, safe mitigation, and prevention, providing immediate marks and qualitative feedback.
+
+### How Can a User Access Simulation Missions?
+* Click **"Missions Catalog"** in the sidebar navigation to browse available guided and independent labs.
+* Filter by your locked career track or view cross-functional scenarios.
+* Launch any mission into the **Mission Workspace** to inspect investigative evidence, formulate your diagnosis, and submit your report.
 
 ---
 
@@ -261,7 +271,7 @@ Open your browser at:
 
 ## 🛡️ Automated Test Suite & Security
 
-The platform includes **30 automated tests** executed via `pytest`:
+The platform includes **33 automated tests** executed via `pytest`:
 
 ```bash
 pytest backend/ -v
@@ -285,7 +295,7 @@ pytest backend/ -v
   * Complete lifecycle test simulating a student registering, locking a career track, studying the manual, passing the quiz, unlocking the dashboard, solving problems, and checking the admin export.
 
 ```
-============================== 30 passed in 2.24s ==============================
+============================== 33 passed in 2.01s ==============================
 ```
 
 ---
