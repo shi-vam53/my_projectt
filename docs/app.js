@@ -764,7 +764,21 @@ function bindNavigation() {
   if (navTracks) navTracks.addEventListener('click', () => switchView('tracks'));
   if (navWorkspace) navWorkspace.addEventListener('click', () => switchView('workspace'));
   if (bcRoot) bcRoot.addEventListener('click', () => switchView('dashboard'));
-  if (sidebarQuickSwitch) sidebarQuickSwitch.addEventListener('click', () => switchView('tracks'));
+
+  if (sidebarQuickSwitch) {
+    sidebarQuickSwitch.addEventListener('click', () => {
+      if (!state.user) {
+        showAuthOverlay(true);
+        showToast('Please sign in first.', 'info');
+        return;
+      }
+      if (state.user.role_locked) {
+        showToast(`Your career track is permanently locked to ${getRoleDisplayName(state.user.role)}.`, 'info');
+      } else {
+        openRoleOnboardingModal();
+      }
+    });
+  }
 
   const navCatalog = document.getElementById('nav-catalog');
   if (navCatalog) navCatalog.addEventListener('click', () => switchView('catalog'));
@@ -781,35 +795,51 @@ function bindNavigation() {
   const navQuiz = document.getElementById('nav-quiz');
   if (navQuiz) navQuiz.addEventListener('click', () => {
     switchView('quiz');
-    loadQuizQuestions();
   });
 
   const navProblems = document.getElementById('nav-problems');
   if (navProblems) navProblems.addEventListener('click', () => {
     switchView('problems');
-    loadProblemsBank();
   });
 
   if (navReadiness) {
     navReadiness.addEventListener('click', () => {
-      openReadinessQuiz(state.activeTrackId);
+      if (!state.user) {
+        showAuthOverlay(true);
+        return;
+      }
+      switchView('quiz');
     });
   }
 
   if (navRoleGuide) {
     navRoleGuide.addEventListener('click', () => {
-      openRoleGuideModal(state.activeTrackId);
+      if (!state.user) {
+        showAuthOverlay(true);
+        return;
+      }
+      switchView('handbook');
     });
   }
 
   if (navRubricGuide) {
     navRubricGuide.addEventListener('click', () => {
+      if (!state.user) {
+        showAuthOverlay(true);
+        return;
+      }
       openRubricModal(true); // Open in guide / preview mode
     });
   }
 }
 
 function switchView(viewName) {
+  if (!state.user) {
+    showAuthOverlay(true);
+    showToast('Please sign in or create an account to access ' + viewName + '.', 'warning');
+    return;
+  }
+
   state.currentView = viewName;
   const views = {
     dashboard: document.getElementById('view-dashboard'),
@@ -2893,61 +2923,60 @@ state.problemsFilter = 'all';
 
 async function checkAuthAndSession() {
   const token = localStorage.getItem('praxis_token');
-  if (!token) {
+  const activeUserStr = localStorage.getItem('praxis_active_user') || localStorage.getItem('praxis_offline_user');
+
+  if (!token && !activeUserStr) {
     showAuthOverlay(true);
     return;
   }
-  state.token = token;
-  try {
-    const res = await fetch('/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      state.user = data.user;
-      showAuthOverlay(false);
-      updateUserHeaderUI();
 
-      if (!state.user.role_locked) {
-        openRoleOnboardingModal();
-      } else {
-        closeRoleOnboardingModal();
-        if (!state.user.quiz_passed) {
-          switchView('handbook');
-        } else {
-          switchView('dashboard');
+  // Restore local learner session immediately so user is not stuck on auth screen
+  if (activeUserStr) {
+    try {
+      state.user = JSON.parse(activeUserStr);
+      state.token = token || ('praxis-token-' + (state.user.user_id || 'usr_local'));
+    } catch (e) {}
+  }
+
+  // If token exists, verify with backend if running
+  if (token) {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        if (res.ok) {
+          const data = await res.json();
+          state.user = data.user;
+          localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+        } else if (res.status === 401) {
+          // Explicit token rejection from real backend API
+          localStorage.removeItem('praxis_token');
+          localStorage.removeItem('praxis_active_user');
+          localStorage.removeItem('praxis_offline_user');
+          state.token = null;
+          state.user = null;
+          showAuthOverlay(true);
+          return;
         }
       }
-      return;
+    } catch (err) {
+      // Backend unreachable or static host (GitHub Pages) - keep offline user active
+    }
+  }
+
+  if (state.user) {
+    showAuthOverlay(false);
+    updateUserHeaderUI();
+    if (!state.user.role_locked) {
+      openRoleOnboardingModal();
+    } else if (!state.user.quiz_passed) {
+      switchView('handbook');
     } else {
-      localStorage.removeItem('praxis_token');
-      localStorage.removeItem('praxis_offline_user');
-      state.token = null;
-      state.user = null;
-      showAuthOverlay(true);
-      return;
+      switchView('dashboard');
     }
-  } catch (err) {
-    console.warn('Backend session check unreachable, verifying local learner session:', err);
-    const offlineUserStr = localStorage.getItem('praxis_offline_user');
-    if (offlineUserStr) {
-      try {
-        state.user = JSON.parse(offlineUserStr);
-        showAuthOverlay(false);
-        updateUserHeaderUI();
-        if (!state.user.role_locked) {
-          openRoleOnboardingModal();
-        } else {
-          closeRoleOnboardingModal();
-          if (!state.user.quiz_passed) {
-            switchView('handbook');
-          } else {
-            switchView('dashboard');
-          }
-        }
-        return;
-      } catch (e) {}
-    }
+  } else {
     showAuthOverlay(true);
   }
 }
@@ -2974,7 +3003,7 @@ function updateUserHeaderUI() {
     if (name) name.textContent = state.user.full_name || state.user.username;
 
     const roleName = getRoleDisplayName(state.user.role);
-    if (role) role.textContent = state.user.role_locked ? `🔒 ${roleName}` : 'Unassigned';
+    if (role) role.textContent = state.user.role_locked ? `🔒 ${roleName}` : 'Unassigned Track';
     if (sidebarTrack) sidebarTrack.textContent = roleName;
     updateHandbookForUserRole();
   } else {
@@ -2998,6 +3027,35 @@ function getRoleDisplayName(roleId) {
   return map[roleId] || roleId || 'Software Developer';
 }
 
+function saveSessionAndProceed(user, token) {
+  state.token = token;
+  state.user = user;
+  localStorage.setItem('praxis_token', token);
+  localStorage.setItem('praxis_active_user', JSON.stringify(user));
+  localStorage.setItem('praxis_offline_user', JSON.stringify(user));
+
+  try {
+    const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+    usersDb[user.username.toLowerCase()] = user;
+    localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+  } catch (e) {}
+
+  showAuthOverlay(false);
+  updateUserHeaderUI();
+  showToast(`Welcome, ${user.full_name || user.username}!`, 'success');
+
+  if (!user.role_locked) {
+    openRoleOnboardingModal();
+  } else {
+    closeRoleOnboardingModal();
+    if (!user.quiz_passed) {
+      switchView('handbook');
+    } else {
+      switchView('dashboard');
+    }
+  }
+}
+
 function bindAuthControls() {
   const tabSignin = document.getElementById('auth-tab-signin');
   const tabSignup = document.getElementById('auth-tab-signup');
@@ -3018,6 +3076,8 @@ function bindAuthControls() {
       if (submitBtn) submitBtn.textContent = 'Sign In to Praxis';
       if (title) title.textContent = 'Sign In to Praxis';
       if (desc) desc.textContent = 'Enter your credentials to access your workplace simulation dashboard.';
+      const errorMsg = document.getElementById('auth-error-msg');
+      if (errorMsg) errorMsg.style.display = 'none';
     });
 
     tabSignup.addEventListener('click', () => {
@@ -3028,6 +3088,8 @@ function bindAuthControls() {
       if (submitBtn) submitBtn.textContent = 'Create Free Account';
       if (title) title.textContent = 'Create Praxis Account';
       if (desc) desc.textContent = 'Create your account to unlock industry handbooks and production problems.';
+      const errorMsg = document.getElementById('auth-error-msg');
+      if (errorMsg) errorMsg.style.display = 'none';
     });
   }
 
@@ -3039,11 +3101,42 @@ function bindAuthControls() {
       const fullnameInput = document.getElementById('auth-fullname');
       const errorMsg = document.getElementById('auth-error-msg');
 
-      if (errorMsg) errorMsg.style.display = 'none';
+      if (errorMsg) {
+        errorMsg.style.display = 'none';
+        errorMsg.textContent = '';
+      }
 
-      const username = usernameInput.value.trim();
+      const rawUsername = usernameInput.value.trim();
+      const username = rawUsername.toLowerCase();
       const password = passwordInput.value.trim();
-      const full_name = fullnameInput ? fullnameInput.value.trim() : username;
+      const full_name = fullnameInput && fullnameInput.value.trim() ? fullnameInput.value.trim() : rawUsername;
+
+      if (!username || username.length < 3) {
+        if (errorMsg) {
+          errorMsg.textContent = 'Username must be at least 3 characters long.';
+          errorMsg.style.display = 'block';
+        }
+        return;
+      }
+      if (!password || password.length < 6) {
+        if (errorMsg) {
+          errorMsg.textContent = 'Password must be at least 6 characters long.';
+          errorMsg.style.display = 'block';
+        }
+        return;
+      }
+      if (isSignup && (!full_name || full_name.length < 2)) {
+        if (errorMsg) {
+          errorMsg.textContent = 'Please enter your full name.';
+          errorMsg.style.display = 'block';
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = isSignup ? 'Creating Account...' : 'Signing In...';
+      }
 
       const endpoint = isSignup ? '/api/auth/register' : '/api/auth/login';
       const payload = isSignup ? { username, password, full_name } : { username, password };
@@ -3055,52 +3148,99 @@ function bindAuthControls() {
           body: JSON.stringify(payload)
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          localStorage.setItem('praxis_token', data.token);
-          state.token = data.token;
-          state.user = data.user;
-          showAuthOverlay(false);
-          updateUserHeaderUI();
-          showToast(`Welcome, ${state.user.full_name || state.user.username}!`, 'success');
-
-          if (!state.user.role_locked) {
-            openRoleOnboardingModal();
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          if (res.ok) {
+            const data = await res.json();
+            if (submitBtn) submitBtn.disabled = false;
+            saveSessionAndProceed(data.user, data.token);
+            return;
           } else {
-            closeRoleOnboardingModal();
-            if (!state.user.quiz_passed) {
-              switchView('handbook');
-            } else {
-              switchView('dashboard');
+            const err = await res.json();
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = isSignup ? 'Create Free Account' : 'Sign In to Praxis';
             }
-          }
-        } else {
-          const err = await res.json();
-          if (errorMsg) {
-            errorMsg.textContent = err.detail || 'Authentication failed.';
-            errorMsg.style.display = 'block';
+            if (errorMsg) {
+              errorMsg.textContent = err.detail || 'Authentication failed.';
+              errorMsg.style.display = 'block';
+            }
+            return;
           }
         }
-      } catch (err) {
-        console.warn('Backend auth unreachable, initializing local learner session:', err);
-        const localUser = {
-          user_id: 'local-' + Date.now(),
+      } catch (networkErr) {
+        // Backend offline, fallback to client-side database
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = isSignup ? 'Create Free Account' : 'Sign In to Praxis';
+      }
+
+      // Local client-side user database fallback (for GitHub Pages / Serverless)
+      let usersDb = {};
+      try {
+        usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+      } catch (e) {
+        usersDb = {};
+      }
+
+      if (isSignup) {
+        if (usersDb[username]) {
+          if (errorMsg) {
+            errorMsg.textContent = `Username "${rawUsername}" is already registered. Please choose another username or sign in.`;
+            errorMsg.style.display = 'block';
+          }
+          return;
+        }
+
+        const newUser = {
+          user_id: 'usr_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
           username: username,
-          full_name: full_name || username,
+          full_name: full_name,
+          password: password,
           role: null,
           role_locked: false,
           quiz_passed: false,
-          quiz_score: 0
+          quiz_score: 0,
+          created_at: new Date().toISOString()
         };
-        const localToken = 'local-token-' + Date.now();
-        localStorage.setItem('praxis_token', localToken);
-        localStorage.setItem('praxis_offline_user', JSON.stringify(localUser));
-        state.token = localToken;
-        state.user = localUser;
-        showAuthOverlay(false);
-        updateUserHeaderUI();
-        showToast(`Welcome, ${state.user.full_name || state.user.username}!`, 'success');
-        openRoleOnboardingModal();
+
+        usersDb[username] = newUser;
+        localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+        const localToken = 'praxis-token-' + newUser.user_id;
+        saveSessionAndProceed(newUser, localToken);
+      } else {
+        // Sign In
+        const existing = usersDb[username];
+        if (existing) {
+          if (existing.password && existing.password !== password) {
+            if (errorMsg) {
+              errorMsg.textContent = 'Incorrect password for this username. Please try again.';
+              errorMsg.style.display = 'block';
+            }
+            return;
+          }
+          const localToken = 'praxis-token-' + existing.user_id;
+          saveSessionAndProceed(existing, localToken);
+        } else {
+          // Automatic seamless enrollment for new visitor
+          const newUser = {
+            user_id: 'usr_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+            username: username,
+            full_name: full_name || rawUsername,
+            password: password,
+            role: null,
+            role_locked: false,
+            quiz_passed: false,
+            quiz_score: 0,
+            created_at: new Date().toISOString()
+          };
+          usersDb[username] = newUser;
+          localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+          const localToken = 'praxis-token-' + newUser.user_id;
+          saveSessionAndProceed(newUser, localToken);
+        }
       }
     });
   }
@@ -3108,6 +3248,8 @@ function bindAuthControls() {
   if (signoutBtn) {
     signoutBtn.addEventListener('click', () => {
       localStorage.removeItem('praxis_token');
+      localStorage.removeItem('praxis_active_user');
+      localStorage.removeItem('praxis_offline_user');
       state.token = null;
       state.user = null;
       updateUserHeaderUI();
@@ -3129,7 +3271,8 @@ async function openRoleOnboardingModal() {
 
   try {
     const res = await fetch('/api/roles');
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.ok) {
       state.rolesList = await res.json();
       renderRoleSelectionGrid();
       return;
@@ -3180,50 +3323,52 @@ function renderRoleSelectionGrid() {
 }
 
 async function confirmRoleLock() {
-  if (!state.selectedRoleForOnboarding || !state.token) return;
+  if (!state.selectedRoleForOnboarding) return;
   const btn = document.getElementById('confirm-role-lock-btn');
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'Locking Track...';
   }
 
-  try {
-    const res = await fetch('/api/auth/select-role', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.token}`
-      },
-      body: JSON.stringify({ role: state.selectedRoleForOnboarding })
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      state.user = data.user;
-      closeRoleOnboardingModal();
-      updateUserHeaderUI();
-      showToast(`Track permanently locked to ${getRoleDisplayName(state.user.role)}.`, 'success');
-      switchView('handbook');
-    } else {
-      const err = await res.json();
-      showToast(err.detail || 'Role locking failed.', 'error');
-    }
-  } catch (err) {
-    console.warn('Backend select-role offline, locking locally:', err);
-    if (state.user) {
-      state.user.role = state.selectedRoleForOnboarding;
-      state.user.role_locked = true;
-      localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
-      closeRoleOnboardingModal();
-      updateUserHeaderUI();
-      showToast(`Track permanently locked to ${getRoleDisplayName(state.user.role)}.`, 'success');
-      switchView('handbook');
-    } else {
-      showToast('Network error while locking role.', 'error');
-    }
-  } finally {
-    if (btn) btn.disabled = false;
+  let backendSuccess = false;
+  if (state.token) {
+    try {
+      const res = await fetch('/api/auth/select-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ role: state.selectedRoleForOnboarding })
+      });
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json') && res.ok) {
+        const data = await res.json();
+        state.user = data.user;
+        backendSuccess = true;
+      }
+    } catch (e) {}
   }
+
+  if (!backendSuccess && state.user) {
+    state.user.role = state.selectedRoleForOnboarding;
+    state.user.role_locked = true;
+  }
+
+  if (state.user) {
+    localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    try {
+      const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+      usersDb[state.user.username.toLowerCase()] = state.user;
+      localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+    } catch (e) {}
+  }
+
+  closeRoleOnboardingModal();
+  updateUserHeaderUI();
+  showToast(`Track permanently locked to ${getRoleDisplayName(state.user ? state.user.role : state.selectedRoleForOnboarding)}.`, 'success');
+  switchView('handbook');
 }
 
 // ----------------------------------------------------------------------------
@@ -3432,50 +3577,57 @@ async function submitReadinessQuiz() {
       body: JSON.stringify({ answers: state.quizUserAnswers })
     });
 
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.ok) {
       const data = await res.json();
       renderQuizResults(data);
-    } else {
-      const err = await res.json();
-      showToast(err.detail || 'Evaluation failed.', 'error');
+      return;
     }
   } catch (err) {
-    console.warn('Backend quiz submission offline, evaluating locally:', err);
-    const offlineQs = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || [];
-    let score = 0;
-    const results = offlineQs.map(q => {
-      const sel = state.quizUserAnswers[q.id];
-      const isCorrect = sel === q.correct;
-      if (isCorrect) score += 1;
-      return {
-        id: q.id,
-        selected: sel,
-        correct: q.correct,
-        is_correct: isCorrect,
-        explanation: q.explanation
-      };
-    });
-    const passed = score >= 4;
-    const payload = {
-      score: score,
-      total: offlineQs.length,
-      percentage: Math.round((score / offlineQs.length) * 100),
-      passed: passed,
-      message: passed ? 'Congratulations! You passed the Readiness Assessment.' : 'Score was below 80%. Review the handbook and try again.',
-      results: results
-    };
-    if (state.user) {
-      state.user.quiz_passed = passed;
-      state.user.quiz_score = score;
-      localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
-    }
-    renderQuizResults(payload);
+    // Backend offline / static GitHub Pages
   } finally {
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'Submit Readiness Assessment';
     }
   }
+
+  // Robust client-side evaluation fallback
+  const offlineQs = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || [];
+  let score = 0;
+  const results = offlineQs.map(q => {
+    const sel = state.quizUserAnswers[q.id];
+    const isCorrect = sel === q.correct;
+    if (isCorrect) score += 1;
+    return {
+      id: q.id,
+      selected: sel,
+      correct: q.correct,
+      is_correct: isCorrect,
+      explanation: q.explanation
+    };
+  });
+  const passed = score >= 4;
+  const payload = {
+    score: score,
+    total: offlineQs.length,
+    percentage: Math.round((score / (offlineQs.length || 1)) * 100),
+    passed: passed,
+    message: passed ? 'Congratulations! You passed the Readiness Assessment.' : 'Score was below 80%. Review the handbook and try again.',
+    results: results
+  };
+  if (state.user) {
+    state.user.quiz_passed = passed;
+    state.user.quiz_score = score;
+    localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    try {
+      const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+      usersDb[state.user.username.toLowerCase()] = state.user;
+      localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+    } catch (e) {}
+  }
+  renderQuizResults(payload);
 }
 
 function renderQuizResults(data) {
@@ -3505,7 +3657,17 @@ function renderQuizResults(data) {
 
   if (data.passed) {
     showToast('Readiness Assessment Passed! Opening your operations dashboard...', 'success');
-    if (state.user) state.user.quiz_passed = true;
+    if (state.user) {
+      state.user.quiz_passed = true;
+      state.user.quiz_score = data.score;
+      localStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+      localStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+      try {
+        const usersDb = JSON.parse(localStorage.getItem('praxis_users_db') || '{}');
+        usersDb[state.user.username.toLowerCase()] = state.user;
+        localStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+      } catch (e) {}
+    }
     const sidebarPill = document.getElementById('quiz-sidebar-pill');
     if (sidebarPill) {
       sidebarPill.textContent = 'Passed (5/5)';
@@ -3824,7 +3986,8 @@ async function submitProblemSolution(problemId) {
       body: JSON.stringify({ solution: input.value.trim() })
     });
 
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.ok) {
       const data = await res.json();
       const evalCard = document.getElementById('problem-eval-result');
       if (evalCard) {
@@ -3850,65 +4013,64 @@ async function submitProblemSolution(problemId) {
       renderProblemsList(state.problemsFilter);
       updateProblemsSolvedCounter();
       showToast(data.passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', data.passed ? 'success' : 'info');
-    } else {
-      const err = await res.json();
-      showToast(err.detail || 'Evaluation failed.', 'error');
+      return;
     }
   } catch (err) {
-    console.warn('Backend problem submission offline, evaluating locally:', err);
-    const match = (window.PRAXIS_OFFLINE_DATA ? window.PRAXIS_OFFLINE_DATA.PROBLEMS : state.problemsList).find(p => p.id === problemId);
-    if (match) {
-      const solLower = input.value.trim().toLowerCase();
-      const keywords = match.expected_keywords || [];
-      const hits = keywords.filter(k => solLower.includes(k.toLowerCase()));
-      const scoreRatio = keywords.length > 0 ? (hits.length / keywords.length) : 1.0;
-      const score = Math.round(scoreRatio * 100);
-      const passed = score >= (match.passing_score || 70);
-      const feedback = passed
-        ? `Solution accepted! (${score}%). Addressed required concepts: ${hits.join(', ')}.`
-        : `Needs refinement (${score}%). Ensure you address: ${keywords.filter(k => !hits.includes(k)).join(', ')}.`;
-
-      const evalData = {
-        problem_id: problemId,
-        status: passed ? 'completed' : 'in_progress',
-        score: score,
-        passed: passed,
-        feedback: feedback
-      };
-
-      const savedProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
-      savedProgress[problemId] = evalData;
-      localStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
-
-      const evalCard = document.getElementById('problem-eval-result');
-      if (evalCard) {
-        evalCard.style.display = 'flex';
-        evalCard.style.background = passed ? '#f0fdf4' : '#fffbeb';
-        evalCard.style.borderColor = passed ? '#bbf7d0' : '#fde68a';
-        evalCard.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="color: ${passed ? '#166534' : '#92400e'}; font-size: 1rem;">
-              ${passed ? '✓ Solution Accepted' : '⚠ Revisions Recommended'}
-            </strong>
-            <span class="badge ${passed ? 'badge-emerald' : 'badge-amber'}">${score} / 100</span>
-          </div>
-          <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(feedback)}</p>
-        `;
-      }
-
-      const prob = state.problemsList.find(p => p.id === problemId);
-      if (prob) {
-        prob.status = evalData.status;
-        prob.score = evalData.score;
-      }
-      renderProblemsList(state.problemsFilter);
-      updateProblemsSolvedCounter();
-      showToast(passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', passed ? 'success' : 'info');
-    } else {
-      showToast('Network error during solution submission.', 'error');
-    }
+    // Offline / static GitHub Pages fallback
   } finally {
     btn.disabled = false;
     btn.textContent = 'Run & Submit Solution';
+  }
+
+  const match = (window.PRAXIS_OFFLINE_DATA ? window.PRAXIS_OFFLINE_DATA.PROBLEMS : state.problemsList).find(p => p.id === problemId);
+  if (match) {
+    const solLower = input.value.trim().toLowerCase();
+    const keywords = match.expected_keywords || [];
+    const hits = keywords.filter(k => solLower.includes(k.toLowerCase()));
+    const scoreRatio = keywords.length > 0 ? (hits.length / keywords.length) : 1.0;
+    const score = Math.round(scoreRatio * 100);
+    const passed = score >= (match.passing_score || 70);
+    const feedback = passed
+      ? `Solution accepted! (${score}%). Addressed required concepts: ${hits.join(', ')}.`
+      : `Needs refinement (${score}%). Ensure you address: ${keywords.filter(k => !hits.includes(k)).join(', ')}.`;
+
+    const evalData = {
+      problem_id: problemId,
+      status: passed ? 'completed' : 'in_progress',
+      score: score,
+      passed: passed,
+      feedback: feedback
+    };
+
+    const savedProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    savedProgress[problemId] = evalData;
+    localStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
+
+    const evalCard = document.getElementById('problem-eval-result');
+    if (evalCard) {
+      evalCard.style.display = 'flex';
+      evalCard.style.background = passed ? '#f0fdf4' : '#fffbeb';
+      evalCard.style.borderColor = passed ? '#bbf7d0' : '#fde68a';
+      evalCard.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: ${passed ? '#166534' : '#92400e'}; font-size: 1rem;">
+            ${passed ? '✓ Solution Accepted' : '⚠ Revisions Recommended'}
+          </strong>
+          <span class="badge ${passed ? 'badge-emerald' : 'badge-amber'}">${score} / 100</span>
+        </div>
+        <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(feedback)}</p>
+      `;
+    }
+
+    const prob = state.problemsList.find(p => p.id === problemId);
+    if (prob) {
+      prob.status = evalData.status;
+      prob.score = evalData.score;
+    }
+    renderProblemsList(state.problemsFilter);
+    updateProblemsSolvedCounter();
+    showToast(passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', passed ? 'success' : 'info');
+  } else {
+    showToast('Network error during solution submission.', 'error');
   }
 }
