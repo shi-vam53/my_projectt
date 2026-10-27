@@ -46,7 +46,10 @@
         </div>
         <div class="auth-field">
           <label for="auth-password">Password</label>
-          <input type="password" id="auth-password" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="auth-password" class="auth-input" placeholder="••••••••" required autocomplete="current-password" style="padding-right: 40px; width: 100%;">
+            <button type="button" id="toggle-auth-password" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; font-size: 1rem; color: #64748b;" title="Show/Hide Password" aria-label="Toggle Password Visibility">👁️</button>
+          </div>
         </div>
         <button type="submit" class="auth-submit-btn" id="auth-submit-btn">Sign In to Praxis</button>
         <div style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center; line-height: 1.4;">
@@ -218,6 +221,14 @@
       </div>
 
       <div class="sidebar-footer">
+        <button class="btn btn-outline btn-block" id="sidebar-logout-btn" style="margin-bottom: 0.75rem; border-color: rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Log Out</span>
+        </button>
         <div class="sandbox-status">
           <span class="status-dot"></span>
           <span>Simulation Engine v1.0.0</span>
@@ -225,11 +236,21 @@
       </div>
     </aside>
 
+    <!-- Mobile Drawer Backdrop Overlay -->
+    <div id="mobile-sidebar-backdrop" class="mobile-sidebar-backdrop"></div>
+
     <!-- Main Content Area -->
     <div class="main-wrapper">
       <!-- Top Header Bar -->
       <header class="top-header">
         <div class="header-left">
+          <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu" style="display: none; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; cursor: pointer; color: var(--text-primary); margin-right: 0.5rem;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
           <div class="breadcrumbs">
             <span class="breadcrumb-item" id="bc-root">Praxis</span>
             <span class="breadcrumb-separator">/</span>
@@ -240,6 +261,16 @@
         </div>
 
         <div class="header-right">
+          <!-- Theme Mode Switcher -->
+          <button class="btn btn-outline btn-sm" id="theme-toggle-btn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme" style="padding: 4px 10px; font-size: 0.82rem;">
+            <span id="theme-toggle-icon">🌙</span>
+          </button>
+
+          <!-- Hotkeys Help Button -->
+          <button class="btn btn-outline btn-sm" id="hotkeys-modal-btn" title="Keyboard Shortcuts (Ctrl+K)" aria-label="Keyboard Shortcuts" style="padding: 4px 10px; font-size: 0.78rem;">
+            ⌨️ Hotkeys
+          </button>
+
           <!-- User Profile Badge & Sign Out -->
           <div class="user-profile-badge" id="header-user-badge">
             <div class="user-avatar" id="header-user-avatar">JD</div>
@@ -417,6 +448,13 @@
             </div>
 
             
+            <!-- Chapters Preview (Clickable to jump directly to section) -->
+            <div class="handbook-search-bar" style="margin-top: 1.25rem; margin-bottom: 0.5rem; display: flex; gap: 0.75rem; align-items: center; background: #ffffff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <span style="font-size: 1rem;">🔍</span>
+              <input type="text" id="handbook-search-input" placeholder="Search keywords across 11 handbook chapters (e.g. SLI, Postmortem, CI/CD, Git)..." style="flex: 1; border: none; outline: none; font-size: 0.85rem; background: transparent; color: inherit;">
+              <span id="handbook-search-count" style="font-size: 0.75rem; font-weight: 700; color: #6366f1;"></span>
+            </div>
+
             <!-- Chapters Preview (Clickable to jump directly to section) -->
             <div class="card" style="padding: 1.5rem;" id="handbook-syllabus-card">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -944,14 +982,20 @@
             <!-- Sidebar with Problem List -->
             <div class="problems-sidebar-panel">
               <div class="problems-list-header">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                   <span style="font-size: 0.825rem; font-weight: 800; color: #0f172a; text-transform: uppercase;">Problem Bank</span>
                   <span class="badge badge-indigo" id="prob-solved-count-badge">0 / 40 Solved</span>
                 </div>
+                <!-- Problem Search Input -->
+                <div style="position: relative; margin-bottom: 0.5rem;">
+                  <input type="text" id="prob-search-input" placeholder="🔍 Search by title, keyword, ID..." style="width: 100%; padding: 6px 10px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #ffffff;">
+                </div>
                 <div class="problems-filter-tabs">
                   <button class="prob-filter-btn active" data-filter="all">All (40)</button>
-                  <button class="prob-filter-btn" data-filter="basic">Phase 1: Basic (20)</button>
-                  <button class="prob-filter-btn" data-filter="inter">Phase 2: Inter (20)</button>
+                  <button class="prob-filter-btn" data-filter="basic">Basic (20)</button>
+                  <button class="prob-filter-btn" data-filter="inter">Inter (20)</button>
+                  <button class="prob-filter-btn" data-filter="solved">Solved</button>
+                  <button class="prob-filter-btn" data-filter="unsolved">Pending</button>
                 </div>
               </div>
 
@@ -1238,12 +1282,20 @@
 
           <!-- Submissions Table Card -->
           <div class="admin-table-card card">
-            <div class="card-header-flex">
+            <div class="card-header-flex" style="flex-wrap: wrap; gap: 0.75rem;">
               <div>
                 <h2 class="card-title">Candidate Submissions Ledger</h2>
                 <p class="card-subtitle">Real-time submissions evaluated and persisted to Praxis SQLite database.</p>
               </div>
-              <button class="btn btn-outline btn-sm" id="admin-refresh-btn">
+              <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
+                <input type="text" id="admin-search-input" placeholder="🔍 Search candidate name/id..." style="padding: 5px 10px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+                <select id="admin-track-filter" style="padding: 5px 8px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #ffffff;">
+                  <option value="all">All Tracks</option>
+                  <option value="software-developer">Software Developer</option>
+                  <option value="cloud-engineer">Cloud Engineer</option>
+                  <option value="data-analyst">Data Analyst</option>
+                </select>
+                <button class="btn btn-outline btn-sm" id="admin-refresh-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
                   <polyline points="23 4 23 10 17 10"></polyline>
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -1553,6 +1605,61 @@
           <button class="btn btn-outline" id="reviewer-action-revise">Request Revisions</button>
           <button class="btn btn-primary" id="reviewer-action-approve">Issue Staff Approval</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. KEYBOARD SHORTCUTS / HOTKEYS MODAL -->
+  <div class="modal-backdrop" id="hotkeys-modal" style="display: none;">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="hotkeys-modal-title" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-indigo">Productivity</span>
+          <h2 class="modal-title" id="hotkeys-modal-title">Keyboard Shortcuts</h2>
+        </div>
+        <button class="btn-close-modal" id="hotkeys-modal-close-btn" aria-label="Close Shortcuts">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
+            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Ctrl</kbd> + <kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Enter</kbd></td>
+            <td>Run Pre-Check / Submit Problem Solution</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
+            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Ctrl</kbd> + <kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">K</kbd></td>
+            <td>Open Hotkeys / Quick Navigation</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
+            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Esc</kbd></td>
+            <td>Close any open modal or drawer</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
+            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Tab</kbd></td>
+            <td>Insert 2 spaces in Code Editor</td>
+          </tr>
+        </table>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-primary" id="hotkeys-done-btn">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. QUIZ ANSWERS & SYLLABUS REVIEW MODAL -->
+  <div class="modal-backdrop" id="quiz-review-modal" style="display: none;">
+    <div class="modal-dialog role-guide-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="quiz-review-modal-title">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <span class="badge badge-emerald">Comprehensive Review</span>
+          <h2 class="modal-title" id="quiz-review-modal-title">5 MEQ Readiness Questions & Explanations</h2>
+        </div>
+        <button class="btn-close-modal" id="quiz-review-modal-close-btn" aria-label="Close Review">&times;</button>
+      </div>
+      <div class="modal-body" id="quiz-review-modal-content" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; max-height: 65vh; overflow-y: auto;">
+        <!-- Filled dynamically via JS -->
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="btn btn-primary" id="quiz-review-done-btn">Back to Dashboard</button>
       </div>
     </div>
   </div>
