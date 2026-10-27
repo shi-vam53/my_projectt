@@ -1,4 +1,4 @@
-// Praxis Curriculum & Problems Offline Bank (Generated from backend/problems.py)
+// Praxis Client-Side Offline Curriculum & Problem Bank Engine
 window.PRAXIS_OFFLINE_DATA = {
   "ROLES": [
     {
@@ -889,6 +889,1898 @@ window.PRAXIS_OFFLINE_DATA = {
         "fencing",
         "consensus"
       ]
+    }
+  ],
+  "MISSIONS": [
+    {
+      "id": "cloud-indep-01",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #01",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #1, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-02",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #02",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #2, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-03",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #03",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #3, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-04",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #04",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #4, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-05",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #05",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #5, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-06",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #06",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #6, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-07",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #07",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #7, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-08",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #08",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #8, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-09",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #09",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #9, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-10",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #10",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #10, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-11",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #11",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #11, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-12",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #12",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #12, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-13",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #13",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #13, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-14",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #14",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #14, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-15",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #15",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #15, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-16",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #16",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #16, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-17",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #17",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #17, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-18",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #18",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #18, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-19",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #19",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #19, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-20",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #20",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #20, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-21",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #21",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #21, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-22",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #22",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #22, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-23",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #23",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #23, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-24",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #24",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #24, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-25",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #25",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #25, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-26",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #26",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #26, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-27",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #27",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #27, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-28",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #28",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #28, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-29",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #29",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #29, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-30",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #30",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #30, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-31",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #31",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #31, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-32",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #32",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #32, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-33",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #33",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #33, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-34",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #34",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #34, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-35",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #35",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #35, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-36",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #36",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #36, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-37",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #37",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #37, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-38",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #38",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #38, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-39",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #39",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #39, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-40",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #40",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #40, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-41",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #41",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #41, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-42",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #42",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #42, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-43",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #43",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #43, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-44",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #44",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #44, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-45",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #45",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #45, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-46",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #46",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #46, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-47",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #47",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #47, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-48",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #48",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #48, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-49",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #49",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #49, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-indep-50",
+      "track_id": "cloud-engineer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Cloud Engineer Independent Infrastructure Incident #50",
+      "problem_brief": "Autonomous production simulation for cloud-engineer: Investigate telemetry anomaly #50, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "cloud-sre-01",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Junior SRE / Cloud Associate",
+      "estimated_time_mins": 30,
+      "title": "Incident 1402: Latency & 5xx Spike After Release v2.4.0",
+      "problem_brief": "At 14:15 UTC, the Payments API automated paging alert triggered. p99 response times spiked from 110ms to 4,850ms, and 504 Gateway Timeout errors rose from 0.01% to 8.7% of all checkout traffic. Investigate the timeline, telemetry, logs, release notes, and runbook. Determine the trigger, distinguish facts from assumptions, recommend a safe immediate action, define verification criteria, and propose one preventative improvement."
+    },
+    {
+      "id": "cloud-sre-02",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Junior SRE / Cloud Associate",
+      "estimated_time_mins": 25,
+      "title": "Incident 1488: CrashLoopBackOff & OOMKilled Flapping in Billing Service",
+      "problem_brief": "Kubernetes pods for billing-gateway are flapping in CrashLoopBackOff with Exit Code 137 (OOMKilled). Memory utilization climbs linearly from 120MB to the 1024MB container limit every 8 minutes before the Linux kernel terminates the process. Review the pod events, memory profile heap snapshot, Helm memory resources diff, and application cache logs. Identify the memory leak trigger, prescribe immediate resource relief, and outline permanent leak remediation."
+    },
+    {
+      "id": "cloud-sre-03",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level SRE / Associate",
+      "estimated_time_mins": 30,
+      "title": "Incident 1520: Intermittent DNS Resolution Cascades & CoreDNS Throttling",
+      "problem_brief": "During flash sales, downstream microservices report intermittent 'EAI_AGAIN (getaddrinfo ENOTFOUND)' connection drops reaching 3.4% of API calls. Kubernetes worker node CPU is below 40%, but CoreDNS latency spiked to 2,400ms. Inspect the CoreDNS logs, conntrack table metrics, and pod /etc/resolv.conf search domains. Diagnose the root cause without guided hints, provide safe operational mitigation, and propose a resilient cluster DNS architecture."
+    },
+    {
+      "id": "cloud-sre-04",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Ingress Triage: SSL/TLS Handshake Failures on Ingress Controller",
+      "problem_brief": "Resolve expired wildcard TLS certificate secrets without restarting ingress pods."
+    },
+    {
+      "id": "cloud-sre-05",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Capacity Planning: Node Autoscaler Thrashing & Spot Instance Eviction Storm",
+      "problem_brief": "Tune Cluster Autoscaler cooldown periods and implement mixed instance spot pools."
+    },
+    {
+      "id": "cloud-sre-06",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Network Security: Misconfigured Kubernetes NetworkPolicy Leaking Database Port",
+      "problem_brief": "Author default-deny NetworkPolicies restricting database access to backend pods."
+    },
+    {
+      "id": "cloud-sre-07",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Infrastructure as Code: Terraform State Lock Contention & Drift Remediation",
+      "problem_brief": "Recover locked DynamoDB state tables and reconcile out-of-band console changes."
+    },
+    {
+      "id": "cloud-sre-08",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Storage Triage: PersistentVolumeClaim ReadWriteOnce Deadlock Across AZs",
+      "problem_brief": "Remediate multi-AZ pod scheduling conflicts with EBS volume attachments."
+    },
+    {
+      "id": "cloud-sre-09",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "CI/CD Pipeline: GitHub Actions Runner Disk Saturation & Cache Invalidation",
+      "problem_brief": "Clean up dangling Docker build cache layers and enforce automated ephemeral disk GC."
+    },
+    {
+      "id": "cloud-sre-10",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Secrets Management: HashiCorp Vault Token Expiration & Pod Injection Failure",
+      "problem_brief": "Renew Vault Agent lease tokens and diagnose sidecar container init crashes."
+    },
+    {
+      "id": "cloud-sre-11",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Chaos Engineering: Network Partition Simulation & Kafka Broker Rebalance",
+      "problem_brief": "Test Kafka ISR replica resilience during cross-rack availability zone network splits."
+    },
+    {
+      "id": "cloud-sre-12",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Observability: Prometheus High Cardinality TSDB Disk Exhaustion",
+      "problem_brief": "Drop unbounded user_id metric labels to prevent Prometheus memory crashes."
+    },
+    {
+      "id": "cloud-sre-13",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Service Mesh: Istio Envoy Sidecar CPU Saturation on mTLS Handshakes",
+      "problem_brief": "Tune Envoy worker thread allocations and enable mutual TLS session ticket caching."
+    },
+    {
+      "id": "cloud-sre-14",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Disaster Recovery: Multi-Region PostgreSQL Read Replica Promotion Runbook",
+      "problem_brief": "Execute controlled failover of AWS Aurora read replica to primary cluster."
+    },
+    {
+      "id": "cloud-sre-15",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Kubernetes Upgrade: Deprecated API Version Eviction in EKS 1.28 Migration",
+      "problem_brief": "Migrate Ingress networking.k8s.io/v1beta1 manifests prior to cluster control plane upgrade."
+    },
+    {
+      "id": "cloud-sre-16",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Cost Optimization: Orphaned EBS Volumes & Unattached Cloud NAT Gateways",
+      "problem_brief": "Automate audit script identifying unused cloud resources saving $14k/month."
+    },
+    {
+      "id": "cloud-sre-17",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Security Incident: Overprivileged IAM Role Assumption via Pod Metadata Service",
+      "problem_brief": "Enforce IMDSv2 and block pod access to 169.254.169.254 AWS metadata endpoint."
+    },
+    {
+      "id": "cloud-sre-18",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Zero-Downtime Release: Flagger Canary Traffic Shifting Stalling at 20%",
+      "problem_brief": "Diagnose metric threshold mismatch halting automated progressive canary progression."
+    },
+    {
+      "id": "cloud-sre-19",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Linux Kernel: Epoll Socket Starvation & TCP SYN Flood Defense",
+      "problem_brief": "Tune sysctl somaxconn, tcp_max_syn_backlog, and enable SYN cookies under DDoS."
+    },
+    {
+      "id": "cloud-sre-20",
+      "track_id": "cloud-engineer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Error Budget Review: SEV-1 Outage Postmortem & Freeze Action Plan",
+      "problem_brief": "Facilitate blameless postmortem and establish engineering hardening priorities."
+    },
+    {
+      "id": "data-analyst-01",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Junior Product Data Analyst",
+      "estimated_time_mins": 30,
+      "title": "Anomaly Investigation: 35% Mobile Checkout Drop",
+      "problem_brief": "Yesterday's daily executive briefing showed total checkout conversion dropped from 4.8% to 3.1% week-over-week. The VP of Growth believes user sentiment dropped following a pricing change. Dive into the segmented dataset, device breakdowns, and event instrumentation to test the hypothesis and uncover the true driver."
+    },
+    {
+      "id": "data-analyst-02",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Junior Product Data Analyst",
+      "estimated_time_mins": 30,
+      "title": "Cohort Retention Degradation Post-Onboarding Redesign",
+      "problem_brief": "Two weeks ago, the Growth team replaced the minimalist 1-step sign-up flow with an interactive 6-step gamified onboarding tutorial. While initial sign-ups rose 4%, Day 7 (D7) cohort retention plummeted from 42% to 26%. Analyze the segmented cohort retention curves, step-by-step tutorial abandonment rates, and time-to-first-value telemetry. Identify where users churn, test the friction hypothesis, and deliver executive recommendations."
+    },
+    {
+      "id": "data-analyst-03",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Product Data Analyst",
+      "estimated_time_mins": 35,
+      "title": "Experimentation Audit: Sample Ratio Mismatch (SRM) in Checkout A/B Test",
+      "problem_brief": "The Growth team is celebrating an A/B test of the checkout flow showing Variant B has a +14.2% lift in average order value (AOV) with p < 0.01. However, looking at the sample allocation count shows Control received 54,200 users while Variant B received only 45,800 users (54.2% vs 45.8%), despite configuring a 50/50 split. Perform a Chi-Square goodness-of-fit test for Sample Ratio Mismatch (SRM), investigate the redirect loop telemetry, and advise leadership on whether to ship."
+    },
+    {
+      "id": "data-analyst-04",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Pipeline Failure: Airflow DAG Deadlock Causing Stale Executive Revenue Dashboard",
+      "problem_brief": "Clear upstream task instance dependencies and optimize task concurrency limits."
+    },
+    {
+      "id": "data-analyst-05",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Data Modeling: Refactoring dbt Staging Model to Fix Duplicate Row Inflation",
+      "problem_brief": "Add unique surrogate key and dedup logic using ROW_NUMBER window function."
+    },
+    {
+      "id": "data-analyst-06",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "SQL Performance: Eliminating Full Table Scan on 2 Billion Row Event Table",
+      "problem_brief": "Add date partition pruning and cluster keys to reduce warehouse query cost by 85%."
+    },
+    {
+      "id": "data-analyst-07",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Metric Reconciliation: Resolving Gross Margin Variance Between Stripe and Warehouse",
+      "problem_brief": "Reconcile payment processor fee deductions and currency exchange rate timing."
+    },
+    {
+      "id": "data-analyst-08",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Data Contract: Upstream Schema Drift Breaking Downstream Marketing Attribution",
+      "problem_brief": "Establish JSON schema validation contract on Kafka ingest topic to alert on drift."
+    },
+    {
+      "id": "data-analyst-09",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Churn Analysis: Survival Analysis Model for Enterprise SaaS Customer Churn",
+      "problem_brief": "Compute Kaplan-Meier curve and identify top leading indicators of customer downgrade."
+    },
+    {
+      "id": "data-analyst-10",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Data Privacy: Masking Personally Identifiable Information (PII) in Analytics Marts",
+      "problem_brief": "Implement SHA-256 salted hashing on email and IP addresses for GDPR compliance."
+    },
+    {
+      "id": "data-analyst-11",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Executive KPI: Building an Executive Net Revenue Retention (NRR) Dashboard",
+      "problem_brief": "Design SQL query calculating expansion, contraction, and churn across customer tiers."
+    },
+    {
+      "id": "data-analyst-12",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Fraud Detection: Identifying Anomalous Velocity Patterns in Payment Gateway Logs",
+      "problem_brief": "Write SQL window function flagging users with > 5 card attempts within 60 seconds."
+    },
+    {
+      "id": "data-analyst-13",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "A/B Testing: Correcting for Variance Drift in Multi-Variant Pricing Experiments",
+      "problem_brief": "Apply Bonferroni correction for multiple hypothesis testing across 4 treatment variants."
+    },
+    {
+      "id": "data-analyst-14",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Data Freshness: SLA Violation Investigation for Real-Time Inventory Updates",
+      "problem_brief": "Diagnose CDC (Change Data Capture) lag in Debezium connector to warehouse."
+    },
+    {
+      "id": "data-analyst-15",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Dimensional Modeling: Implementing SCD-2 for Customer Subscription Tier Changes",
+      "problem_brief": "Build slowly changing dimension table tracking valid_from and valid_to timestamps."
+    },
+    {
+      "id": "data-analyst-16",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Marketing Mix: Multi-Touch Attribution Model Divergence Investigation",
+      "problem_brief": "Compare First-Touch, Last-Touch, and Linear attribution models across ad campaigns."
+    },
+    {
+      "id": "data-analyst-17",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Data Quality: Establishing Automated Great Expectations Assertions in CI",
+      "problem_brief": "Configure automated schema tests asserting non-null constraints on order IDs."
+    },
+    {
+      "id": "data-analyst-18",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Cohort Heatmap: Diagnosing Sudden Day-7 Drop-off in Android App Users",
+      "problem_brief": "Investigate push notification permission prompt changes causing day-7 retention dip."
+    },
+    {
+      "id": "data-analyst-19",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Operational BI: Designing a Real-Time SRE Incident SLA Response Dashboard",
+      "problem_brief": "Build SQL rollup tracking MTTA (Mean Time to Acknowledge) and MTTR (Mean Time to Resolve)."
+    },
+    {
+      "id": "data-analyst-20",
+      "track_id": "data-analyst",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Analytics Strategy: Quarter-End Data Accuracy Sign-Off & Governance Audit",
+      "problem_brief": "Conduct cross-departmental audit certifying metric definitions for financial filings."
+    },
+    {
+      "id": "data-indep-01",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #01",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #1, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-02",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #02",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #2, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-03",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #03",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #3, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-04",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #04",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #4, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-05",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #05",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #5, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-06",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #06",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #6, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-07",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #07",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #7, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-08",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #08",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #8, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-09",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #09",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #9, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-10",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #10",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #10, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-11",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #11",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #11, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-12",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #12",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #12, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-13",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #13",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #13, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-14",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #14",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #14, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-15",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #15",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #15, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-16",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #16",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #16, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-17",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #17",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #17, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-18",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #18",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #18, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-19",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #19",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #19, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-20",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #20",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #20, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-21",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #21",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #21, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-22",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #22",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #22, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-23",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #23",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #23, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-24",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #24",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #24, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-25",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #25",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #25, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-26",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #26",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #26, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-27",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #27",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #27, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-28",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #28",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #28, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-29",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #29",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #29, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-30",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #30",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #30, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-31",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #31",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #31, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-32",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #32",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #32, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-33",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #33",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #33, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-34",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #34",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #34, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-35",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #35",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #35, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-36",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #36",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #36, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-37",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #37",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #37, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-38",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #38",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #38, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-39",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #39",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #39, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-40",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #40",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #40, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-41",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #41",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #41, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-42",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #42",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #42, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-43",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #43",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #43, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-44",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #44",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #44, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-45",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #45",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #45, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-46",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #46",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #46, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-47",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #47",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #47, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-48",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #48",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #48, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-49",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #49",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #49, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "data-indep-50",
+      "track_id": "data-analyst",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Data Analyst Independent Analytics Audit #50",
+      "problem_brief": "Autonomous production simulation for data-analyst: Investigate telemetry anomaly #50, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-01",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Junior Software Engineer",
+      "estimated_time_mins": 35,
+      "title": "Bug Triage: Double-Charge on Stripe Webhook Retries",
+      "problem_brief": "Customers are complaining about being billed twice for their monthly subscription renewals. The Stripe webhook handler was recently refactored to support async processing. Investigate the pull request diff, unit test suite, and webhook server logs to identify the race condition/idempotency failure, write a mitigation plan, and design the fix."
+    },
+    {
+      "id": "swe-02",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Junior Software Engineer",
+      "estimated_time_mins": 30,
+      "title": "Bug 2204: EventEmitter Memory Leak & Unhandled Rejection in Notification Worker",
+      "problem_brief": "The notification microservice terminates with `MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added`. When Redis socket reconnects, unhandled promise rejections trigger process crash. Review the socket connection pool, unit test suite, and listener lifecycle. Fix the dangling listener leak, handle rejection safely, and design an automated leak test."
+    },
+    {
+      "id": "swe-03",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Software Engineer",
+      "estimated_time_mins": 35,
+      "title": "Security Triage: SQL Injection & Filter Bypass in Product Search API",
+      "problem_brief": "An internal penetration audit discovered that an attacker can inject arbitrary SQL fragments into the `/api/v2/products/search?category=electronics' OR '1'='1` query parameter, bypassing tenant isolation filters. The backend constructs SQL with dynamic string concatenation. Refactor the repository layer to use parameterized queries, ensure backward compatibility for valid special characters, and write security regression test cases."
+    },
+    {
+      "id": "swe-04",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Performance: N+1 Query Cascade in User Activity Feed API",
+      "problem_brief": "Eliminate N+1 database queries by refactoring to batch JOINs and eager loading."
+    },
+    {
+      "id": "swe-05",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Concurrency: Distributed Locking & Race Condition in Flash Sale Inventory",
+      "problem_brief": "Prevent overselling by implementing Redis Redlock distributed synchronization."
+    },
+    {
+      "id": "swe-06",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Resilience: Circuit Breaker Implementation for Unstable 3rd-Party Tax Service",
+      "problem_brief": "Wrap synchronous external API calls in circuit breakers to preserve thread pools."
+    },
+    {
+      "id": "swe-07",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Data Modeling: Zero-Downtime Database Migration for User Phone Numbers",
+      "problem_brief": "Execute expand-and-contract column migration without locking table or breaking APIs."
+    },
+    {
+      "id": "swe-08",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Architecture: Rate Limiter Token Bucket Middleware for Public REST API",
+      "problem_brief": "Protect public endpoints against denial of service using sliding window token buckets."
+    },
+    {
+      "id": "swe-09",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Caching: Redis Cache Stampede & Cache Penetration Mitigation",
+      "problem_brief": "Implement probabilistic early expiration (XFetch) and Bloom filters for non-existent keys."
+    },
+    {
+      "id": "swe-10",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "AuthN/AuthZ: JWT Refresh Token Rotation & Replay Attack Defense",
+      "problem_brief": "Enforce single-use refresh token families and revoke compromised user sessions."
+    },
+    {
+      "id": "swe-11",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Observability: Structured JSON Logging & Distributed Trace Context Propagation",
+      "problem_brief": "Instrument HTTP requests with OpenTelemetry traceparent headers and JSON logging."
+    },
+    {
+      "id": "swe-12",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Error Handling: Global Error Handling Middleware & RFC 7807 Problem Details",
+      "problem_brief": "Standardize application exception payloads using the RFC 7807 specification."
+    },
+    {
+      "id": "swe-13",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Messaging: Dead Letter Queue (DLQ) & Idempotent Consumer in RabbitMQ",
+      "problem_brief": "Handle poison pill messages gracefully without stalling message consumption pipelines."
+    },
+    {
+      "id": "swe-14",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "API Versioning: Deprecating v1 Endpoints with Sunset Headers & Contract Tests",
+      "problem_brief": "Implement graceful API deprecation with Sunset headers and schema compatibility checks."
+    },
+    {
+      "id": "swe-15",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Microservices: Saga Pattern Implementation for Multi-Service Order Fulfillment",
+      "problem_brief": "Coordinate distributed transactions across inventory, payment, and shipping services."
+    },
+    {
+      "id": "swe-16",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Security: Cross-Site Request Forgery (CSRF) & SameSite Cookie Hardening",
+      "problem_brief": "Implement cryptographic CSRF tokens and SameSite=Lax cookie policies on auth cookies."
+    },
+    {
+      "id": "swe-17",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Performance: Server-Sent Events (SSE) Memory Accumulation in Live Dashboard",
+      "problem_brief": "Prevent client connection leaks and backpressure buffer overflows in real-time streams."
+    },
+    {
+      "id": "swe-18",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Testing: Property-Based Testing for Currency Conversion & Cent Rounding",
+      "problem_brief": "Use Hypothesis to detect floating point cent discrepancies across exchange rates."
+    },
+    {
+      "id": "swe-19",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Database: PostgreSQL Connection Pool Deadlock under High Transaction Volume",
+      "problem_brief": "Establish deterministic transaction lock ordering to eliminate DB graph cycles."
+    },
+    {
+      "id": "swe-20",
+      "track_id": "software-developer",
+      "type": "guided",
+      "difficulty": "Mid-Level Specialist",
+      "estimated_time_mins": 35,
+      "title": "Deployment: Zero-Downtime Blue-Green Switchover for Core Monolith API",
+      "problem_brief": "Execute DNS traffic cutover with pre-warmed connection pools and backward-compatible DB."
+    },
+    {
+      "id": "swe-indep-01",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #01",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #1, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-02",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #02",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #2, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-03",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #03",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #3, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-04",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #04",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #4, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-05",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #05",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #5, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-06",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #06",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #6, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-07",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #07",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #7, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-08",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #08",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #8, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-09",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #09",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #9, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-10",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #10",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #10, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-11",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #11",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #11, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-12",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #12",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #12, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-13",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #13",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #13, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-14",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #14",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #14, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-15",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #15",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #15, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-16",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #16",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #16, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-17",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #17",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #17, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-18",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #18",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #18, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-19",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #19",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #19, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-20",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #20",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #20, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-21",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #21",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #21, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-22",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #22",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #22, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-23",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #23",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #23, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-24",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #24",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #24, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-25",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #25",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #25, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-26",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #26",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #26, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-27",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #27",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #27, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-28",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #28",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #28, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-29",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #29",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #29, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-30",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #30",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #30, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-31",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #31",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #31, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-32",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #32",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #32, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-33",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #33",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #33, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-34",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #34",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #34, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-35",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #35",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #35, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-36",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #36",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #36, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-37",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #37",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #37, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-38",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #38",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #38, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-39",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #39",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #39, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-40",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #40",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #40, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-41",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #41",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #41, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-42",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #42",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #42, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-43",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #43",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #43, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-44",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #44",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #44, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-45",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #45",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #45, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-46",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #46",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #46, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-47",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #47",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #47, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-48",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #48",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #48, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-49",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #49",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #49, formulate hypothesis, define safe mitigation, and provide verification criteria."
+    },
+    {
+      "id": "swe-indep-50",
+      "track_id": "software-developer",
+      "type": "independent",
+      "difficulty": "Senior Specialist",
+      "estimated_time_mins": 45,
+      "title": "Software Developer Independent Production Challenge #50",
+      "problem_brief": "Autonomous production simulation for software-developer: Investigate telemetry anomaly #50, formulate hypothesis, define safe mitigation, and provide verification criteria."
     }
   ]
 };

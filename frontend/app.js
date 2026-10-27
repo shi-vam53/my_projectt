@@ -1045,7 +1045,8 @@ async function renderMissionWorkspace(missionId) {
   if (!mission || !mission.evidence_tabs) {
     try {
       const res = await fetch(`/api/missions/${missionId}`);
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json') && res.ok) {
         mission = await res.json();
         MISSIONS_DATA[missionId] = mission;
       }
@@ -1053,7 +1054,84 @@ async function renderMissionWorkspace(missionId) {
       console.warn('Mission fetch fallback:', e);
     }
   }
+
+  // If still missing or metadata only from catalog, load from offline catalog or fallback
+  if (!mission) {
+    const offlineList = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.MISSIONS) || [];
+    mission = offlineList.find(m => m.id === missionId);
+  }
   if (!mission) mission = MISSIONS_DATA['cloud-sre-01'];
+
+  // Ensure full evidence tabs exist for any mission
+  if (!mission.evidence_tabs) {
+    mission.metadata = mission.metadata || {
+      tier: 'Tier-1 Mission Critical',
+      service: mission.track_id === 'software-developer' ? 'Application API' : (mission.track_id === 'data-analyst' ? 'ETL Pipeline' : 'Cloud Cluster'),
+      runtime: 'Production Linux',
+      cluster: 'us-east-1 prod'
+    };
+    mission.submission_fields = mission.submission_fields || [
+      { id: 'timeline_impact', label: '1. Incident Timeline & Customer Impact', placeholder: 'Assess the start time, impacted services, failure blast radius, and SLO degradation...', required: true },
+      { id: 'root_cause_hypothesis', label: '2. Root Cause Hypothesis (Telemetry vs Assumptions)', placeholder: 'Delineate concrete telemetry evidence from initial assumptions...', required: true },
+      { id: 'mitigation_plan', label: '3. Immediate Safe Mitigation Plan (Runbook SOP)', placeholder: 'Step-by-step containment steps, rollback procedure, or traffic shedding...', required: true },
+      { id: 'verification', label: '4. Health Verification & Recovery Confirmation', placeholder: 'Which SLI/SLO metrics, query checks, or status probes confirm full recovery?...', required: true },
+      { id: 'preventative_hardening', label: '5. Preventative Hardening & Architectural Fix', placeholder: 'What automated tests, alert rules, or code refactor prevents regression?...', required: true }
+    ];
+    mission.evidence_tabs = [
+      {
+        id: 'timeline',
+        title: 'Incident Timeline',
+        type: 'timeline',
+        content: [
+          { time: '14:00 UTC', event: 'Scheduled deployment or pipeline trigger started.' },
+          { time: '14:15 UTC', event: 'Automated monitoring detected anomaly: ' + mission.title },
+          { time: '14:20 UTC', event: 'On-call engineer paged. Incident triage channel opened.' },
+          { time: '14:35 UTC', event: 'Customer reports and error rates confirmed; mitigation required.' }
+        ]
+      },
+      {
+        id: 'metrics',
+        title: 'Telemetry & APM',
+        type: 'metrics',
+        content: {
+          chart_type: 'latency_vs_errors',
+          datapoints: [
+            { timestamp: '14:00', latency_p99: 110, error_rate: 0.01 },
+            { timestamp: '14:15', latency_p99: 1850, error_rate: 4.2 },
+            { timestamp: '14:30', latency_p99: 4850, error_rate: 8.7 },
+            { timestamp: '14:45', latency_p99: 4120, error_rate: 7.9 }
+          ]
+        }
+      },
+      {
+        id: 'logs',
+        title: 'Production Logs',
+        type: 'log_viewer',
+        content: [
+          '[WARN] 14:15:02.102 [worker-04] Elevated latency detected on critical request path',
+          '[ERROR] 14:15:18.421 [worker-04] Connection timeout / threshold exceeded: ' + (mission.problem_brief || 'Failure in subsystem'),
+          '[FATAL] 14:20:05.890 [router] Circuit breaker triggered; fallback response invoked'
+        ]
+      },
+      {
+        id: 'runbook',
+        title: 'Standard Runbook',
+        type: 'markdown_doc',
+        content: `### Standard Operating Procedure (SOP)\n1. Acknowledge alert in the incident command channel.\n2. Review recent commits and configuration updates.\n3. Execute safe traffic shift or automated rollback if SLO error budget is depleted.\n4. Verify recovery through APM latency percentiles and error rates.\n5. Author blameless post-mortem handoff report.`
+      }
+    ];
+    mission.rubric = mission.rubric || {
+      passing_score: 75,
+      dimensions: [
+        { name: 'Evidence Grounding & Metric Analysis', weight: 25, criteria: 'Correctly identifies telemetry anomalies, p99 spikes, and timeline sequence.' },
+        { name: 'Root Cause Reasoning & Plausibility', weight: 25, criteria: 'Delineates verified factual logs from unproven hypotheses.' },
+        { name: 'Operational Containment & Safe Mitigation', weight: 25, criteria: 'Executes non-destructive rollbacks, circuit breaking, or config fixes.' },
+        { name: 'Verification Rigor & Preventative Hardening', weight: 25, criteria: 'Validates health recovery and adds automated safeguards.' }
+      ]
+    };
+    MISSIONS_DATA[mission.id] = mission;
+  }
+
   state.activeMissionId = mission.id;
   if (mission.track_id) state.activeTrackId = mission.track_id;
 
@@ -1071,16 +1149,16 @@ async function renderMissionWorkspace(missionId) {
   if (briefEl) briefEl.textContent = mission.problem_brief;
   if (trackBadgeEl) trackBadgeEl.textContent = track.title;
   if (diffBadgeEl) diffBadgeEl.textContent = mission.difficulty;
-  if (timeTextEl) timeTextEl.textContent = `${mission.estimated_time_mins} mins`;
-  if (tierBadgeEl) tierBadgeEl.textContent = mission.metadata.tier || 'Tier-1 Mission Critical';
+  if (timeTextEl) timeTextEl.textContent = `${mission.estimated_time_mins || 30} mins`;
+  if (tierBadgeEl) tierBadgeEl.textContent = (mission.metadata && mission.metadata.tier) || 'Tier-1 Mission Critical';
 
   // Metadata bar
   const metaService = document.getElementById('meta-service');
   const metaCluster = document.getElementById('meta-cluster');
   const metaType = document.getElementById('meta-type');
 
-  if (metaService) metaService.textContent = mission.metadata.service || mission.metadata.domain || 'N/A';
-  if (metaCluster) metaCluster.textContent = mission.metadata.cluster || mission.metadata.runtime || 'N/A';
+  if (metaService) metaService.textContent = (mission.metadata && (mission.metadata.service || mission.metadata.domain)) || 'N/A';
+  if (metaCluster) metaCluster.textContent = (mission.metadata && (mission.metadata.cluster || mission.metadata.runtime)) || 'N/A';
   if (metaType) metaType.textContent = mission.type ? `${mission.type.toUpperCase()} Simulation` : 'Guided';
 
   // Render Evidence Tabs Navigation & Body
@@ -2056,7 +2134,27 @@ function handleSubmitRubric() {
   .catch(err => {
     console.warn('Backend unavailable or network error; using client evaluation:', err);
     const evalResult = evaluateSubmission(mission, answers);
+
+    // Persist to offline submissions ledger for Admin Review Portal
+    const offlineSub = {
+      submission_id: 'sub_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
+      mission_id: mission.id,
+      answers: answers,
+      score: evalResult.totalScore,
+      overall_score: evalResult.totalScore,
+      approval_status: evalResult.totalScore >= 75 ? 'approved' : 'needs_revision',
+      reviewer_status: null,
+      created_at: new Date().toISOString(),
+      dimensions: evalResult.dimensions
+    };
+    try {
+      const existingSubs = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+      existingSubs.unshift(offlineSub);
+      localStorage.setItem('praxis_offline_submissions', JSON.stringify(existingSubs));
+    } catch (e) {}
+
     displayRubricResults(mission, evalResult);
+    showToast('Evaluated & Persisted to Local Simulation Ledger', 'success');
   });
 }
 
@@ -2464,20 +2562,33 @@ async function openRoleGuideModal(trackId) {
 // ============================================================================
 
 async function loadMissionsCatalog() {
+  let loaded = false;
   try {
     const res = await fetch('/api/missions');
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.ok) {
       const missions = await res.json();
       state.allMissions = missions;
       missions.forEach(m => {
         MISSIONS_DATA[m.id] = Object.assign({}, MISSIONS_DATA[m.id] || {}, m);
       });
       const pill = document.getElementById('catalog-count-pill');
-      if (pill) pill.textContent = `${missions.length} Missions`;
+      if (pill) pill.textContent = `${missions.length} Labs`;
+      loaded = true;
     }
-  } catch (err) {
-    console.warn('API mission catalog fallback:', err);
-    state.allMissions = Object.values(MISSIONS_DATA);
+  } catch (err) {}
+
+  if (!loaded) {
+    if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.MISSIONS) {
+      state.allMissions = window.PRAXIS_OFFLINE_DATA.MISSIONS;
+      state.allMissions.forEach(m => {
+        MISSIONS_DATA[m.id] = Object.assign({}, MISSIONS_DATA[m.id] || {}, m);
+      });
+      const pill = document.getElementById('catalog-count-pill');
+      if (pill) pill.textContent = `${state.allMissions.length} Labs`;
+    } else {
+      state.allMissions = Object.values(MISSIONS_DATA);
+    }
   }
 }
 
@@ -2597,13 +2708,22 @@ async function renderAdminView() {
 
   tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading submissions from SQLite database...</td></tr>`;
 
+  let loadedFromBackend = false;
   try {
     const res = await fetch('/api/submissions');
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.ok) {
       state.submissionsLedger = await res.json();
+      loadedFromBackend = true;
     }
-  } catch (err) {
-    console.warn('Submissions ledger fetch fallback:', err);
+  } catch (err) {}
+
+  if (!loadedFromBackend) {
+    try {
+      state.submissionsLedger = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+    } catch (e) {
+      state.submissionsLedger = [];
+    }
   }
 
   const subs = state.submissionsLedger || [];
@@ -2774,7 +2894,8 @@ async function submitReviewerDecision(status) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: status, notes: notes })
     });
-    if (res.ok) {
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json') && res.ok) {
       showToast(`Review saved: marked as ${status.toUpperCase()}`, 'success');
       closeReviewerModal();
       renderAdminView();
@@ -2787,6 +2908,16 @@ async function submitReviewerDecision(status) {
   // Local update fallback
   sub.reviewer_status = status;
   sub.reviewer_notes = notes;
+  try {
+    const offlineSubs = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+    const match = offlineSubs.find(s => s.submission_id === sub.submission_id);
+    if (match) {
+      match.reviewer_status = status;
+      match.reviewer_notes = notes;
+      localStorage.setItem('praxis_offline_submissions', JSON.stringify(offlineSubs));
+    }
+  } catch (e) {}
+
   showToast(`Updated reviewer status locally to ${status.toUpperCase()}`, 'info');
   closeReviewerModal();
   renderAdminView();
@@ -2803,9 +2934,11 @@ function bindProfileControls() {
   const resetBtn = document.getElementById('btn-reset-progress');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      if (confirm('Clear local draft and simulation history?')) {
-        localStorage.clear();
-        showToast('Local progress reset.', 'info');
+      if (confirm('Clear simulation problem and mission progress? (Your login and locked track will be preserved)')) {
+        localStorage.removeItem('praxis_offline_submissions');
+        localStorage.removeItem('praxis_offline_problem_progress');
+        localStorage.removeItem('praxis_drafts');
+        showToast('Simulation progress reset.', 'info');
         renderProfileView();
       }
     });
@@ -2813,15 +2946,33 @@ function bindProfileControls() {
 }
 
 function renderProfileView() {
-  const completedMissions = state.submissionsLedger || [];
+  let completedMissions = state.submissionsLedger || [];
+  if (completedMissions.length === 0) {
+    try {
+      completedMissions = JSON.parse(localStorage.getItem('praxis_offline_submissions') || '[]');
+    } catch (e) {
+      completedMissions = [];
+    }
+  }
+
+  // Solved problems count
+  let solvedProblemsCount = 0;
+  try {
+    const probProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+    solvedProblemsCount = Object.values(probProgress).filter(p => p.status === 'completed').length;
+  } catch (e) {}
+
+  const totalActivities = completedMissions.length + solvedProblemsCount;
   const compCountEl = document.getElementById('pstat-completed');
   const avgScoreEl = document.getElementById('pstat-avg-score');
   const readinessEl = document.getElementById('pstat-readiness');
 
-  if (compCountEl) compCountEl.textContent = completedMissions.length;
+  if (compCountEl) compCountEl.textContent = totalActivities;
 
-  if (completedMissions.length > 0) {
-    const avg = Math.round(completedMissions.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0) / completedMissions.length);
+  if (totalActivities > 0) {
+    const missionScoreSum = completedMissions.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0);
+    const probScoreSum = solvedProblemsCount * 100;
+    const avg = Math.round((missionScoreSum + probScoreSum) / totalActivities);
     if (avgScoreEl) avgScoreEl.textContent = `${avg} / 100`;
     if (readinessEl) readinessEl.textContent = avg >= 80 ? 'Production Ready' : 'In Calibration';
   } else {
@@ -2846,7 +2997,7 @@ function renderProfileView() {
 
     compList.innerHTML = coreCompetencies.map((comp, idx) => `
       <div class="comp-item">
-        <span class="comp-check">${idx < (completedMissions.length + 2) ? '✓' : '○'}</span>
+        <span class="comp-check">${idx < (totalActivities + 2) ? '✓' : '○'}</span>
         <span class="comp-text">${escapeHtml(comp)}</span>
       </div>
     `).join('');
@@ -2855,23 +3006,49 @@ function renderProfileView() {
   // History list
   const historyList = document.getElementById('profile-history-list');
   if (historyList) {
-    if (completedMissions.length === 0) {
-      historyList.innerHTML = `<p class="text-muted" style="padding: 1rem 0;">No completed missions yet. Launch any mission from the catalog to build your verified record.</p>`;
+    if (totalActivities === 0) {
+      historyList.innerHTML = `<p class="text-muted" style="padding: 1rem 0;">No completed missions or problems yet. Solve problems or launch any mission from the catalog to build your verified record.</p>`;
     } else {
-      historyList.innerHTML = completedMissions.map(s => {
+      let historyHtml = '';
+      completedMissions.forEach(s => {
         const m = MISSIONS_DATA[s.mission_id] || { title: s.mission_id };
-        return `
+        historyHtml += `
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
             <div>
               <strong>${escapeHtml(m.title)}</strong>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">${s.created_at || ''}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${s.created_at || ''} (Mission Simulation)</div>
             </div>
             <div style="text-align: right;">
               <span class="badge badge-emerald">${s.score || s.overall_score || 0}/100</span>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">${escapeHtml(s.reviewer_status || s.approval_status || 'Evaluated')}</div>
             </div>
           </div>
         `;
-      }).join('');
+      });
+
+      // Add solved problems
+      try {
+        const probProgress = JSON.parse(localStorage.getItem('praxis_offline_problem_progress') || '{}');
+        Object.entries(probProgress).forEach(([pid, pdata]) => {
+          if (pdata.status === 'completed') {
+            const prob = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS ? window.PRAXIS_OFFLINE_DATA.PROBLEMS.find(p => p.id === pid) : null) || { title: pid.toUpperCase() };
+            historyHtml += `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
+                <div>
+                  <strong>${escapeHtml(prob.title)}</strong>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Production Problem (${pid.toUpperCase()})</div>
+                </div>
+                <div style="text-align: right;">
+                  <span class="badge badge-indigo">${pdata.score || 100}/100</span>
+                  <div style="font-size: 0.75rem; color: #16a34a; margin-top: 0.2rem;">✓ Solved</div>
+                </div>
+              </div>
+            `;
+          }
+        });
+      } catch (e) {}
+
+      historyList.innerHTML = historyHtml;
     }
   }
 }
