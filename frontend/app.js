@@ -3856,6 +3856,23 @@ function bindHandbookAndQuizControls() {
     });
   }
 
+  const retakeQuizBtn = document.getElementById('quiz-retake-btn');
+  if (retakeQuizBtn) {
+    retakeQuizBtn.addEventListener('click', () => {
+      loadQuizQuestions();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Loaded 5 new random questions from the 25-question pool!', 'info');
+    });
+  }
+
+  const shuffleQuizBtn = document.getElementById('btn-shuffle-quiz');
+  if (shuffleQuizBtn) {
+    shuffleQuizBtn.addEventListener('click', () => {
+      loadQuizQuestions();
+      showToast('Loaded 5 new random questions from the 25-question pool!', 'info');
+    });
+  }
+
   const probSearchInput = document.getElementById('prob-search-input');
   if (probSearchInput) {
     probSearchInput.addEventListener('input', () => {
@@ -3951,8 +3968,11 @@ function updateHandbookForUserRole() {
 
 async function loadQuizQuestions() {
   const container = document.getElementById('quiz-questions-list');
+  const banner = document.getElementById('quiz-results-banner');
+  if (banner) banner.style.display = 'none';
   if (!container) return;
-  container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #64748b;">Loading assessment questions...</div>`;
+  container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #64748b;">Loading randomized questions...</div>`;
+  state.quizUserAnswers = {};
 
   try {
     const res = await fetch('/api/quiz/questions');
@@ -3962,11 +3982,17 @@ async function loadQuizQuestions() {
       return;
     }
   } catch (err) {
-    console.warn('Backend quiz API unreachable, loading offline questions:', err);
+    console.warn('Backend quiz API unreachable, loading randomized offline questions:', err);
   }
 
   if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) {
-    state.quizQuestions = window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS.map(q => ({
+    const pool = [...window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS];
+    // Fisher-Yates random shuffle to pick 5 randomized questions from 25-question pool
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    state.quizQuestions = pool.slice(0, 5).map(q => ({
       id: q.id,
       question: q.question,
       options: q.options
@@ -4048,25 +4074,30 @@ async function submitReadinessQuiz() {
   }
 
   // Robust client-side evaluation fallback
-  const offlineQs = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || [];
+  const offlinePool = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || [];
+  const offlineMap = {};
+  offlinePool.forEach(q => { offlineMap[q.id] = q; });
+
   let score = 0;
-  const results = offlineQs.map(q => {
-    const sel = state.quizUserAnswers[q.id];
-    const isCorrect = sel === q.correct;
+  const results = state.quizQuestions.map(q => {
+    const qData = offlineMap[q.id] || q;
+    const sel = (state.quizUserAnswers[q.id] || '').toLowerCase();
+    const isCorrect = sel && (sel === (qData.correct || '').toLowerCase());
     if (isCorrect) score += 1;
     return {
       id: q.id,
       selected: sel,
-      correct: q.correct,
+      correct: qData.correct,
       is_correct: isCorrect,
-      explanation: q.explanation
+      explanation: qData.explanation || 'Refer to the handbook for details.'
     };
   });
+  const total = state.quizQuestions.length || 5;
   const passed = score >= 4;
   const payload = {
     score: score,
-    total: offlineQs.length,
-    percentage: Math.round((score / (offlineQs.length || 1)) * 100),
+    total: total,
+    percentage: Math.round((score / total) * 100),
     passed: passed,
     message: passed ? 'Congratulations! You passed the Readiness Assessment.' : 'Score was below 80%. Review the handbook and try again.',
     results: results

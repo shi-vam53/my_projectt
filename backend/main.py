@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import random
 import re
 import secrets
 import sqlite3
@@ -947,18 +948,20 @@ def create_app(
         )
 
     # --------------------------------------------------------------------------
-    # 5-QUESTION READINESS QUIZ
+    # 5-QUESTION READINESS QUIZ (Randomly sampled from 25 questions)
     # --------------------------------------------------------------------------
     @application.get("/api/quiz/questions", tags=["quiz"])
     def get_quiz_questions() -> list[dict[str, Any]]:
-        # Return questions without revealing correct answer
+        # Randomly sample 5 questions from the 25-question pool so each attempt is randomized
+        sample_size = min(5, len(QUIZ_QUESTIONS))
+        sampled = random.sample(QUIZ_QUESTIONS, sample_size)
         return [
             {
                 "id": q["id"],
                 "question": q["question"],
                 "options": q["options"],
             }
-            for q in QUIZ_QUESTIONS
+            for q in sampled
         ]
 
     @application.post("/api/quiz/submit", tags=["quiz"])
@@ -970,10 +973,13 @@ def create_app(
         user_answers = payload.answers
         results = []
         score = 0
+        quiz_map = {q["id"]: q for q in QUIZ_QUESTIONS}
 
-        for q in QUIZ_QUESTIONS:
-            qid = q["id"]
-            selected = user_answers.get(qid, "").casefold()
+        for qid, ans in user_answers.items():
+            q = quiz_map.get(qid)
+            if not q:
+                continue
+            selected = str(ans).casefold()
             correct = q["correct"].casefold()
             is_correct = (selected == correct)
             if is_correct:
@@ -986,13 +992,14 @@ def create_app(
                 "explanation": q["explanation"],
             })
 
+        total = max(len(results), 5)
         passed = (score >= 4)
         store.update_user_quiz(user["user_id"], passed=passed, score=score)
 
         return {
             "score": score,
-            "total": len(QUIZ_QUESTIONS),
-            "percentage": int((score / len(QUIZ_QUESTIONS)) * 100),
+            "total": total,
+            "percentage": int((score / total) * 100),
             "passed": passed,
             "results": results,
             "message": "Congratulations! You passed the Readiness Assessment." if passed else "Score was below 80%. Review the handbook and try again.",

@@ -961,15 +961,23 @@
           </div>
         </section>
 
-        <!-- VIEW: 5 MEQ Readiness Assessment Quiz -->
+        <!-- VIEW: 5 MEQ Readiness Assessment Quiz (Randomized 5 from 25 Questions) -->
         <section class="view-section" id="view-quiz" style="display: none;">
           <div class="quiz-container">
             <div class="card" style="padding: 1.5rem; text-align: center;">
-              <div class="badge badge-indigo" style="margin: 0 auto 0.5rem;">Pre-Flight Evaluation</div>
+              <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                <span class="badge badge-indigo">Pre-Flight Evaluation</span>
+                <span class="badge badge-emerald">25-Question Pool • 5 Random MEQs Each Attempt</span>
+              </div>
               <h1 style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">Industry Readiness Assessment</h1>
-              <p style="color: #64748b; font-size: 0.9rem; max-width: 580px; margin: 0.25rem auto 0;">
-                Test your understanding of corporate engineering operations, incident triage, and reliability standards. Score 80% (4 of 5) to unlock the production problem bank.
+              <p style="color: #64748b; font-size: 0.9rem; max-width: 620px; margin: 0.25rem auto 0;">
+                Test your understanding of corporate engineering operations, incident triage, and reliability standards. Each attempt presents a randomized sample of 5 questions. Score 80% (4 of 5) to unlock the production problem bank.
               </p>
+              <div style="margin-top: 0.75rem;">
+                <button class="btn btn-ghost btn-sm" id="btn-shuffle-quiz" style="font-size: 0.78rem; color: #6366f1; border: 1px dashed #cbd5e1; padding: 4px 12px; border-radius: 6px;" title="Load 5 different random questions from the 25-question pool">
+                  🔄 Shuffle / Get 5 New Random Questions
+                </button>
+              </div>
             </div>
 
             <div id="quiz-questions-list" style="display: flex; flex-direction: column; gap: 1rem;">
@@ -979,9 +987,14 @@
             <div id="quiz-results-banner" class="card" style="display: none; padding: 1.5rem; text-align: center;">
               <div id="quiz-score-display" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;"></div>
               <p id="quiz-status-message" style="font-size: 0.95rem; color: #475569; margin-bottom: 1rem;"></p>
-              <button class="btn btn-primary" id="quiz-unlock-problems-btn" style="display: none; margin: 0 auto;">
-                Start Production Problem Bank (40 Problems) ➔
-              </button>
+              <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="quiz-unlock-problems-btn" style="display: none; margin: 0;">
+                  Start Production Problem Bank (40 Problems) ➔
+                </button>
+                <button class="btn btn-outline" id="quiz-retake-btn" style="margin: 0; font-size: 0.85rem;">
+                  🔄 Retake with 5 New Random Questions
+                </button>
+              </div>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 1rem;">
