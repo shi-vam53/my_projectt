@@ -3346,7 +3346,7 @@ function bindAuthControls() {
   const userLabel = document.getElementById('auth-username-label');
   let isSignup = false;
 
-  function switchToSignIn() {
+  function switchToSignIn(prefillUsername = null) {
     isSignup = false;
     if (tabSignin) tabSignin.classList.add('active');
     if (tabSignup) tabSignup.classList.remove('active');
@@ -3354,7 +3354,7 @@ function bindAuthControls() {
     if (userLabel) userLabel.textContent = 'Email or Username';
     if (submitBtn) submitBtn.textContent = 'Sign In to Praxis';
     if (title) title.textContent = 'Sign In to Praxis';
-    if (desc) desc.textContent = 'Enter your email or username to access your simulation dashboard.';
+    if (desc) desc.textContent = 'Enter your registered credentials to access your simulation dashboard.';
     const promptEl = document.getElementById('auth-footer-prompt');
     if (promptEl) {
       promptEl.innerHTML = `Don't have an account? <a href="#" id="auth-link-switch" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Create a Free Account</a>`;
@@ -3365,9 +3365,13 @@ function bindAuthControls() {
     }
     const errorMsg = document.getElementById('auth-error-msg');
     if (errorMsg) errorMsg.style.display = 'none';
+    if (prefillUsername) {
+      const uInput = document.getElementById('auth-username');
+      if (uInput) uInput.value = prefillUsername;
+    }
   }
 
-  function switchToSignUp() {
+  function switchToSignUp(prefillUsername = null) {
     isSignup = true;
     if (tabSignup) tabSignup.classList.add('active');
     if (tabSignin) tabSignin.classList.remove('active');
@@ -3386,6 +3390,10 @@ function bindAuthControls() {
     }
     const errorMsg = document.getElementById('auth-error-msg');
     if (errorMsg) errorMsg.style.display = 'none';
+    if (prefillUsername) {
+      const uInput = document.getElementById('auth-username');
+      if (uInput) uInput.value = prefillUsername;
+    }
   }
 
   if (tabSignin && tabSignup) {
@@ -3457,6 +3465,7 @@ function bindAuthControls() {
           if (res.ok && data.user && data.token) {
             backendSuccess = true;
             if (submitBtn) submitBtn.disabled = false;
+            data.user.password = password;
             saveSessionAndProceed(data.user, data.token);
             return;
           }
@@ -3479,10 +3488,10 @@ function bindAuthControls() {
               submitBtn.textContent = 'Create Free Account';
             }
             if (errorMsg) {
-              errorMsg.innerHTML = `${escapeHtml(detailMsg)} <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Click to Sign In with this Email</button>`;
+              errorMsg.innerHTML = `${escapeHtml(detailMsg)} <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;">Sign In with this Account</button>`;
               errorMsg.style.display = 'block';
               document.getElementById('btn-quick-signin')?.addEventListener('click', () => {
-                switchToSignIn();
+                switchToSignIn(rawUsername);
                 if (passwordInput) passwordInput.focus();
               });
             }
@@ -3494,10 +3503,10 @@ function bindAuthControls() {
               submitBtn.textContent = 'Sign In to Praxis';
             }
             if (errorMsg) {
-              errorMsg.innerHTML = `${escapeHtml(detailMsg)} <br>New to Praxis? <button type="button" class="btn btn-outline btn-sm" id="btn-quick-signup" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Create Free Account with this Email</button>`;
+              errorMsg.innerHTML = `${escapeHtml(detailMsg)} <br>New to Praxis? <button type="button" class="btn btn-outline btn-sm" id="btn-quick-signup" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;">Create Free Account with this Email</button>`;
               errorMsg.style.display = 'block';
               document.getElementById('btn-quick-signup')?.addEventListener('click', () => {
-                switchToSignUp();
+                switchToSignUp(rawUsername);
                 if (passwordInput) passwordInput.focus();
               });
             }
@@ -3532,12 +3541,13 @@ function bindAuthControls() {
       }
 
       if (isSignup) {
+        // CREATING A NEW ACCOUNT
         if (usersDb[username]) {
           if (errorMsg) {
-            errorMsg.innerHTML = `Account "${escapeHtml(rawUsername)}" is already registered locally. <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin-off" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem;">Sign in with this account</button>`;
+            errorMsg.innerHTML = `An account with username "<strong>${escapeHtml(rawUsername)}</strong>" is already registered. <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin-off" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;">Sign in to this account</button>`;
             errorMsg.style.display = 'block';
             document.getElementById('btn-quick-signin-off')?.addEventListener('click', () => {
-              switchToSignIn();
+              switchToSignIn(rawUsername);
               if (passwordInput) passwordInput.focus();
             });
           }
@@ -3561,36 +3571,33 @@ function bindAuthControls() {
         const localToken = 'praxis-token-' + newUser.user_id;
         saveSessionAndProceed(newUser, localToken);
       } else {
-        // Sign In
+        // SIGNING IN TO AN EXISTING ACCOUNT
         const existing = usersDb[username];
-        if (existing) {
-          if (existing.password && existing.password !== password) {
-            if (errorMsg) {
-              errorMsg.textContent = 'Incorrect password for this account. Please verify and try again.';
-              errorMsg.style.display = 'block';
-            }
-            return;
+        if (!existing) {
+          // ACCOUNT DOES NOT EXIST! STRICT VERIFICATION: MUST NOT LET RANDOM USERS IN!
+          if (errorMsg) {
+            errorMsg.innerHTML = `No account found for "<strong>${escapeHtml(rawUsername)}</strong>". <br>New to Praxis? <button type="button" class="btn btn-outline btn-sm" id="btn-quick-signup-off" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;">Create a Free Account first</button>`;
+            errorMsg.style.display = 'block';
+            document.getElementById('btn-quick-signup-off')?.addEventListener('click', () => {
+              switchToSignUp(rawUsername);
+              if (passwordInput) passwordInput.focus();
+            });
           }
-          const localToken = 'praxis-token-' + existing.user_id;
-          saveSessionAndProceed(existing, localToken);
-        } else {
-          // Automatic seamless enrollment for visitor on static host
-          const newUser = {
-            user_id: 'usr_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6),
-            username: username,
-            full_name: full_name,
-            password: password,
-            role: null,
-            role_locked: false,
-            quiz_passed: false,
-            quiz_score: 0,
-            created_at: new Date().toISOString()
-          };
-          usersDb[username] = newUser;
-          safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
-          const localToken = 'praxis-token-' + newUser.user_id;
-          saveSessionAndProceed(newUser, localToken);
+          return;
         }
+
+        if (existing.password && existing.password !== password) {
+          // PASSWORD DOES NOT MATCH! STRICT VERIFICATION!
+          if (errorMsg) {
+            errorMsg.textContent = 'Incorrect password for this account. Please verify your credentials and try again.';
+            errorMsg.style.display = 'block';
+          }
+          return;
+        }
+
+        // Credentials strictly verified!
+        const localToken = 'praxis-token-' + existing.user_id;
+        saveSessionAndProceed(existing, localToken);
       }
     });
   }
