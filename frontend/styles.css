@@ -17,6 +17,8 @@
   --bg-main: #f9f7f1;           /* Elegant warm cream paper canvas */
   --bg-card: #ffffff;           /* Clean warm-white card surfaces */
   --bg-subtle: #f2eee3;         /* Soft warm ivory pill/input backgrounds */
+  --bg-secondary: #f2eee3;      /* Secondary container surface */
+  --bg-hover: #eae5d8;          /* Warm hover surface */
   --bg-input: #ffffff;
   --border-color: #e5e0d3;      /* Warm muted borders */
   --border-subtle: #eeeae0;     /* Subtle warm dividing lines */
@@ -1941,18 +1943,20 @@ html, body {
 }
 
 /* ==========================================================================
-   MODAL 1: 5-Question Readiness Check Modal
+   MODAL 1: 5-Question Readiness Check Modal & Universal Modal Base
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(4px);
+  background-color: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 1100;
   padding: 1.5rem;
+  overflow-y: auto;
   animation: fadeIn 0.15s ease-out;
 }
 
@@ -1962,9 +1966,10 @@ html, body {
 }
 
 .modal-dialog {
-  background-color: #ffffff;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--border-color);
   width: 100%;
   max-width: 680px;
   max-height: 90vh;
@@ -1972,7 +1977,33 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--border-color);
+  position: relative;
+  z-index: 1101;
   animation: scaleUp 0.15s ease-out;
+}
+
+/* Universal Keyboard Keycap (Kbd) Styling */
+kbd {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 0.78rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1e293b;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.hotkeys-table tr {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.hotkeys-table tr:last-child {
+  border-bottom: none;
 }
 
 @keyframes scaleUp {
@@ -4305,6 +4336,8 @@ body.dark-mode {
   --bg-main: #0b0f17;
   --bg-card: #151d2a;
   --bg-subtle: #1e293b;
+  --bg-secondary: #1e293b;
+  --bg-hover: #273549;
   --bg-input: #1e293b;
   --border-color: #334155;
   --border-subtle: #1e293b;
@@ -4334,6 +4367,23 @@ body.dark-mode .view-description {
   color: #94a3b8 !important;
 }
 
+/* Keycaps & Inputs in Dark Mode */
+body.dark-mode kbd {
+  color: #f8fafc !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  border-bottom-color: #64748b !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
 /* Surface Cards & Panels */
 body.dark-mode .card,
 body.dark-mode .dashboard-queue-box,
@@ -4355,6 +4405,90 @@ body.dark-mode .dashboard-section-card {
   background-color: #151d2a !important;
   border-color: #334155 !important;
   color: #f8fafc !important;
+}
+
+/* Quiz Option Buttons in Dark Mode */
+body.dark-mode .quiz-option-btn {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .quiz-option-btn:hover:not(:disabled) {
+  border-color: #6366f1 !important;
+  background-color: #273549 !important;
+}
+
+body.dark-mode .quiz-option-btn.selected-correct,
+body.dark-mode .quiz-option-btn.correct-revealed {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #6ee7b7 !important;
+}
+
+body.dark-mode .quiz-option-btn.selected-incorrect {
+  border-color: #f43f5e !important;
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #fda4af !important;
+}
+
+/* Rubric Modal Elements in Dark Mode */
+body.dark-mode .rubric-hero-card {
+  background: linear-gradient(135deg, #1e293b, #151d2a) !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .dimension-card {
+  background-color: #151d2a !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .dimension-feedback {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-left-color: #818cf8 !important;
+}
+
+body.dark-mode .coaching-feedback-card {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+body.dark-mode .coaching-title {
+  color: #fcd34d !important;
+}
+
+body.dark-mode .coaching-content {
+  color: #fef3c7 !important;
+}
+
+body.dark-mode .tag-pill {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #a5b4fc !important;
+}
+
+body.dark-mode .data-table tr:hover td {
+  background: #1e293b !important;
+}
+
+body.dark-mode .admin-sheet-card {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+body.dark-mode .admin-sheet-title {
+  color: #34d399 !important;
+}
+
+body.dark-mode .admin-sheet-desc {
+  color: #a7f3d0 !important;
+}
+
+body.dark-mode .admin-sheet-csv-btn {
+  background: #1e293b !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
 }
 
 /* Top Header Bar in Dark Mode */

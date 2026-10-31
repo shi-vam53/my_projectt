@@ -2913,20 +2913,20 @@ function openReviewerModal(submissionId) {
   `).join('');
 
   let html = `
-    <div style="display: flex; gap: 1rem; align-items: center; background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem;">
+    <div style="display: flex; gap: 1rem; align-items: center; background: var(--bg-subtle); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; border: 1px solid var(--border-color);">
       <div style="font-size: 1.5rem; font-weight: 800; color: var(--indigo-600);">${sub.score || sub.overall_score || 0} / 100</div>
       <div>
-        <div style="font-weight: 700; font-size: 0.95rem;">Automated Rubric Verdict: ${escapeHtml(sub.approval_message || sub.approval_status)}</div>
+        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">Automated Rubric Verdict: ${escapeHtml(sub.approval_message || sub.approval_status)}</div>
         <div style="font-size: 0.825rem; color: var(--text-muted);">${escapeHtml(sub.evaluation_note || 'Deterministic rubric scoring.')}</div>
       </div>
     </div>
 
-    <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem;">Dimensional Rubric Scores:</h4>
-    <div style="margin-bottom: 1.25rem; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 0.75rem 1rem;">
+    <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-primary);">Dimensional Rubric Scores:</h4>
+    <div style="margin-bottom: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem 1rem;">
       ${dimsHtml}
     </div>
 
-    <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem;">Candidate's Structured Incident Report:</h4>
+    <h4 style="margin-bottom: 0.75rem; font-size: 0.95rem; color: var(--text-primary);">Candidate's Structured Incident Report:</h4>
     <div>${answersHtml}</div>
 
     <div style="margin-top: 1.25rem;">
@@ -4707,16 +4707,16 @@ function renderProblemDetail(problemId) {
         <span class="badge ${problem.status === 'completed' ? 'badge-emerald' : 'badge-outline'}">${problem.status === 'completed' ? '✓ Solved (' + (problem.score || 100) + '/100)' : 'Unsolved'}</span>
       </div>
 
-      <h1 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-top: 0.25rem;">${escapeHtml(problem.title)}</h1>
+      <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;">${escapeHtml(problem.title)}</h1>
 
       <div>
-        <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.04em;">Production Incident & Scenario</h3>
-        <p style="font-size: 0.925rem; color: #1e293b; line-height: 1.5; margin-top: 0.25rem;">${escapeHtml(problem.scenario)}</p>
+        <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em;">Production Incident & Scenario</h3>
+        <p style="font-size: 0.925rem; color: var(--text-secondary); line-height: 1.5; margin-top: 0.25rem;">${escapeHtml(problem.scenario)}</p>
       </div>
 
       <div style="margin-top: 0.25rem;">
-        <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.04em;">Your Engineering Deliverable</h3>
-        <p style="font-size: 0.925rem; color: #1e293b; line-height: 1.5; margin-top: 0.25rem;">${escapeHtml(problem.task)}</p>
+        <h3 style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em;">Your Engineering Deliverable</h3>
+        <p style="font-size: 0.925rem; color: var(--text-secondary); line-height: 1.5; margin-top: 0.25rem;">${escapeHtml(problem.task)}</p>
       </div>
     </div>
 
@@ -4904,19 +4904,24 @@ async function submitProblemSolution(problemId) {
       const data = await res.json();
       const evalCard = document.getElementById('problem-eval-result');
       if (evalCard) {
+        const isDark = document.body.classList.contains('dark-mode');
         evalCard.style.display = 'flex';
-        evalCard.style.background = data.passed ? '#f0fdf4' : '#fffbeb';
-        evalCard.style.borderColor = data.passed ? '#bbf7d0' : '#fde68a';
+        evalCard.style.background = data.passed
+          ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#f0fdf4')
+          : (isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb');
+        evalCard.style.borderColor = data.passed
+          ? (isDark ? 'rgba(16, 185, 129, 0.4)' : '#bbf7d0')
+          : (isDark ? 'rgba(245, 158, 11, 0.4)' : '#fde68a');
         evalCard.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <strong style="color: ${data.passed ? '#166534' : '#92400e'}; font-size: 1rem;">
+            <strong style="color: ${data.passed ? (isDark ? '#6ee7b7' : '#166534') : (isDark ? '#fcd34d' : '#92400e')}; font-size: 1rem;">
               ${data.passed ? '✓ Solution Accepted' : '⚠ Revisions Recommended'}
             </strong>
             <span class="badge ${data.passed ? 'badge-emerald' : 'badge-amber'}">${data.score} / 100</span>
           </div>
-          <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(data.feedback)}</p>
+          <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(data.feedback)}</p>
           ${nextProb ? `
-            <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${data.passed ? '#bbf7d0' : '#fde68a'};">
+            <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${data.passed ? (isDark ? 'rgba(16, 185, 129, 0.3)' : '#bbf7d0') : (isDark ? 'rgba(245, 158, 11, 0.3)' : '#fde68a')};">
               <button class="btn btn-primary btn-sm" id="btn-eval-next-prob">
                 Proceed to Next Question (${nextProb.id.toUpperCase()}) ➔
               </button>
@@ -4974,19 +4979,24 @@ async function submitProblemSolution(problemId) {
 
     const evalCard = document.getElementById('problem-eval-result');
     if (evalCard) {
+      const isDark = document.body.classList.contains('dark-mode');
       evalCard.style.display = 'flex';
-      evalCard.style.background = passed ? '#f0fdf4' : '#fffbeb';
-      evalCard.style.borderColor = passed ? '#bbf7d0' : '#fde68a';
+      evalCard.style.background = passed
+        ? (isDark ? 'rgba(16, 185, 129, 0.15)' : '#f0fdf4')
+        : (isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb');
+      evalCard.style.borderColor = passed
+        ? (isDark ? 'rgba(16, 185, 129, 0.4)' : '#bbf7d0')
+        : (isDark ? 'rgba(245, 158, 11, 0.4)' : '#fde68a');
       evalCard.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="color: ${passed ? '#166534' : '#92400e'}; font-size: 1rem;">
+          <strong style="color: ${passed ? (isDark ? '#6ee7b7' : '#166534') : (isDark ? '#fcd34d' : '#92400e')}; font-size: 1rem;">
             ${passed ? '✓ Solution Accepted' : '⚠ Revisions Recommended'}
           </strong>
           <span class="badge ${passed ? 'badge-emerald' : 'badge-amber'}">${score} / 100</span>
         </div>
-        <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(feedback)}</p>
+        <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(feedback)}</p>
         ${nextProb ? `
-          <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${passed ? '#bbf7d0' : '#fde68a'};">
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${passed ? (isDark ? 'rgba(16, 185, 129, 0.3)' : '#bbf7d0') : (isDark ? 'rgba(245, 158, 11, 0.3)' : '#fde68a')};">
             <button class="btn btn-primary btn-sm" id="btn-eval-next-prob">
               Proceed to Next Question (${nextProb.id.toUpperCase()}) ➔
             </button>
@@ -5228,24 +5238,32 @@ function openQuizReviewModal(data) {
     ? state.quizQuestions
     : ((window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.QUIZ_QUESTIONS) || []);
 
+  const isDark = document.body.classList.contains('dark-mode');
+
   content.innerHTML = questions.map((q, idx) => {
     const userAnsId = state.quizUserAnswers[q.id];
     const isCorrect = userAnsId === q.correct_option_id;
     return `
       <div class="card" style="padding: 1rem; border-left: 4px solid ${isCorrect ? '#10b981' : '#f59e0b'};">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <strong style="font-size: 0.95rem; color: #0f172a;">Q${idx + 1}: ${escapeHtml(q.prompt || q.question)}</strong>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+          <strong style="font-size: 0.95rem; color: var(--text-primary);">Q${idx + 1}: ${escapeHtml(q.prompt || q.question)}</strong>
           <span class="badge ${isCorrect ? 'badge-emerald' : 'badge-amber'}">${isCorrect ? 'Correct ✓' : 'Incorrect ✗'}</span>
         </div>
-        <div style="font-size: 0.85rem; color: #475569; margin-bottom: 0.5rem;">
+        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
           ${(q.options || []).map(opt => `
-            <div style="padding: 4px 8px; margin: 3px 0; border-radius: 4px; ${opt.id === q.correct_option_id ? 'background: #dcfce7; color: #166534; font-weight: bold;' : (opt.id === userAnsId ? 'background: #fee2e2; color: #991b1b;' : '')}">
+            <div style="padding: 6px 10px; margin: 4px 0; border-radius: 6px; ${
+              opt.id === q.correct_option_id
+                ? (isDark ? 'background: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: bold; border: 1px solid rgba(16, 185, 129, 0.4);' : 'background: #dcfce7; color: #166534; font-weight: bold; border: 1px solid #bbf7d0;')
+                : (opt.id === userAnsId
+                    ? (isDark ? 'background: rgba(244, 63, 94, 0.2); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.4);' : 'background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3;')
+                    : 'background: var(--bg-subtle); color: var(--text-secondary);')
+            }">
               ${opt.id === q.correct_option_id ? '✓ ' : (opt.id === userAnsId ? '✗ ' : '• ')}${escapeHtml(opt.text)}
             </div>
           `).join('')}
         </div>
-        <div style="background: #f8fafc; padding: 0.5rem; border-radius: 6px; font-size: 0.8rem; color: #334155; line-height: 1.4;">
-          <strong>Concept Explanation:</strong> ${escapeHtml(q.explanation || 'Review industry standard best practices for this role.')}
+        <div style="background: var(--bg-subtle); padding: 0.65rem 0.85rem; border-radius: 6px; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; border: 1px solid var(--border-subtle);">
+          <strong style="color: var(--text-primary);">Concept Explanation:</strong> ${escapeHtml(q.explanation || 'Review industry standard best practices for this role.')}
         </div>
       </div>
     `;

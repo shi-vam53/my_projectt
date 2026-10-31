@@ -22,8 +22,8 @@
           </svg>
         </div>
         <div class="brand-text">
-          <span class="brand-title" style="color: #0f172a;">Praxis</span>
-          <span class="brand-subtitle" style="color: #64748b;">Workplace Simulation Platform</span>
+          <span class="brand-title" style="color: var(--text-primary);">Praxis</span>
+          <span class="brand-subtitle" style="color: var(--text-muted);">Workplace Simulation Platform</span>
         </div>
       </div>
       <div class="auth-header">
@@ -48,11 +48,11 @@
           <label for="auth-password">Password</label>
           <div style="position: relative; display: flex; align-items: center;">
             <input type="password" id="auth-password" class="auth-input" placeholder="Password (at least 4 characters)" required autocomplete="current-password" style="padding-right: 40px; width: 100%;">
-            <button type="button" id="toggle-auth-password" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; font-size: 1rem; color: #64748b;" title="Show/Hide Password" aria-label="Toggle Password Visibility">👁️</button>
+            <button type="button" id="toggle-auth-password" style="position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; font-size: 1rem; color: var(--text-muted);" title="Show/Hide Password" aria-label="Toggle Password Visibility">👁️</button>
           </div>
         </div>
         <button type="submit" class="auth-submit-btn" id="auth-submit-btn">Sign In to Praxis</button>
-        <div id="auth-footer-prompt" style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center; line-height: 1.4;">
+        <div id="auth-footer-prompt" style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted); text-align: center; line-height: 1.4;">
           Don't have an account? <a href="#" id="auth-link-switch" style="color: #4f46e5; font-weight: bold; text-decoration: underline;">Create a Free Account</a>
         </div>
       </form>
@@ -70,8 +70,8 @@
           </svg>
         </div>
         <div class="brand-text">
-          <span class="brand-title" style="color: #0f172a;">Praxis Onboarding</span>
-          <span class="brand-subtitle" style="color: #64748b;">Step 1: Choose Your Career Track</span>
+          <span class="brand-title" style="color: var(--text-primary);">Praxis Onboarding</span>
+          <span class="brand-subtitle" style="color: var(--text-muted);">Step 1: Choose Your Career Track</span>
         </div>
       </div>
       <div class="role-lock-warning">
@@ -315,8 +315,8 @@
             <!-- The 4 Main Action Sections: 3 Incomplete Problem Sections + 1 Visit Handbook -->
             <div>
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Engineering Curriculum & Resources</h2>
-                <span style="font-size: 0.8rem; color: #64748b;">Click any section below to jump directly</span>
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Engineering Curriculum & Resources</h2>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Click any section below to jump directly</span>
               </div>
 
               <div class="dashboard-grid-4">
@@ -394,8 +394,8 @@
             <div class="dashboard-queue-box">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                  <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Up Next: 3 Incomplete Problems</h3>
-                  <p style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">Immediate production tickets waiting for your triage and solution.</p>
+                  <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">Up Next: 3 Incomplete Problems</h3>
+                  <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Immediate production tickets waiting for your triage and solution.</p>
                 </div>
                 <span class="badge badge-indigo">Priority Queue</span>
               </div>
@@ -427,20 +427,19 @@
               </div>
             </div>
 
-            
             <!-- Chapters Preview (Clickable to jump directly to section) -->
-            <div class="handbook-search-bar" style="margin-top: 1.25rem; margin-bottom: 0.5rem; display: flex; gap: 0.75rem; align-items: center; background: #ffffff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div class="handbook-search-bar" style="margin-top: 1.25rem; margin-bottom: 0.5rem; display: flex; gap: 0.75rem; align-items: center; background: var(--bg-card); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
               <span style="font-size: 1rem;">🔍</span>
-              <input type="text" id="handbook-search-input" placeholder="Search keywords across 11 handbook chapters (e.g. SLI, Postmortem, CI/CD, Git)..." style="flex: 1; border: none; outline: none; font-size: 0.85rem; background: transparent; color: inherit;">
-              <span id="handbook-search-count" style="font-size: 0.75rem; font-weight: 700; color: #6366f1;"></span>
+              <input type="text" id="handbook-search-input" placeholder="Search keywords across 11 handbook chapters (e.g. SLI, Postmortem, CI/CD, Git)..." style="flex: 1; border: none; outline: none; font-size: 0.85rem; background: transparent; color: var(--text-primary);">
+              <span id="handbook-search-count" style="font-size: 0.75rem; font-weight: 700; color: var(--indigo-500);"></span>
             </div>
 
             <!-- Chapters Preview (Clickable to jump directly to section) -->
             <div class="card" style="padding: 1.5rem;" id="handbook-syllabus-card">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <div>
-                  <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Handbook Syllabus (Click to Jump Directly)</h2>
-                  <p style="font-size: 0.825rem; color: #64748b; margin-top: 2px;">Click any section below to read its in-depth production guide instantly.</p>
+                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Handbook Syllabus (Click to Jump Directly)</h2>
+                  <p style="font-size: 0.825rem; color: var(--text-muted); margin-top: 2px;">Click any section below to read its in-depth production guide instantly.</p>
                 </div>
                 <span class="badge badge-indigo">11 Core Sections</span>
               </div>
@@ -537,7 +536,7 @@
               <article class="reader-section-block" id="sec-01">
                 <span class="reader-section-tag">Section 01 • Organizational Structure</span>
                 <h2 class="reader-section-title">Modern Engineering Organization Topology & Decision Ownership</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Software in modern tech companies is built by cross-functional teams rather than isolated individuals. Understanding who owns which decisions prevents friction, accelerates feature delivery, and ensures operational accountability.
                 </p>
 
@@ -597,20 +596,20 @@
               <article class="reader-section-block" id="sec-02">
                 <span class="reader-section-tag">Section 02 • Agile Operations</span>
                 <h2 class="reader-section-title">The Agile Delivery Engine & Work Tracking</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Engineering teams work in 1- to 2-week iterations known as <strong>Sprints</strong>. Work is organized into backlogs and tracked in tools like Jira, Linear, or GitHub Projects.
                 </p>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">Core Scrum Ceremonies</h3>
-                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 6px;">
+                <h3 >Core Scrum Ceremonies</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
                   <li><strong>Sprint Planning:</strong> At the start of each cycle, the team breaks backlog user stories into engineering tasks and commits to a specific deliverable scope.</li>
                   <li><strong>Daily Standup (15 mins):</strong> Three concise updates: (1) What was completed yesterday, (2) What is planned for today, and (3) Any blockers preventing progress.</li>
                   <li><strong>Backlog Refinement (Grooming):</strong> Engineers and PMs review upcoming proposals, clarify ambiguous acceptance criteria, identify dependencies, and assign story points.</li>
                   <li><strong>Sprint Retrospective:</strong> A blameless review at sprint end: What went well? What slowed us down? What concrete action items will we implement next cycle?</li>
                 </ul>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1.25rem 0 0.5rem;">Story Pointing & Estimation (Fibonacci Scale)</h3>
-                <p style="color: #334155; line-height: 1.6;">
+                <h3 >Story Pointing & Estimation (Fibonacci Scale)</h3>
+                <p >
                   Story points measure relative complexity and uncertainty, not literal calendar hours. Common scale:
                   <strong>1 point</strong> (trivial change, e.g. text copy or config bump),
                   <strong>2 points</strong> (routine task with clear patterns),
@@ -628,17 +627,17 @@
               <article class="reader-section-block" id="sec-03">
                 <span class="reader-section-tag">Section 03 • Code Hygiene</span>
                 <h2 class="reader-section-title">Version Control Hygiene & Pull Request Etiquette</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   In production teams, Git is not just backup storage; it is the official audit trail of why, when, and how your software evolved.
                 </p>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">Trunk-Based Development vs. Long-Lived Branches</h3>
-                <p style="color: #334155; line-height: 1.6;">
+                <h3 >Trunk-Based Development vs. Long-Lived Branches</h3>
+                <p >
                   High-performing teams practice <strong>Trunk-Based Development</strong>: engineers create short-lived feature branches (lasting hours to 2 days maximum), rebase frequently onto <code>main</code>, and merge often via automated CI checks. Long-lived feature branches lead to painful merge conflicts ("merge hell") and risky, high-blast-radius releases.
                 </p>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1.25rem 0 0.5rem;">Conventional Commit Standards</h3>
-                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 4px;">
+                <h3 >Conventional Commit Standards</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 4px;">
                   <li><code>feat(auth): add stripe webhook handler</code> — Adds a new user-facing capability.</li>
                   <li><code>fix(db): handle connection pool timeout</code> — Patches an unexpected bug or error.</li>
                   <li><code>refactor(api): extract validation middleware</code> — Modifies code structure without altering external behavior.</li>
@@ -655,7 +654,7 @@
               <article class="reader-section-block" id="sec-04">
                 <span class="reader-section-tag">Section 04 • Infrastructure</span>
                 <h2 class="reader-section-title">Environment Tiers & Infrastructure Parity</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Code progresses through distinct, isolated runtime environments before reaching paying users. Never test or debug experimental logic in production.
                 </p>
 
@@ -695,12 +694,12 @@
               <article class="reader-section-block" id="sec-05">
                 <span class="reader-section-tag">Section 05 • Deployment Engineering</span>
                 <h2 class="reader-section-title">CI/CD Pipelines & Modern Deployment Strategies</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   High-performing engineering teams deploy multiple times per day using automated delivery pipelines that eliminate manual human error.
                 </p>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">Zero-Downtime Deployment Patterns</h3>
-                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+                <h3 >Zero-Downtime Deployment Patterns</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
                   <li><strong>Rolling Update:</strong> Containers are incrementally replaced one-by-one. The load balancer stops routing to old instances as new healthy instances pass health check probes.</li>
                   <li><strong>Blue/Green Deployment:</strong> Two identical production environments exist. "Blue" serves live traffic. You deploy new version to "Green". Once verified, the load balancer router instantly flips traffic from Blue to Green.</li>
                   <li><strong>Canary Release:</strong> Route 2% of live traffic to the new version while 98% remains on stable. Monitor error rates, memory usage, and latency for 15 minutes. If metrics remain healthy, ramp to 10%, 50%, and 100%.</li>
@@ -716,12 +715,12 @@
               <article class="reader-section-block" id="sec-06">
                 <span class="reader-section-tag">Section 06 • Telemetry</span>
                 <h2 class="reader-section-title">Production Observability: Telemetry in the Wild</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   You cannot fix what you cannot measure. When an incident occurs at 2:00 AM, observability is the only lens through which engineers understand internal system state.
                 </p>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">The Three Pillars of Observability</h3>
-                <ol style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+                <h3 >The Three Pillars of Observability</h3>
+                <ol style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
                   <li><strong>Metrics (Aggregated Numerics):</strong> Numeric measurements collected over time intervals. Key primitives include <strong>Counters</strong> (monotonically increasing requests), <strong>Gauges</strong> (current memory in MB), and <strong>Histograms</strong> (latency distributions). Fast to query, cheap to store.</li>
                   <li><strong>Structured Logs (Events & Context):</strong> Structured JSON log entries containing contextual metadata: timestamp, log level (DEBUG, INFO, WARN, ERROR), service name, customer ID, and trace ID. Human-readable and indexable in Datadog, Elasticsearch, or Loki.</li>
                   <li><strong>Distributed Tracing (Request Journeys):</strong> Tracks a single user request as it traverses 10+ microservices. Propagates a <code>Trace-ID</code> and child <code>Span-IDs</code> across HTTP/gRPC boundaries to pinpoint exact millisecond bottlenecks.</li>
@@ -736,12 +735,12 @@
               <article class="reader-section-block" id="sec-07">
                 <span class="reader-section-tag">Section 07 • Reliability Engineering</span>
                 <h2 class="reader-section-title">Reliability Engineering, SLAs & Incident Triage</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   No distributed system achieves 100% uptime. SRE is the discipline of treating operational reliability as a software problem with mathematically defined boundaries.
                 </p>
 
-                <h3 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin: 1rem 0 0.5rem;">SLI, SLO, SLA & Error Budgets</h3>
-                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 6px;">
+                <h3 >SLI, SLO, SLA & Error Budgets</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
                   <li><strong>Service Level Indicator (SLI):</strong> A quantifiable metric of service performance (e.g. "% of HTTP requests returning &lt; 200ms without 5xx errors").</li>
                   <li><strong>Service Level Objective (SLO):</strong> Target reliability goal agreed upon by engineering and product (e.g. "99.9% of requests succeed over rolling 30-day window").</li>
                   <li><strong>Service Level Agreement (SLA):</strong> Formal legal contract specifying financial penalties if reliability breaches thresholds (e.g. 99.5%).</li>
@@ -757,11 +756,11 @@
               <article class="reader-section-block" id="sec-08">
                 <span class="reader-section-tag">Section 08 • Application Security</span>
                 <h2 class="reader-section-title">Enterprise Security, Zero Trust & Compliance</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Security is not a department; it is a fundamental property of every line of code you commit. Modern architectures assume the network is already hostile.
                 </p>
 
-                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 8px;">
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
                   <li><strong>Principle of Least Privilege (PoLP):</strong> A service, database user, or engineer should possess only the absolute minimum permissions necessary to perform their specific job—nothing more. Avoid granting <code>admin</code> or <code>root</code> roles.</li>
                   <li><strong>Zero Trust Architecture:</strong> Never trust internal network boundaries. Authenticate and authorize every single inter-service request using mutual TLS (mTLS) and cryptographically signed tokens (JWTs).</li>
                   <li><strong>Defense in Depth:</strong> Layer multiple defenses: WAF rate limiting at the edge, input sanitization in the API layer, parameterized queries at the ORM layer, and disk encryption at rest.</li>
@@ -777,7 +776,7 @@
               <article class="reader-section-block" id="sec-09">
                 <span class="reader-section-tag">Section 09 • Architecture Lexicon</span>
                 <h2 class="reader-section-title">The Essential Industry Lexicon (Architectural Terms)</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Master these 10 architectural and infrastructure terms to navigate technical design reviews with confidence:
                 </p>
 
@@ -837,7 +836,7 @@
               <article class="reader-section-block" id="sec-10">
                 <span class="reader-section-tag">Section 10 • Operations Lexicon</span>
                 <h2 class="reader-section-title">The Essential Industry Lexicon (Operations & Culture)</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Engineering culture has its own operational vernacular. Understanding these terms helps decode everyday team communication:
                 </p>
 
@@ -893,11 +892,11 @@
               <article class="reader-section-block" id="sec-11">
                 <span class="reader-section-tag">Section 11 • Career Acceleration</span>
                 <h2 class="reader-section-title">The First 90 Days Survival & Acceleration Guide</h2>
-                <p style="color: #334155; line-height: 1.6; margin-bottom: 1rem;">
+                <p >
                   Transitioning from academic coursework to corporate production engineering can feel overwhelming. Follow these five high-leverage principles to establish credibility quickly:
                 </p>
 
-                <ul style="padding-left: 1.25rem; color: #334155; line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 10px;">
                   <li><strong>The 30-Minute Rule for Being Stuck:</strong> Spend 30 minutes researching logs, searching the codebase, and reading internal documentation. If still stuck, ask for help! When asking, document: (1) What you are trying to accomplish, (2) What you tried, (3) The exact error message, and (4) Your current hypothesis.</li>
                   <li><strong>Improve Documentation as You Onboard:</strong> When you encounter out-of-date README steps or broken local setup scripts, submit a PR fixing them immediately. Your teammates will appreciate it.</li>
                   <li><strong>Read Code 3x More Than You Write:</strong> Before implementing a new endpoint, inspect how three existing endpoints handle error validation, database transactions, and logging. Follow established project conventions.</li>
@@ -935,8 +934,8 @@
                 <span class="badge badge-indigo">Pre-Flight Evaluation</span>
                 <span class="badge badge-emerald">25-Question Pool • 5 Random MEQs Each Attempt</span>
               </div>
-              <h1 style="font-size: 1.45rem; font-weight: 800; color: #0f172a;">Industry Readiness Assessment</h1>
-              <p style="color: #64748b; font-size: 0.9rem; max-width: 620px; margin: 0.25rem auto 0;">
+              <h1 style="font-size: 1.45rem; font-weight: 800; color: var(--text-primary);">Industry Readiness Assessment</h1>
+              <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 620px; margin: 0.25rem auto 0;">
                 Test your understanding of corporate engineering operations, incident triage, and reliability standards. Each attempt presents a randomized sample of 5 questions. Score 80% (4 of 5) to unlock the production problem bank.
               </p>
               <div style="margin-top: 0.75rem;">
@@ -952,7 +951,7 @@
 
             <div id="quiz-results-banner" class="card" style="display: none; padding: 1.5rem; text-align: center;">
               <div id="quiz-score-display" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;"></div>
-              <p id="quiz-status-message" style="font-size: 0.95rem; color: #475569; margin-bottom: 1rem;"></p>
+              <p id="quiz-status-message" style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1rem;"></p>
               <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                 <button class="btn btn-primary" id="quiz-unlock-problems-btn" style="display: none; margin: 0;">
                   Start Production Problem Bank (40 Problems) ➔
@@ -1232,18 +1231,18 @@
           </div>
 
           <!-- Live Google Sheet Registration Sync Card -->
-          <div class="card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1px solid #bbf7d0;">
+          <div class="card" class="card admin-sheet-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 1rem;">
               <div style="width: 40px; height: 40px; background: #16a34a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.2rem; font-weight: 800;">
                 📊
               </div>
               <div>
-                <div style="font-weight: 800; font-size: 0.95rem; color: #166534;">Live Google Sheet: Registered Users Master Ledger</div>
-                <div style="font-size: 0.8rem; color: #15803d;">Active sync with Google Drive. Records all user signups, locked career tracks, and readiness assessment scores in real time.</div>
+                <div class="admin-sheet-title" style="font-weight: 800; font-size: 0.95rem;">Live Google Sheet: Registered Users Master Ledger</div>
+                <div class="admin-sheet-desc" style="font-size: 0.8rem;">Active sync with Google Drive. Records all user signups, locked career tracks, and readiness assessment scores in real time.</div>
               </div>
             </div>
             <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-              <a href="assets/Praxis_Registered_Users.csv" download="Praxis_Registered_Users.csv" class="btn btn-outline" style="text-decoration: none; border-color: #86efac; color: #166534; background: #ffffff;">
+              <a href="assets/Praxis_Registered_Users.csv" download="Praxis_Registered_Users.csv" class="btn btn-outline" class="btn btn-outline admin-sheet-csv-btn" style="text-decoration: none;">
                 Download CSV Ledger 📥
               </a>
               <a href="https://docs.google.com/spreadsheets/d/1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0/edit?usp=drivesdk" target="_blank" class="btn btn-primary" style="background: #16a34a; border-color: #15803d; text-decoration: none;">
@@ -1292,8 +1291,8 @@
                 <p class="card-subtitle">Real-time submissions evaluated and persisted to Praxis SQLite database.</p>
               </div>
               <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
-                <input type="text" id="admin-search-input" placeholder="🔍 Search candidate name/id..." style="padding: 5px 10px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
-                <select id="admin-track-filter" style="padding: 5px 8px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #ffffff;">
+                <input type="text" id="admin-search-input" placeholder="🔍 Search candidate name/id..." style="padding: 5px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; outline: none; background: var(--bg-input); color: var(--text-primary);">
+                <select id="admin-track-filter" style="padding: 5px 8px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; outline: none; background: var(--bg-card); color: var(--text-primary);">
                   <option value="all">All Tracks</option>
                   <option value="software-developer">Software Developer</option>
                   <option value="cloud-engineer">Cloud Engineer</option>
@@ -1705,31 +1704,31 @@
 
   <!-- 5. KEYBOARD SHORTCUTS / HOTKEYS MODAL -->
   <div class="modal-backdrop" id="hotkeys-modal" style="display: none;">
-    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="hotkeys-modal-title" style="max-width: 500px;">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="hotkeys-modal-title" style="max-width: 520px;">
       <div class="modal-header">
-        <div class="modal-header-left">
+        <div class="modal-header-left" style="display: flex; align-items: center; gap: 8px;">
           <span class="badge badge-indigo">Productivity</span>
           <h2 class="modal-title" id="hotkeys-modal-title">Keyboard Shortcuts</h2>
         </div>
         <button class="btn-close-modal" id="hotkeys-modal-close-btn" aria-label="Close Shortcuts">&times;</button>
       </div>
       <div class="modal-body" style="padding: 1.5rem;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
-            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Ctrl</kbd> + <kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Enter</kbd></td>
-            <td>Run Pre-Check / Submit Problem Solution</td>
+        <table class="hotkeys-table" style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+          <tr>
+            <td style="padding: 12px 10px; width: 140px; white-space: nowrap;"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+            <td style="padding: 12px 10px; color: var(--text-secondary);">Run Pre-Check / Submit Problem Solution</td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
-            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Ctrl</kbd> + <kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">K</kbd></td>
-            <td>Open Hotkeys / Quick Navigation</td>
+          <tr>
+            <td style="padding: 12px 10px; width: 140px; white-space: nowrap;"><kbd>Ctrl</kbd> + <kbd>K</kbd></td>
+            <td style="padding: 12px 10px; color: var(--text-secondary);">Open Hotkeys / Quick Navigation</td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
-            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Esc</kbd></td>
-            <td>Close any open modal or drawer</td>
+          <tr>
+            <td style="padding: 12px 10px; width: 140px; white-space: nowrap;"><kbd>Esc</kbd></td>
+            <td style="padding: 12px 10px; color: var(--text-secondary);">Close any open modal or drawer</td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border-color); height: 38px;">
-            <td><kbd style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace;">Tab</kbd></td>
-            <td>Insert 2 spaces in Code Editor</td>
+          <tr>
+            <td style="padding: 12px 10px; width: 140px; white-space: nowrap;"><kbd>Tab</kbd></td>
+            <td style="padding: 12px 10px; color: var(--text-secondary);">Insert 2 spaces in Code Editor</td>
           </tr>
         </table>
       </div>
