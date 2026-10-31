@@ -774,8 +774,9 @@ function initApp() {
   try { bindProfileControls(); } catch (e) { console.error('Error binding profile controls:', e); }
   try { bindFormEvents(); } catch (e) { console.error('Error binding form events:', e); }
 
-  // Suite features: Theme, Mobile Drawer, Hotkeys, PWA
+  // Suite features: Theme, Mobile Drawer, Sidebar Collapse, Hotkeys, PWA
   try { initTheme(); } catch (e) { console.error('Error initializing theme:', e); }
+  try { initSidebarCollapse(); } catch (e) { console.error('Error initializing sidebar collapse:', e); }
   try { initMobileDrawer(); } catch (e) { console.error('Error initializing mobile drawer:', e); }
   try { initHotkeys(); } catch (e) { console.error('Error initializing hotkeys:', e); }
   try { initPwaServiceWorker(); } catch (e) { console.error('Error initializing service worker:', e); }
@@ -4219,9 +4220,8 @@ async function renderDashboardView() {
       queueList.querySelectorAll('.dashboard-queue-item').forEach(item => {
         item.addEventListener('click', () => {
           const pid = item.dataset.problemId;
-          state.activeProblemId = pid;
           switchView('problems');
-          renderProblemDetail(pid);
+          openProblemInWorkspace(pid);
         });
       });
     }
@@ -4233,6 +4233,7 @@ async function renderDashboardView() {
     cardBasic.onclick = () => {
       state.problemsFilter = 'basic';
       switchView('problems');
+      openProblemsCatalog();
       const filterBtns = document.querySelectorAll('.prob-filter-btn');
       filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'basic'));
       renderProblemsList('basic');
@@ -4244,6 +4245,7 @@ async function renderDashboardView() {
     cardInter.onclick = () => {
       state.problemsFilter = 'inter';
       switchView('problems');
+      openProblemsCatalog();
       const filterBtns = document.querySelectorAll('.prob-filter-btn');
       filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'inter'));
       renderProblemsList('inter');
@@ -4277,7 +4279,7 @@ async function loadProblemsBank() {
       state.problemsList = await res.json();
       renderProblemsList(state.problemsFilter);
       if (state.problemsList.length > 0) {
-        renderProblemDetail(state.activeProblemId || state.problemsList[0].id);
+        openProblemInWorkspace(state.activeProblemId || state.problemsList[0].id);
       }
       updateProblemsSolvedCounter();
       return;
@@ -4296,7 +4298,7 @@ async function loadProblemsBank() {
     }));
     renderProblemsList(state.problemsFilter);
     if (state.problemsList.length > 0) {
-      renderProblemDetail(state.activeProblemId || state.problemsList[0].id);
+      openProblemInWorkspace(state.activeProblemId || state.problemsList[0].id);
     }
     updateProblemsSolvedCounter();
   }
@@ -4304,9 +4306,9 @@ async function loadProblemsBank() {
 
 function updateProblemsSolvedCounter() {
   const solved = state.problemsList.filter(p => p.status === 'completed').length;
-  const total = state.problemsList.length;
+  const total = state.problemsList.length || 40;
   const countPill = document.getElementById('problems-count-pill');
-  const badge = document.getElementById('prob-solved-count-badge');
+  const badge = document.getElementById('prob-catalog-solved-badge');
   if (countPill) countPill.textContent = `${solved}/${total}`;
   if (badge) badge.textContent = `${solved} / ${total} Solved`;
 }
@@ -4314,11 +4316,30 @@ function updateProblemsSolvedCounter() {
 let currentProbSearch = '';
 let currentProbFilter = 'all';
 
-function renderProblemsList(filter = 'all') {
+function openProblemInWorkspace(problemId) {
+  state.activeProblemId = problemId;
+  const catalogContainer = document.getElementById('problems-catalog-container');
+  const detailContainer = document.getElementById('problem-detail-container');
+  if (catalogContainer) catalogContainer.style.display = 'none';
+  if (detailContainer) detailContainer.style.display = 'flex';
+  renderProblemDetail(problemId);
+}
+
+function openProblemsCatalog() {
+  const catalogContainer = document.getElementById('problems-catalog-container');
+  const detailContainer = document.getElementById('problem-detail-container');
+  if (catalogContainer) catalogContainer.style.display = 'block';
+  if (detailContainer) detailContainer.style.display = 'none';
+  renderProblemsCatalog(currentProbFilter);
+}
+
+function renderProblemsCatalog(filter = 'all') {
   currentProbFilter = filter;
   state.problemsFilter = filter;
-  const container = document.getElementById('problems-scroll-container');
-  if (!container) return;
+  const grid = document.getElementById('problems-catalog-grid');
+  if (!grid) return;
+
+  updateProblemsSolvedCounter();
 
   let filtered = state.problemsList;
   if (filter === 'basic') filtered = filtered.filter(p => p.phase === 1);
@@ -4335,34 +4356,76 @@ function renderProblemsList(filter = 'all') {
     );
   }
 
+  // Bind Resume Active Button
+  const resumeBtn = document.getElementById('btn-resume-active-problem');
+  if (resumeBtn) {
+    resumeBtn.onclick = () => openProblemInWorkspace(state.activeProblemId || 'prob-01');
+  }
+
+  // Bind Search Input
+  const searchInput = document.getElementById('prob-search-input');
+  if (searchInput && !searchInput.dataset.bound) {
+    searchInput.dataset.bound = 'true';
+    searchInput.addEventListener('input', (e) => {
+      currentProbSearch = e.target.value;
+      renderProblemsCatalog(currentProbFilter);
+    });
+  }
+
+  // Bind Filter Tabs
+  const filterTabs = document.querySelectorAll('.problems-filter-tabs .prob-filter-btn');
+  filterTabs.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+    if (!btn.dataset.bound) {
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', () => {
+        filterTabs.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderProblemsCatalog(btn.dataset.filter);
+      });
+    }
+  });
+
   if (filtered.length === 0) {
-    container.innerHTML = `
-      <div style="padding: 2rem 1rem; text-align: center; color: #64748b; font-size: 0.85rem;">
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 3rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
         No problems match your search criteria.
       </div>
     `;
     return;
   }
 
-  container.innerHTML = filtered.map(p => `
-    <div class="prob-list-item ${state.activeProblemId === p.id ? 'active' : ''}" data-problem-id="${p.id}">
-      <div class="prob-item-top">
-        <span class="prob-item-id">${p.id.toUpperCase()}</span>
-        <span class="prob-item-badge ${p.status === 'completed' ? 'prob-badge-done' : (p.phase === 1 ? 'prob-badge-basic' : 'prob-badge-inter')}">
-          ${p.status === 'completed' ? '✓ Completed' : (p.phase === 1 ? 'Basic • Help' : 'Inter • No Help')}
+  grid.innerHTML = filtered.map(p => `
+    <div class="prob-catalog-card ${state.activeProblemId === p.id ? 'active' : ''}" data-problem-id="${p.id}">
+      <div class="prob-catalog-card-header">
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span style="font-weight: 800; font-size: 0.78rem; color: #6366f1;">${p.id.toUpperCase()}</span>
+          <span class="badge ${p.phase === 1 ? 'badge-indigo' : 'badge-amber'}" style="font-size: 0.68rem; padding: 1px 6px;">
+            ${p.phase === 1 ? 'Phase 1: Basic' : 'Phase 2: Inter'}
+          </span>
+        </div>
+        <span class="badge ${p.status === 'completed' ? 'badge-emerald' : 'badge-outline'}" style="font-size: 0.68rem; padding: 1px 6px;">
+          ${p.status === 'completed' ? '✓ Solved' : 'Pending'}
         </span>
       </div>
-      <div class="prob-item-title">${escapeHtml(p.title)}</div>
+      <div class="prob-catalog-card-title">${escapeHtml(p.title)}</div>
+      <div class="prob-catalog-card-scenario">${escapeHtml(p.scenario)}</div>
+      <div class="prob-catalog-card-footer">
+        <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.category)}</span>
+        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 10px;">Solve Ticket ➔</button>
+      </div>
     </div>
   `).join('');
 
-  container.querySelectorAll('.prob-list-item').forEach(item => {
-    item.addEventListener('click', () => {
-      state.activeProblemId = item.dataset.problemId;
-      renderProblemsList(currentProbFilter);
-      renderProblemDetail(state.activeProblemId);
+  grid.querySelectorAll('.prob-catalog-card').forEach(card => {
+    card.addEventListener('click', () => {
+      openProblemInWorkspace(card.dataset.problemId);
     });
   });
+}
+
+function renderProblemsList(filter = 'all') {
+  renderProblemsCatalog(filter);
 }
 
 async function runProblemPrecheck(problemId) {
@@ -4436,7 +4499,43 @@ function renderProblemDetail(problemId) {
   const problem = state.problemsList.find(p => p.id === problemId);
   if (!problem) return;
 
+  const currentIndex = state.problemsList.findIndex(p => p.id === problemId);
+  const totalProblems = state.problemsList.length || 40;
+  const prevProblem = currentIndex > 0 ? state.problemsList[currentIndex - 1] : null;
+  const nextProblem = currentIndex >= 0 && currentIndex < state.problemsList.length - 1 ? state.problemsList[currentIndex + 1] : null;
+
   container.innerHTML = `
+    <!-- In-Question Navigation Toolbar (Prev / Next / Jump Select / Browse All) -->
+    <div class="problem-nav-toolbar">
+      <div class="prob-nav-left">
+        <button class="btn btn-outline btn-sm btn-back-catalog" id="btn-back-to-catalog" title="Browse full catalog grid of 40 problems">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Browse All 40 Problems
+        </button>
+        <div class="prob-jump-select-container">
+          <label for="prob-quick-jump-select" class="prob-jump-label">Jump to:</label>
+          <select id="prob-quick-jump-select" class="prob-quick-jump-select" title="Jump directly to any problem">
+            ${state.problemsList.map((p, idx) => `
+              <option value="${p.id}" ${p.id === problemId ? 'selected' : ''}>
+                ${p.id.toUpperCase()}: ${escapeHtml(p.title)} [${p.phase === 1 ? 'Phase 1: Basic' : 'Phase 2: Inter'}${p.status === 'completed' ? ' - ✓ Solved' : ''}]
+              </option>
+            `).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="prob-nav-right">
+        <span class="prob-counter-pill">Question ${currentIndex >= 0 ? currentIndex + 1 : 1} of ${totalProblems}</span>
+        <button class="btn btn-outline btn-sm" id="btn-prev-problem" ${!prevProblem ? 'disabled style="opacity: 0.45; cursor: not-allowed;"' : ''} title="${prevProblem ? 'Go to ' + prevProblem.title : 'First problem'}">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          ‹ Prev Question
+        </button>
+        <button class="btn btn-primary btn-sm" id="btn-next-problem" ${!nextProblem ? 'disabled style="opacity: 0.45; cursor: not-allowed;"' : ''} title="${nextProblem ? 'Go to ' + nextProblem.title : 'Last problem'}">
+          Next Question ›
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+    </div>
+
     <div class="problem-header-box">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; gap: 8px; align-items: center;">
@@ -4509,6 +4608,35 @@ function renderProblemDetail(problemId) {
     <!-- Live Evaluation Result Card -->
     <div class="problem-eval-card" id="problem-eval-result"></div>
   `;
+
+  // Bind In-Question Navigation Toolbar
+  const backBtn = document.getElementById('btn-back-to-catalog');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      openProblemsCatalog();
+    });
+  }
+
+  const jumpSelect = document.getElementById('prob-quick-jump-select');
+  if (jumpSelect) {
+    jumpSelect.addEventListener('change', (e) => {
+      openProblemInWorkspace(e.target.value);
+    });
+  }
+
+  const prevBtn = document.getElementById('btn-prev-problem');
+  if (prevBtn && prevProblem) {
+    prevBtn.addEventListener('click', () => {
+      openProblemInWorkspace(prevProblem.id);
+    });
+  }
+
+  const nextBtn = document.getElementById('btn-next-problem');
+  if (nextBtn && nextProblem) {
+    nextBtn.addEventListener('click', () => {
+      openProblemInWorkspace(nextProblem.id);
+    });
+  }
 
   const inputEl = document.getElementById('problem-solution-input');
   const gutterEl = document.getElementById('code-editor-gutter');
@@ -4592,6 +4720,9 @@ async function submitProblemSolution(problemId) {
     return;
   }
 
+  const curIdx = state.problemsList.findIndex(p => p.id === problemId);
+  const nextProb = (curIdx >= 0 && curIdx < state.problemsList.length - 1) ? state.problemsList[curIdx + 1] : null;
+
   const btn = document.getElementById('btn-submit-problem');
   btn.disabled = true;
   btn.textContent = 'Evaluating against rubric...';
@@ -4622,7 +4753,20 @@ async function submitProblemSolution(problemId) {
             <span class="badge ${data.passed ? 'badge-emerald' : 'badge-amber'}">${data.score} / 100</span>
           </div>
           <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(data.feedback)}</p>
+          ${nextProb ? `
+            <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${data.passed ? '#bbf7d0' : '#fde68a'};">
+              <button class="btn btn-primary btn-sm" id="btn-eval-next-prob">
+                Proceed to Next Question (${nextProb.id.toUpperCase()}) ➔
+              </button>
+            </div>
+          ` : ''}
         `;
+        const evalNextBtn = document.getElementById('btn-eval-next-prob');
+        if (evalNextBtn && nextProb) {
+          evalNextBtn.addEventListener('click', () => {
+            openProblemInWorkspace(nextProb.id);
+          });
+        }
       }
 
       const prob = state.problemsList.find(p => p.id === problemId);
@@ -4679,7 +4823,20 @@ async function submitProblemSolution(problemId) {
           <span class="badge ${passed ? 'badge-emerald' : 'badge-amber'}">${score} / 100</span>
         </div>
         <p style="font-size: 0.875rem; color: #334155; line-height: 1.4; margin-top: 0.25rem;">${escapeHtml(feedback)}</p>
+        ${nextProb ? `
+          <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${passed ? '#bbf7d0' : '#fde68a'};">
+            <button class="btn btn-primary btn-sm" id="btn-eval-next-prob">
+              Proceed to Next Question (${nextProb.id.toUpperCase()}) ➔
+            </button>
+          </div>
+        ` : ''}
       `;
+      const evalNextBtn = document.getElementById('btn-eval-next-prob');
+      if (evalNextBtn && nextProb) {
+        evalNextBtn.addEventListener('click', () => {
+          openProblemInWorkspace(nextProb.id);
+        });
+      }
     }
 
     if (passed) {
@@ -4729,6 +4886,62 @@ function updateThemeIcon() {
   if (icon) {
     const isDark = document.body.classList.contains('dark-mode');
     icon.textContent = isDark ? '☀️' : '🌙';
+  }
+}
+
+function initSidebarCollapse() {
+  const sidebar = document.querySelector('.sidebar');
+  const collapseBtn = document.getElementById('sidebar-collapse-toggle-btn');
+  const headerToggleBtn = document.getElementById('header-sidebar-toggle-btn');
+
+  // Load saved sidebar state
+  const isCollapsed = safeStorage.getItem('praxis_sidebar_collapsed') === 'true';
+  if (isCollapsed && sidebar) {
+    sidebar.classList.add('collapsed');
+    updateSidebarToggleState(true);
+  }
+
+  function updateSidebarToggleState(collapsed) {
+    if (collapseBtn) {
+      collapseBtn.setAttribute('title', collapsed ? 'Expand Sidebar' : 'Collapse Sidebar to Icons Only');
+      collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    }
+    if (headerToggleBtn) {
+      headerToggleBtn.setAttribute('title', collapsed ? 'Expand Sidebar' : 'Collapse Sidebar to Icons Only');
+    }
+  }
+
+  function toggleSidebar() {
+    if (!sidebar) return;
+    const isNowCollapsed = !sidebar.classList.contains('collapsed');
+    if (isNowCollapsed) {
+      sidebar.classList.add('collapsed');
+      safeStorage.setItem('praxis_sidebar_collapsed', 'true');
+    } else {
+      sidebar.classList.remove('collapsed');
+      safeStorage.setItem('praxis_sidebar_collapsed', 'false');
+    }
+    updateSidebarToggleState(isNowCollapsed);
+  }
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSidebar();
+    });
+  }
+
+  if (headerToggleBtn) {
+    headerToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('mobile-open');
+        const backdrop = document.getElementById('mobile-sidebar-backdrop');
+        if (backdrop) backdrop.classList.toggle('active');
+      } else {
+        toggleSidebar();
+      }
+    });
   }
 }
 

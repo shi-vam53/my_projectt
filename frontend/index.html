@@ -121,11 +121,16 @@
             <span class="brand-subtitle">Workplace Simulation Platform</span>
           </div>
         </div>
+        <button class="sidebar-collapse-btn" id="sidebar-collapse-toggle-btn" title="Toggle Sidebar (Expand / Icons Only)" aria-label="Toggle Sidebar Collapse">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="sidebar-collapse-icon-svg">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
       </div>
 
       <nav class="sidebar-nav">
         <div class="nav-section-label">Your Workspace</div>
-        <button class="nav-item active" id="nav-dashboard" data-view="dashboard">
+        <button class="nav-item active" id="nav-dashboard" data-view="dashboard" title="Dashboard">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="9"></rect>
             <rect x="14" y="3" width="7" height="5"></rect>
@@ -137,7 +142,7 @@
         </button>
 
         <div class="nav-section-label" style="margin-top: 1.25rem;">Your Foundation</div>
-        <button class="nav-item" id="nav-handbook" data-view="handbook">
+        <button class="nav-item" id="nav-handbook" data-view="handbook" title="Industry Foundations Handbook (12p PDF)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -145,7 +150,7 @@
           <span>Industry Handbook</span>
           <span class="nav-pill" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">12p PDF</span>
         </button>
-        <button class="nav-item" id="nav-quiz" data-view="quiz">
+        <button class="nav-item" id="nav-quiz" data-view="quiz" title="5-Question Readiness Check (MEQs)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -156,7 +161,7 @@
         </button>
 
         <div class="nav-section-label" style="margin-top: 1.25rem;">Problem Bank</div>
-        <button class="nav-item" id="nav-problems" data-view="problems">
+        <button class="nav-item" id="nav-problems" data-view="problems" title="40 Production Engineering Problems">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="16 18 22 12 16 6"></polyline>
             <polyline points="8 6 2 12 8 18"></polyline>
@@ -166,7 +171,7 @@
         </button>
 
         <div class="nav-section-label" style="margin-top: 1.25rem;">Simulations</div>
-        <button class="nav-item" id="nav-catalog" data-view="catalog">
+        <button class="nav-item" id="nav-catalog" data-view="catalog" title="210 Workplace Simulation Missions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
             <polyline points="2 17 12 22 22 17"></polyline>
@@ -175,7 +180,7 @@
           <span>Incident Catalog</span>
           <span class="nav-pill" id="catalog-count-pill">210 Labs</span>
         </button>
-        <button class="nav-item" id="nav-workspace" data-view="workspace">
+        <button class="nav-item" id="nav-workspace" data-view="workspace" title="Mission Investigation Lab">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
           </svg>
@@ -183,7 +188,7 @@
         </button>
 
         <div class="nav-section-label" style="margin-top: 1.25rem;">Governance</div>
-        <button class="nav-item" id="nav-admin" data-view="admin">
+        <button class="nav-item" id="nav-admin" data-view="admin" title="Staff Reviewer Portal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
             <circle cx="9" cy="7" r="4"></circle>
@@ -193,7 +198,7 @@
           <span>Reviewer Portal</span>
           <span class="nav-pill" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">Review</span>
         </button>
-        <button class="nav-item" id="nav-profile" data-view="profile">
+        <button class="nav-item" id="nav-profile" data-view="profile" title="Learner Competency & Solved Problems">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="8" r="5"></circle>
             <path d="M20 21a8 8 0 0 0-16 0"></path>
@@ -201,7 +206,7 @@
           <span>Learner Progress</span>
           <span class="nav-pill" id="nav-streak-pill">Active</span>
         </button>
-        <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide">
+        <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide" title="Evaluation Rubric Dimensions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
@@ -252,6 +257,12 @@
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <button class="header-sidebar-toggle-btn" id="header-sidebar-toggle-btn" title="Toggle Navigation Menu (Expand / Icons Only)" aria-label="Toggle Navigation Sidebar">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
             </svg>
           </button>
           <div class="breadcrumbs">
@@ -981,17 +992,27 @@
 
         <!-- VIEW: 40 Production Problems Workspace -->
         <section class="view-section" id="view-problems">
-          <div class="problems-workspace-layout">
-            <!-- Sidebar with Problem List -->
-            <div class="problems-sidebar-panel">
-              <div class="problems-list-header">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                  <span style="font-size: 0.825rem; font-weight: 800; color: #0f172a; text-transform: uppercase;">Problem Bank</span>
-                  <span class="badge badge-indigo" id="prob-solved-count-badge">0 / 40 Solved</span>
+          <!-- Catalog Mode (Browse all 40 questions) -->
+          <div id="problems-catalog-container" class="problems-catalog-container" style="display: none;">
+            <div class="problems-catalog-header card">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap;">
+                <div>
+                  <div class="badge badge-indigo" style="margin-bottom: 0.4rem;">Production Engineering Curriculum</div>
+                  <h1 style="font-size: 1.45rem; font-weight: 800; color: var(--text-primary); margin: 0;">40 Production Engineering Problems</h1>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                    Phase 1 (Basic): 20 incident tickets with reference SOP hints. Phase 2 (Intermediate): 20 autonomous distributed systems tickets.
+                  </p>
                 </div>
-                <!-- Problem Search Input -->
-                <div style="position: relative; margin-bottom: 0.5rem;">
-                  <input type="text" id="prob-search-input" placeholder="🔍 Search by title, keyword, ID..." style="width: 100%; padding: 6px 10px; font-size: 0.8rem; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: #ffffff;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="badge badge-emerald" id="prob-catalog-solved-badge" style="font-size: 0.825rem; padding: 4px 10px;">0 / 40 Solved</span>
+                  <button class="btn btn-primary btn-sm" id="btn-resume-active-problem">Resume Active Ticket ➔</button>
+                </div>
+              </div>
+
+              <!-- Search & Filter Controls -->
+              <div class="problems-catalog-controls" style="margin-top: 1.25rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 240px; position: relative;">
+                  <input type="text" id="prob-search-input" placeholder="🔍 Search problems by title, keyword, ID (e.g. OOMKilled, Kafka, Redis)..." style="width: 100%; padding: 8px 12px; font-size: 0.85rem; border: 1px solid var(--border-color); border-radius: 8px; outline: none; background: var(--bg-card); color: var(--text-primary);">
                 </div>
                 <div class="problems-filter-tabs">
                   <button class="prob-filter-btn active" data-filter="all">All (40)</button>
@@ -1001,16 +1022,17 @@
                   <button class="prob-filter-btn" data-filter="unsolved">Pending</button>
                 </div>
               </div>
-
-              <div class="problems-scroll-list" id="problems-scroll-container">
-                <!-- 40 problems rendered dynamically via JS -->
-              </div>
             </div>
 
-            <!-- Main Problem Details & Code Editor -->
-            <div class="problem-detail-panel" id="problem-detail-container">
+            <!-- Grid of 40 Problems -->
+            <div class="problems-catalog-grid" id="problems-catalog-grid">
               <!-- Rendered dynamically via JS -->
             </div>
+          </div>
+
+          <!-- Single Problem Solving Workspace (Only active question is displayed) -->
+          <div id="problem-detail-container" class="problem-detail-panel">
+            <!-- Rendered dynamically via JS with Question Nav Toolbar + Scenario + Code Editor -->
           </div>
         </section>
 
