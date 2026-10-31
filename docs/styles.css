@@ -3065,15 +3065,17 @@ kbd {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.75rem 1rem;
+  transition: all 0.15s ease;
 }
 
 .comp-check {
   color: var(--emerald-600);
   font-weight: 800;
+  flex-shrink: 0;
 }
 
 .comp-text {
@@ -3084,8 +3086,8 @@ kbd {
 
 /* Reviewer modal answers */
 .reviewer-answer-item {
-  background: #f8fafc;
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -4789,13 +4791,19 @@ body.dark-mode .profile-tagline {
   color: #cbd5e1 !important;
 }
 
+body.dark-mode .comp-item,
 body.dark-mode .competency-item {
   background-color: #1e293b !important;
   border-color: #334155 !important;
 }
 
+body.dark-mode .comp-text,
 body.dark-mode .comp-title {
   color: #f8fafc !important;
+}
+
+body.dark-mode .comp-check {
+  color: #34d399 !important;
 }
 
 body.dark-mode .comp-desc {
@@ -4813,6 +4821,227 @@ body.dark-mode .history-title {
 
 body.dark-mode .history-score {
   color: #34d399 !important;
+}
+
+/* Reviewer Answers Modal in Dark Mode */
+body.dark-mode .reviewer-answer-item {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .reviewer-answer-label {
+  color: #818cf8 !important;
+}
+
+body.dark-mode .reviewer-answer-text {
+  color: #f8fafc !important;
+}
+
+/* Problem List Items & Problem Workspace in Dark Mode */
+body.dark-mode .prob-list-item {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .prob-list-item:hover {
+  background-color: #273549 !important;
+  border-color: #475569 !important;
+}
+
+body.dark-mode .prob-list-item.active {
+  background-color: rgba(99, 102, 241, 0.25) !important;
+  border-color: #818cf8 !important;
+}
+
+body.dark-mode .prob-item-title {
+  color: #f8fafc !important;
+}
+
+/* Mission Workspace Evidence Tabs & Submission Card in Dark Mode */
+body.dark-mode .evidence-tabs-header {
+  background-color: #151d2a !important;
+  border-bottom-color: #334155 !important;
+}
+
+body.dark-mode .evidence-tab-body {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .tab-btn {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .tab-btn:hover {
+  color: #f8fafc !important;
+  border-bottom-color: #64748b !important;
+}
+
+body.dark-mode .tab-btn.active {
+  color: #818cf8 !important;
+  border-bottom-color: #818cf8 !important;
+}
+
+body.dark-mode .tab-btn.active svg {
+  color: #818cf8 !important;
+}
+
+body.dark-mode .submission-card {
+  background-color: #151d2a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .submission-card-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .submission-card-subtitle {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .mission-banner {
+  background: #151d2a !important;
+  border-color: #334155 !important;
+}
+
+/* Mission Catalog Cards in Dark Mode */
+body.dark-mode .catalog-mission-card {
+  background-color: #151d2a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .catalog-card-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .catalog-card-brief {
+  color: #94a3b8 !important;
+}
+
+/* Handbook Glossary, Tools, Workflows & Action Box in Dark Mode */
+body.dark-mode .glossary-card,
+body.dark-mode .tool-card,
+body.dark-mode .workflow-step {
+  background-color: #151d2a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .glossary-term {
+  color: #818cf8 !important;
+}
+
+body.dark-mode .glossary-def {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .tool-name {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .tool-desc {
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .workflow-step-badge {
+  background-color: #4f46e5 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .handbook-action-box {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Locked Career Role Onboarding Modal in Dark Mode */
+body.dark-mode .role-select-item {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .role-select-item:hover {
+  background-color: #273549 !important;
+  border-color: #6366f1 !important;
+}
+
+body.dark-mode .role-select-item.selected {
+  background-color: rgba(79, 70, 229, 0.25) !important;
+  border-color: #818cf8 !important;
+}
+
+body.dark-mode .role-item-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .role-item-desc {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .role-skill-pill {
+  background-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .role-lock-warning {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #fcd34d !important;
+}
+
+/* Authentication Modal in Dark Mode */
+body.dark-mode .auth-title {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .auth-subtitle {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .auth-tabs {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+
+body.dark-mode .auth-tab {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .auth-tab.active {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Pill Buttons, Modals & Toast in Dark Mode */
+body.dark-mode #role-guide-modal {
+  background: #151d2a !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .pill-btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .pill-btn:hover {
+  background: #273549 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .pill-btn.active {
+  background: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .toast {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* SIDEBAR PROFILE & POPOVER IN DARK MODE */
