@@ -772,6 +772,7 @@ function initApp() {
   try { bindCatalogControls(); } catch (e) { console.error('Error binding catalog controls:', e); }
   try { bindAdminControls(); } catch (e) { console.error('Error binding admin controls:', e); }
   try { bindProfileControls(); } catch (e) { console.error('Error binding profile controls:', e); }
+  try { bindSidebarProfileCard(); } catch (e) { console.error('Error binding sidebar profile card:', e); }
   try { bindFormEvents(); } catch (e) { console.error('Error binding form events:', e); }
 
   // Suite features: Theme, Mobile Drawer, Sidebar Collapse, Hotkeys, PWA
@@ -3004,6 +3005,70 @@ function bindProfileControls() {
   }
 }
 
+function bindSidebarProfileCard() {
+  const profileCardBtn = document.getElementById('sidebar-profile-card-btn');
+  const popover = document.getElementById('sidebar-profile-popover');
+  const viewProgressBtn = document.getElementById('popover-view-progress-btn');
+  const toggleThemeBtn = document.getElementById('popover-toggle-theme-btn');
+  const logoutBtn = document.getElementById('popover-logout-btn');
+
+  function openPopover() {
+    if (!popover) return;
+    popover.style.display = 'flex';
+    if (profileCardBtn) profileCardBtn.classList.add('active');
+  }
+
+  function closePopover() {
+    if (!popover) return;
+    popover.style.display = 'none';
+    if (profileCardBtn) profileCardBtn.classList.remove('active');
+  }
+
+  if (profileCardBtn) {
+    profileCardBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!popover) return;
+      const isOpen = popover.style.display === 'flex';
+      if (isOpen) closePopover();
+      else openPopover();
+    });
+  }
+
+  if (viewProgressBtn) {
+    viewProgressBtn.addEventListener('click', () => {
+      closePopover();
+      switchView('profile');
+    });
+  }
+
+  if (toggleThemeBtn) {
+    toggleThemeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
+      updateThemeIcon();
+      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closePopover();
+      const signoutBtn = document.getElementById('header-signout-btn');
+      if (signoutBtn) signoutBtn.click();
+    });
+  }
+
+  // Close popover when clicking anywhere outside
+  document.addEventListener('click', (e) => {
+    if (!popover || popover.style.display !== 'flex') return;
+    if (!popover.contains(e.target) && (!profileCardBtn || !profileCardBtn.contains(e.target))) {
+      closePopover();
+    }
+  });
+}
+
 function renderProfileView() {
   let completedMissions = state.submissionsLedger || [];
   if (completedMissions.length === 0) {
@@ -3274,6 +3339,22 @@ function updateUserHeaderUI() {
   const role = document.getElementById('header-user-role');
   const sidebarTrack = document.getElementById('sidebar-active-track-name');
 
+  // Sidebar profile card elements
+  const sbAvatar = document.getElementById('sidebar-user-avatar');
+  const sbName = document.getElementById('sidebar-user-name');
+  const sbRole = document.getElementById('sidebar-user-role');
+  const sbSolved = document.getElementById('sidebar-user-solved-count');
+
+  // Popover elements
+  const popAvatar = document.getElementById('popover-user-avatar');
+  const popName = document.getElementById('popover-user-name');
+  const popHandle = document.getElementById('popover-user-handle');
+  const popRole = document.getElementById('popover-role-badge');
+  const popQuiz = document.getElementById('popover-quiz-badge');
+
+  const solvedCount = (state.problemsList || []).filter(p => p.status === 'completed').length;
+  const totalCount = (state.problemsList || []).length || 40;
+
   if (state.user) {
     const initials = (state.user.full_name || state.user.username || 'U')
       .split(' ')
@@ -3284,14 +3365,40 @@ function updateUserHeaderUI() {
     if (avatar) avatar.textContent = initials;
     if (name) name.textContent = state.user.full_name || state.user.username;
 
+    if (sbAvatar) sbAvatar.textContent = initials;
+    if (sbName) sbName.textContent = state.user.full_name || state.user.username;
+    if (popAvatar) popAvatar.textContent = initials;
+    if (popName) popName.textContent = state.user.full_name || state.user.username;
+    if (popHandle) popHandle.textContent = '@' + (state.user.username || 'learner');
+
     const roleName = getRoleDisplayName(state.user.role);
     if (role) role.textContent = state.user.role_locked ? `🔒 ${roleName}` : 'Unassigned Track';
     if (sidebarTrack) sidebarTrack.textContent = roleName;
+    if (sbRole) sbRole.textContent = roleName;
+    if (popRole) popRole.textContent = roleName;
+
+    const quizStatusStr = state.user.quiz_passed ? `Readiness: ${state.user.quiz_score || 5}/5 ✓` : 'Readiness: Pending';
+    if (popQuiz) popQuiz.textContent = quizStatusStr;
+
+    if (sbSolved) sbSolved.textContent = `${solvedCount}/${totalCount} Solved`;
+    updateProblemsSolvedCounter();
     updateHandbookForUserRole();
   } else {
     if (avatar) avatar.textContent = 'G';
     if (name) name.textContent = 'Guest';
     if (role) role.textContent = 'Sign In Required';
+
+    if (sbAvatar) sbAvatar.textContent = 'G';
+    if (sbName) sbName.textContent = 'Guest Learner';
+    if (sbRole) sbRole.textContent = 'Sign In First';
+    if (sbSolved) sbSolved.textContent = '0/40 Solved';
+
+    if (popAvatar) popAvatar.textContent = 'G';
+    if (popName) popName.textContent = 'Guest Learner';
+    if (popHandle) popHandle.textContent = '@guest';
+    if (popRole) popRole.textContent = 'Unassigned';
+    if (popQuiz) popQuiz.textContent = 'Readiness: Pending';
+
     updateHandbookForUserRole();
   }
 }
@@ -4342,6 +4449,24 @@ function updateProblemsSolvedCounter() {
   const badge = document.getElementById('prob-catalog-solved-badge');
   if (countPill) countPill.textContent = `${solved}/${total}`;
   if (badge) badge.textContent = `${solved} / ${total} Solved`;
+
+  const sbSolved = document.getElementById('sidebar-user-solved-count');
+  if (sbSolved) sbSolved.textContent = `${solved}/${total} Solved`;
+
+  const popSolved = document.getElementById('popover-solved-count');
+  if (popSolved) popSolved.textContent = `${solved} of ${total}`;
+
+  const popBar = document.getElementById('popover-solved-bar');
+  if (popBar) {
+    const pct = Math.min(100, Math.round((solved / total) * 100));
+    popBar.style.width = `${pct}%`;
+  }
+
+  const sidebarCard = document.getElementById('sidebar-profile-card-btn');
+  if (sidebarCard) {
+    const uname = state.user ? (state.user.full_name || state.user.username) : 'Learner';
+    sidebarCard.setAttribute('title', `${uname} (${solved}/${total} Solved - Click for Settings)`);
+  }
 }
 
 let currentProbSearch = '';
@@ -4913,11 +5038,15 @@ function initTheme() {
 }
 
 function updateThemeIcon() {
+  const isDark = document.body.classList.contains('dark-mode');
   const icon = document.getElementById('theme-toggle-icon');
   if (icon) {
-    const isDark = document.body.classList.contains('dark-mode');
     icon.textContent = isDark ? '☀️' : '🌙';
   }
+  const popIcon = document.getElementById('popover-theme-icon');
+  const popLabel = document.getElementById('popover-theme-label');
+  if (popIcon) popIcon.textContent = isDark ? '☀️' : '🌙';
+  if (popLabel) popLabel.textContent = isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme';
 }
 
 function initSidebarCollapse() {

@@ -229,14 +229,82 @@
       </div>
 
       <div class="sidebar-footer">
-        <button class="btn btn-outline btn-block" id="sidebar-logout-btn" style="margin-bottom: 0.75rem; border-color: rgba(239, 68, 68, 0.4); color: #ef4444; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-          <span>Log Out</span>
-        </button>
+        <!-- Interactive User Profile Card in Sidebar Footer -->
+        <div class="sidebar-profile-card" id="sidebar-profile-card-btn" role="button" tabindex="0" title="Your Profile & Progress (Click for quick settings)">
+          <div class="sidebar-profile-avatar-wrap">
+            <div class="sidebar-profile-avatar" id="sidebar-user-avatar">JD</div>
+            <span class="sidebar-profile-status-dot" title="Active simulation session"></span>
+          </div>
+          <div class="sidebar-profile-info">
+            <div class="sidebar-profile-name" id="sidebar-user-name">Learner</div>
+            <div class="sidebar-profile-meta">
+              <span class="sidebar-profile-role" id="sidebar-user-role">Cloud & SRE</span>
+              <span class="sidebar-profile-solved" id="sidebar-user-solved-count">0/40 Solved</span>
+            </div>
+          </div>
+          <div class="sidebar-profile-chevron" title="Profile Settings & Progress">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Floating Profile & Settings Popover Menu (anchored above the profile card) -->
+        <div class="sidebar-profile-popover" id="sidebar-profile-popover" style="display: none;">
+          <div class="popover-header">
+            <div class="popover-user-row">
+              <div class="popover-avatar" id="popover-user-avatar">JD</div>
+              <div style="min-width: 0; flex: 1;">
+                <div class="popover-name" id="popover-user-name">Learner Practitioner</div>
+                <div class="popover-username" id="popover-user-handle">@username</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar & Stats Section -->
+          <div class="popover-stats-section">
+            <div class="popover-stat-row">
+              <span class="popover-stat-label">Problems Solved</span>
+              <span class="popover-stat-value" id="popover-solved-count">0 of 40</span>
+            </div>
+            <div class="popover-progress-bar-bg">
+              <div class="popover-progress-bar-fill" id="popover-solved-bar" style="width: 0%;"></div>
+            </div>
+
+            <div class="popover-badges-row">
+              <span class="popover-badge" id="popover-quiz-badge">Readiness: 0/5</span>
+              <span class="popover-badge" id="popover-role-badge">Cloud Engineer</span>
+            </div>
+          </div>
+
+          <!-- Quick Navigation & Settings Actions -->
+          <div class="popover-actions-menu">
+            <button type="button" class="popover-action-item" id="popover-view-progress-btn">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="5"></circle>
+                <path d="M20 21a8 8 0 0 0-16 0"></path>
+              </svg>
+              <span>View Full Progress Profile</span>
+            </button>
+
+            <button type="button" class="popover-action-item" id="popover-toggle-theme-btn">
+              <span id="popover-theme-icon" style="font-size: 13px;">🌙</span>
+              <span id="popover-theme-label">Switch to Dark Theme</span>
+            </button>
+
+            <div class="popover-divider"></div>
+
+            <button type="button" class="popover-action-item popover-logout-btn" id="popover-logout-btn">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+
         <div class="sandbox-status">
           <span class="status-dot"></span>
           <span>Simulation Engine v1.0.0</span>
