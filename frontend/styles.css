@@ -4615,6 +4615,25 @@ body.dark-mode .problem-editor-header {
 }
 
 /* PROFILE / TRANSCRIPT IN DARK MODE */
+.theme-choice-btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-choice-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.02);
+}
+
+body.dark-mode .theme-choice-btn#theme-choice-light {
+  background: #f1ede1 !important;
+  color: #1e293b !important;
+}
+
+body.dark-mode .theme-choice-btn#theme-choice-dark {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
 body.dark-mode .pstat-item {
   background-color: #1e293b !important;
   border-color: #334155 !important;

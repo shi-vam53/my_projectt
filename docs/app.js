@@ -3007,66 +3007,12 @@ function bindProfileControls() {
 
 function bindSidebarProfileCard() {
   const profileCardBtn = document.getElementById('sidebar-profile-card-btn');
-  const popover = document.getElementById('sidebar-profile-popover');
-  const viewProgressBtn = document.getElementById('popover-view-progress-btn');
-  const toggleThemeBtn = document.getElementById('popover-toggle-theme-btn');
-  const logoutBtn = document.getElementById('popover-logout-btn');
-
-  function openPopover() {
-    if (!popover) return;
-    popover.style.display = 'flex';
-    if (profileCardBtn) profileCardBtn.classList.add('active');
-  }
-
-  function closePopover() {
-    if (!popover) return;
-    popover.style.display = 'none';
-    if (profileCardBtn) profileCardBtn.classList.remove('active');
-  }
-
   if (profileCardBtn) {
     profileCardBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (!popover) return;
-      const isOpen = popover.style.display === 'flex';
-      if (isOpen) closePopover();
-      else openPopover();
-    });
-  }
-
-  if (viewProgressBtn) {
-    viewProgressBtn.addEventListener('click', () => {
-      closePopover();
       switchView('profile');
     });
   }
-
-  if (toggleThemeBtn) {
-    toggleThemeBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
-      updateThemeIcon();
-      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
-    });
-  }
-
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closePopover();
-      const signoutBtn = document.getElementById('header-signout-btn');
-      if (signoutBtn) signoutBtn.click();
-    });
-  }
-
-  // Close popover when clicking anywhere outside
-  document.addEventListener('click', (e) => {
-    if (!popover || popover.style.display !== 'flex') return;
-    if (!popover.contains(e.target) && (!profileCardBtn || !profileCardBtn.contains(e.target))) {
-      closePopover();
-    }
-  });
 }
 
 function renderProfileView() {
@@ -3079,19 +3025,26 @@ function renderProfileView() {
     }
   }
 
-  // Solved problems count
+  // Solved problems count from offline storage or state
   let solvedProblemsCount = 0;
+  let basicSolved = 0;
+  let interSolved = 0;
   try {
     const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
-    solvedProblemsCount = Object.values(probProgress).filter(p => p.status === 'completed').length;
+    const solvedList = Object.values(probProgress).filter(p => p.status === 'completed');
+    solvedProblemsCount = solvedList.length;
+    basicSolved = solvedList.filter(p => p.difficulty === 'Basic').length;
+    interSolved = solvedList.filter(p => p.difficulty === 'Intermediate').length;
   } catch (e) {}
 
   const totalActivities = completedMissions.length + solvedProblemsCount;
   const compCountEl = document.getElementById('pstat-completed');
   const avgScoreEl = document.getElementById('pstat-avg-score');
   const readinessEl = document.getElementById('pstat-readiness');
+  const problemsStatEl = document.getElementById('pstat-problems');
 
-  if (compCountEl) compCountEl.textContent = totalActivities;
+  if (compCountEl) compCountEl.textContent = completedMissions.length;
+  if (problemsStatEl) problemsStatEl.textContent = `${solvedProblemsCount}/40`;
 
   if (totalActivities > 0) {
     const missionScoreSum = completedMissions.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0);
@@ -3103,6 +3056,59 @@ function renderProfileView() {
     if (avgScoreEl) avgScoreEl.textContent = '--';
     if (readinessEl) readinessEl.textContent = 'In Training';
   }
+
+  // Learner Identity Details in Profile View
+  const profileAvatar = document.getElementById('profile-main-avatar');
+  const profileName = document.getElementById('profile-main-name');
+  const profileRoleBadge = document.getElementById('profile-main-role-badge');
+  const profileUsername = document.getElementById('profile-main-username');
+  const profileTrackDisplay = document.getElementById('profile-main-track-display');
+
+  if (state.user) {
+    const initials = (state.user.full_name || state.user.username || 'U')
+      .split(' ')
+      .map(w => w[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+    if (profileAvatar) profileAvatar.textContent = initials;
+    if (profileName) profileName.textContent = state.user.full_name || state.user.username;
+    if (profileUsername) profileUsername.textContent = '@' + (state.user.username || 'learner');
+
+    const roleName = getRoleDisplayName(state.user.role);
+    if (profileRoleBadge) profileRoleBadge.textContent = state.user.role_locked ? `🔒 ${roleName} (Permanent Track)` : 'Unassigned Track';
+    if (profileTrackDisplay) profileTrackDisplay.textContent = roleName;
+  } else {
+    if (profileAvatar) profileAvatar.textContent = 'G';
+    if (profileName) profileName.textContent = 'Guest Learner';
+    if (profileUsername) profileUsername.textContent = '@guest';
+    if (profileRoleBadge) profileRoleBadge.textContent = 'Sign In Required';
+    if (profileTrackDisplay) profileTrackDisplay.textContent = 'Unassigned';
+  }
+
+  // 40 Problem Bank Progress breakdown
+  const pct = Math.round((solvedProblemsCount / 40) * 100);
+  const probPctEl = document.getElementById('profile-problems-pct');
+  const probBarEl = document.getElementById('profile-problems-progress-bar');
+  const basicEl = document.getElementById('profile-basic-solved');
+  const interEl = document.getElementById('profile-inter-solved');
+
+  if (probPctEl) probPctEl.textContent = `${pct}% (${solvedProblemsCount} of 40)`;
+  if (probBarEl) probBarEl.style.width = `${pct}%`;
+  if (basicEl) basicEl.textContent = `${basicSolved} / 20 Solved`;
+  if (interEl) interEl.textContent = `${interSolved} / 20 Solved`;
+
+  const jumpProblemsBtn = document.getElementById('profile-jump-problems-btn');
+  if (jumpProblemsBtn) {
+    jumpProblemsBtn.onclick = () => switchView('problems');
+  }
+
+  const profileLogoutBtn = document.getElementById('btn-profile-logout');
+  if (profileLogoutBtn) {
+    profileLogoutBtn.onclick = handleLogoutAction;
+  }
+
+  updateThemeIcon();
 
   // Official Certificate of Completion Banner
   const certBanner = document.getElementById('profile-certificate-banner');
@@ -3441,6 +3447,27 @@ function saveSessionAndProceed(user, token) {
   }
 }
 
+async function handleLogoutAction() {
+  try {
+    if (state.token) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${state.token}` }
+      });
+    }
+  } catch (e) {
+    // offline fallback
+  }
+  safeStorage.removeItem('praxis_token');
+  safeStorage.removeItem('praxis_active_user');
+  safeStorage.removeItem('praxis_offline_user');
+  state.token = null;
+  state.user = null;
+  updateUserHeaderUI();
+  showAuthOverlay(true);
+  showToast('Logged out successfully.', 'info');
+}
+
 function bindAuthControls() {
   const tabSignin = document.getElementById('auth-tab-signin');
   const tabSignup = document.getElementById('auth-tab-signup');
@@ -3709,27 +3736,6 @@ function bindAuthControls() {
       }
     });
   }
-
-  const handleLogoutAction = async () => {
-    try {
-      if (state.token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${state.token}` }
-        });
-      }
-    } catch (e) {
-      // offline fallback
-    }
-    safeStorage.removeItem('praxis_token');
-    safeStorage.removeItem('praxis_active_user');
-    safeStorage.removeItem('praxis_offline_user');
-    state.token = null;
-    state.user = null;
-    updateUserHeaderUI();
-    showAuthOverlay(true);
-    showToast('Logged out successfully.', 'info');
-  };
 
   if (signoutBtn) {
     signoutBtn.addEventListener('click', handleLogoutAction);
@@ -5032,7 +5038,26 @@ function initTheme() {
       const isDark = document.body.classList.contains('dark-mode');
       safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
       updateThemeIcon();
-      showToast(isDark ? 'Dark theme enabled' : 'Light theme enabled', 'info');
+      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
+    });
+  }
+
+  const lightChoice = document.getElementById('theme-choice-light');
+  const darkChoice = document.getElementById('theme-choice-dark');
+  if (lightChoice) {
+    lightChoice.addEventListener('click', () => {
+      document.body.classList.remove('dark-mode');
+      safeStorage.setItem('praxis_theme', 'light');
+      updateThemeIcon();
+      showToast('Warm cream light theme enabled', 'info');
+    });
+  }
+  if (darkChoice) {
+    darkChoice.addEventListener('click', () => {
+      document.body.classList.add('dark-mode');
+      safeStorage.setItem('praxis_theme', 'dark');
+      updateThemeIcon();
+      showToast('Midnight dark theme enabled', 'info');
     });
   }
 }
@@ -5047,6 +5072,22 @@ function updateThemeIcon() {
   const popLabel = document.getElementById('popover-theme-label');
   if (popIcon) popIcon.textContent = isDark ? '☀️' : '🌙';
   if (popLabel) popLabel.textContent = isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme';
+
+  const lightChoice = document.getElementById('theme-choice-light');
+  const darkChoice = document.getElementById('theme-choice-dark');
+  if (lightChoice && darkChoice) {
+    if (isDark) {
+      darkChoice.style.borderColor = '#38bdf8';
+      darkChoice.style.boxShadow = '0 0 0 2px rgba(56, 189, 248, 0.4)';
+      lightChoice.style.borderColor = 'var(--border-color)';
+      lightChoice.style.boxShadow = 'none';
+    } else {
+      lightChoice.style.borderColor = '#4f46e5';
+      lightChoice.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.3)';
+      darkChoice.style.borderColor = 'var(--border-color)';
+      darkChoice.style.boxShadow = 'none';
+    }
+  }
 }
 
 function initSidebarCollapse() {

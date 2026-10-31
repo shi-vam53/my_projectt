@@ -198,13 +198,13 @@
           <span>Reviewer Portal</span>
           <span class="nav-pill" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">Review</span>
         </button>
-        <button class="nav-item" id="nav-profile" data-view="profile" title="Learner Competency & Solved Problems">
+        <button class="nav-item" id="nav-profile" data-view="profile" title="Learner Profile & App Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="8" r="5"></circle>
             <path d="M20 21a8 8 0 0 0-16 0"></path>
           </svg>
-          <span>Learner Progress</span>
-          <span class="nav-pill" id="nav-streak-pill">Active</span>
+          <span>Profile & Settings</span>
+          <span class="nav-pill" id="nav-streak-pill">Settings</span>
         </button>
         <button class="nav-item" id="nav-rubric-guide" data-action="open-rubric-guide" title="Evaluation Rubric Dimensions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -215,22 +215,9 @@
         </button>
       </nav>
 
-      <!-- Active Track Card in Sidebar -->
-      <div class="sidebar-track-widget">
-        <div class="track-widget-header">
-          <span class="widget-label">Active Track</span>
-          <span class="status-indicator-dot"></span>
-        </div>
-        <div class="track-widget-content">
-          <div class="widget-track-title" id="sidebar-active-track-name">Cloud Engineer & SRE</div>
-          <div class="widget-track-mission" id="sidebar-active-mission-name">Incident 1402 (Guided)</div>
-        </div>
-        <button class="btn btn-sidebar-outline" id="sidebar-quick-switch-btn">Switch Role Track</button>
-      </div>
-
       <div class="sidebar-footer">
         <!-- Interactive User Profile Card in Sidebar Footer -->
-        <div class="sidebar-profile-card" id="sidebar-profile-card-btn" role="button" tabindex="0" title="Your Profile & Progress (Click for quick settings)">
+        <div class="sidebar-profile-card" id="sidebar-profile-card-btn" role="button" tabindex="0" title="Profile & App Settings (Click to open)">
           <div class="sidebar-profile-avatar-wrap">
             <div class="sidebar-profile-avatar" id="sidebar-user-avatar">JD</div>
             <span class="sidebar-profile-status-dot" title="Active simulation session"></span>
@@ -242,66 +229,10 @@
               <span class="sidebar-profile-solved" id="sidebar-user-solved-count">0/40 Solved</span>
             </div>
           </div>
-          <div class="sidebar-profile-chevron" title="Profile Settings & Progress">
+          <div class="sidebar-profile-chevron" title="Open Profile & Settings Activity">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
-              <polyline points="6 9 12 15 18 9"></polyline>
+              <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
-          </div>
-        </div>
-
-        <!-- Floating Profile & Settings Popover Menu (anchored above the profile card) -->
-        <div class="sidebar-profile-popover" id="sidebar-profile-popover" style="display: none;">
-          <div class="popover-header">
-            <div class="popover-user-row">
-              <div class="popover-avatar" id="popover-user-avatar">JD</div>
-              <div style="min-width: 0; flex: 1;">
-                <div class="popover-name" id="popover-user-name">Learner Practitioner</div>
-                <div class="popover-username" id="popover-user-handle">@username</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Progress Bar & Stats Section -->
-          <div class="popover-stats-section">
-            <div class="popover-stat-row">
-              <span class="popover-stat-label">Problems Solved</span>
-              <span class="popover-stat-value" id="popover-solved-count">0 of 40</span>
-            </div>
-            <div class="popover-progress-bar-bg">
-              <div class="popover-progress-bar-fill" id="popover-solved-bar" style="width: 0%;"></div>
-            </div>
-
-            <div class="popover-badges-row">
-              <span class="popover-badge" id="popover-quiz-badge">Readiness: 0/5</span>
-              <span class="popover-badge" id="popover-role-badge">Cloud Engineer</span>
-            </div>
-          </div>
-
-          <!-- Quick Navigation & Settings Actions -->
-          <div class="popover-actions-menu">
-            <button type="button" class="popover-action-item" id="popover-view-progress-btn">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="8" r="5"></circle>
-                <path d="M20 21a8 8 0 0 0-16 0"></path>
-              </svg>
-              <span>View Full Progress Profile</span>
-            </button>
-
-            <button type="button" class="popover-action-item" id="popover-toggle-theme-btn">
-              <span id="popover-theme-icon" style="font-size: 13px;">🌙</span>
-              <span id="popover-theme-label">Switch to Dark Theme</span>
-            </button>
-
-            <div class="popover-divider"></div>
-
-            <button type="button" class="popover-action-item popover-logout-btn" id="popover-logout-btn">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-              <span>Log Out</span>
-            </button>
           </div>
         </div>
 
@@ -317,7 +248,7 @@
 
     <!-- Main Content Area -->
     <div class="main-wrapper">
-      <!-- Top Header Bar -->
+      <!-- Top Header Bar (Clean, uncluttered, zero duplicates) -->
       <header class="top-header">
         <div class="header-left">
           <button class="mobile-menu-toggle" id="mobile-menu-btn" aria-label="Toggle Navigation Menu" style="display: none; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; cursor: pointer; color: var(--text-primary); margin-right: 0.5rem;">
@@ -343,42 +274,9 @@
         </div>
 
         <div class="header-right">
-          <!-- Theme Mode Switcher -->
-          <button class="btn btn-outline btn-sm" id="theme-toggle-btn" title="Toggle Dark/Light Mode" aria-label="Toggle Theme" style="padding: 4px 10px; font-size: 0.82rem;">
-            <span id="theme-toggle-icon">🌙</span>
-          </button>
-
           <!-- Hotkeys Help Button -->
           <button class="btn btn-outline btn-sm" id="hotkeys-modal-btn" title="Keyboard Shortcuts (Ctrl+K)" aria-label="Keyboard Shortcuts" style="padding: 4px 10px; font-size: 0.78rem;">
             ⌨️ Hotkeys
-          </button>
-
-          <!-- User Profile Badge & Sign Out -->
-          <div class="user-profile-badge" id="header-user-badge">
-            <div class="user-avatar" id="header-user-avatar">JD</div>
-            <div class="user-meta">
-              <span class="user-name" id="header-user-name">Learner</span>
-              <span class="user-role-pill" id="header-user-role">Cloud & SRE</span>
-            </div>
-            <button class="btn btn-ghost btn-sm" id="header-signout-btn" style="padding: 2px 8px; font-size: 0.72rem; color: #ef4444;" title="Sign out of Praxis">Sign Out</button>
-          </div>
-
-          <!-- Quick Actions: Handbook & Quiz -->
-          <button class="btn btn-outline btn-sm" id="header-role-guide-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            12p Handbook (PDF)
-          </button>
-
-          <button class="btn btn-outline btn-sm" id="header-quiz-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            Readiness Check (5 Qs)
           </button>
         </div>
       </header>
@@ -1431,13 +1329,13 @@
           </div>
         </section>
 
-        <!-- VIEW 5: Learner Progress & Transcript View -->
+        <!-- VIEW 5: Learner Profile & App Settings Activity -->
         <section class="view-section" id="view-profile" style="display: none;">
           <div class="view-header">
-            <div class="view-badge badge-emerald">Learner Dashboard</div>
-            <h1 class="view-title">Practical Engineering Competency Profile</h1>
+            <div class="view-badge badge-emerald">Account & App Settings</div>
+            <h1 class="view-title">Learner Profile & Application Settings</h1>
             <p class="view-description">
-              Verified record of realistic workplace simulations triaged, investigated, and remediated by this learner.
+              Manage your engineering simulation credentials, inspect verified progress across the 40-problem curriculum, and configure your appearance and account preferences.
             </p>
           </div>
 
@@ -1448,31 +1346,77 @@
             <div class="profile-left-col">
               <!-- Learner Identity Card -->
               <div class="profile-card card">
-                <div class="profile-avatar">👨‍💻</div>
-                <h2 class="profile-name">Learner Practitioner</h2>
-                <div class="profile-role-badge">Fresher / Candidate</div>
-                <p class="profile-tagline">Simulating real work problems across Cloud, Backend, and Analytics.</p>
+                <div class="profile-avatar" id="profile-main-avatar">👨‍💻</div>
+                <h2 class="profile-name" id="profile-main-name">Learner Practitioner</h2>
+                <div class="profile-role-badge" id="profile-main-role-badge">🔒 Cloud Engineer (Permanent Track)</div>
+                <p class="profile-tagline" id="profile-main-tagline">Active Candidate practicing real production incidents, telemetry triage, and code fixes.</p>
 
                 <div class="profile-stats-grid">
                   <div class="pstat-item">
+                    <div class="pstat-num" id="pstat-problems">0/40</div>
+                    <div class="pstat-label">Problems Solved</div>
+                  </div>
+                  <div class="pstat-item">
                     <div class="pstat-num" id="pstat-completed">0</div>
-                    <div class="pstat-label">Missions Completed</div>
+                    <div class="pstat-label">Missions Solved</div>
                   </div>
                   <div class="pstat-item">
                     <div class="pstat-num" id="pstat-avg-score">--</div>
                     <div class="pstat-label">Avg Rubric Score</div>
                   </div>
                   <div class="pstat-item">
-                    <div class="pstat-num" id="pstat-quizzes">0/3</div>
-                    <div class="pstat-label">Readiness Pre-Checks</div>
-                  </div>
-                  <div class="pstat-item">
                     <div class="pstat-num" id="pstat-readiness">In Training</div>
-                    <div class="pstat-label">Industry Readiness</div>
+                    <div class="pstat-label">Workplace Readiness</div>
                   </div>
                 </div>
 
-                <div class="profile-actions">
+                <!-- Account Identity Details -->
+                <div class="profile-identity-details" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.82rem; display: flex; flex-direction: column; gap: 8px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Account Handle:</span>
+                    <strong style="color: var(--text-primary);" id="profile-main-username">@learner</strong>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Account Status:</span>
+                    <span class="badge badge-emerald" style="padding: 2px 8px; font-size: 0.72rem;">Verified Candidate</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Assigned Track:</span>
+                    <strong style="color: var(--primary);" id="profile-main-track-display">Cloud Engineer & SRE</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Application Settings Card: Theme & Appearance -->
+              <div class="settings-card card" style="margin-top: 1.5rem;">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span>🎨</span> App Appearance & Theme
+                </h3>
+                <p class="card-subtitle">Choose your preferred visual presentation style for the simulation workspace:</p>
+
+                <div class="theme-selection-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1rem;">
+                  <button type="button" class="theme-choice-btn" id="theme-choice-light" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: #f9f7f1; color: #1e293b; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 600; font-size: 0.84rem; transition: all 0.2s;">
+                    <span style="font-size: 1.4rem;">☀️</span>
+                    <span>Warm Cream Light</span>
+                    <span style="font-size: 0.7rem; color: #64748b; font-weight: normal;">Soft contrast, easy on eyes</span>
+                  </button>
+
+                  <button type="button" class="theme-choice-btn" id="theme-choice-dark" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: #0f172a; color: #f8fafc; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 600; font-size: 0.84rem; transition: all 0.2s;">
+                    <span style="font-size: 1.4rem;">🌙</span>
+                    <span>Midnight Dark</span>
+                    <span style="font-size: 0.7rem; color: #94a3b8; font-weight: normal;">Sleek dark engineering IDE</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Account Actions & Session Management -->
+              <div class="danger-zone-card card" style="margin-top: 1.5rem;">
+                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span>⚙️</span> Session & Data Management
+                </h3>
+                <p class="card-subtitle">Export records, manage local browser workspace, or end your session:</p>
+
+                <div class="profile-actions" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 10px;">
                   <button class="btn btn-outline btn-block" id="btn-export-transcript">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -1482,15 +1426,59 @@
                     Export Verified Transcript (Markdown)
                   </button>
                   <button class="btn btn-sidebar-outline btn-block" id="btn-reset-progress">
-                    Clear Local Progress
+                    Clear Local Drafts
+                  </button>
+                  <button class="btn btn-danger btn-block" id="btn-profile-logout" style="background: #ef4444; color: white; border: none; padding: 10px 14px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0.5rem;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Log Out of Praxis Account
                   </button>
                 </div>
               </div>
             </div>
 
             <div class="profile-right-col">
+              <!-- Curriculum Progress Summary Card -->
+              <div class="curriculum-summary-card card">
+                <div class="card-header-flex">
+                  <div>
+                    <h3 class="card-title">Production Problem Bank Progress (40 Real Issues)</h3>
+                    <p class="card-subtitle">Progress tracking across 20 Basic (with SOP Help) and 20 Intermediate (Standalone) problems.</p>
+                  </div>
+                  <button class="btn btn-primary btn-sm" id="profile-jump-problems-btn">
+                    Go to Problems ➔
+                  </button>
+                </div>
+
+                <div style="margin: 1rem 0;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">
+                    <span>Overall Problem Bank Completion</span>
+                    <span id="profile-problems-pct">0% (0 of 40)</span>
+                  </div>
+                  <div style="width: 100%; height: 10px; background: var(--bg-hover); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-color);">
+                    <div id="profile-problems-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 999px; transition: width 0.3s;"></div>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1rem;">
+                  <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Phase 1: Basic (with SOP Help)</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;" id="profile-basic-solved">0 / 20 Solved</div>
+                    <div style="font-size: 0.75rem; color: #10b981; margin-top: 2px;">Includes step-by-step resolution SOP</div>
+                  </div>
+                  <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Phase 2: Intermediate (Standalone)</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;" id="profile-inter-solved">0 / 20 Solved</div>
+                    <div style="font-size: 0.75rem; color: #f59e0b; margin-top: 2px;">Independent engineering investigation</div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Competency Skills Card -->
-              <div class="skills-card card">
+              <div class="skills-card card" style="margin-top: 1.5rem;">
                 <h3 class="card-title">Demonstrated Workplace Competencies</h3>
                 <p class="card-subtitle">Validated through multi-dimensional rubric evaluations:</p>
 
@@ -1500,7 +1488,7 @@
               </div>
 
               <!-- Completed Missions History -->
-              <div class="history-card card">
+              <div class="history-card card" style="margin-top: 1.5rem;">
                 <h3 class="card-title">Completed Simulation History</h3>
                 <div class="history-list" id="profile-history-list">
                   <!-- Populated dynamically -->
