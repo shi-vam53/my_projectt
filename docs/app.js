@@ -876,6 +876,7 @@ function bindNavigation() {
 }
 
 function switchView(viewName) {
+  if (viewName === 'reviewer') viewName = 'admin';
   if (!state.user) {
     showAuthOverlay(true);
     showToast('Please sign in or create an account to access ' + viewName + '.', 'warning');
@@ -2778,35 +2779,51 @@ function renderAdminView() {
   const tbody = document.getElementById('leaderboard-tbody') || document.getElementById('admin-submissions-tbody');
   if (!tbody) return;
 
-  const session = state.userSession || {};
-  const currentUsername = session.username || 'learner';
-  const lockedRole = session.locked_role || session.role || state.activeTrack || 'cloud-engineer';
-
-  const roleDisplayNames = {
-    'software-developer': 'Software Developer',
-    'cloud-engineer': 'Cloud Engineer & SRE',
-    'data-analyst': 'Data Analyst'
-  };
-  const currentJobRole = roleDisplayNames[lockedRole] || (TRACKS_DATA[lockedRole] ? TRACKS_DATA[lockedRole].title : 'Cloud Engineer & SRE');
+  const currentUsername = (state.user && (state.user.username || state.user.full_name)) || 'learner';
+  const userRole = (state.user && state.user.role) || state.activeTrackId || 'cloud-sre';
+  const currentJobRole = getRoleDisplayName(userRole);
 
   // Count user solved questions/problems (each solved question = 1 star)
   let userSolvedCount = 0;
-  try {
-    const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
-    userSolvedCount = Object.values(probProgress).filter(p => p.status === 'completed').length;
-  } catch (e) {
-    userSolvedCount = 0;
+  if (state.problemsList && state.problemsList.length > 0) {
+    userSolvedCount = state.problemsList.filter(p => p.status === 'completed').length;
+  } else {
+    try {
+      const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+      userSolvedCount = Object.values(probProgress).filter(p => p.status === 'completed').length;
+    } catch (e) {
+      userSolvedCount = 0;
+    }
   }
 
-  // Candidate Cohort Leaderboard entries
+  // Load registered users from offline/local DB to show real users on the leaderboard
+  let registeredUsers = [];
+  try {
+    const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+    registeredUsers = Object.values(usersDb);
+  } catch (e) {
+    registeredUsers = [];
+  }
+
+  // Candidate Cohort Benchmark entries
   const benchmarkCandidates = [
-    { username: 'aarav_dev', jobRole: 'Software Developer', points: 18, isCurrentUser: false },
-    { username: 'priya_cloud', jobRole: 'Cloud Engineer & SRE', points: 15, isCurrentUser: false },
-    { username: 'rohit_analyst', jobRole: 'Data Analyst', points: 12, isCurrentUser: false },
-    { username: 'ananya_swe', jobRole: 'Software Developer', points: 9, isCurrentUser: false },
-    { username: 'vikram_sre', jobRole: 'Cloud Engineer & SRE', points: 6, isCurrentUser: false },
-    { username: 'neha_data', jobRole: 'Data Analyst', points: 3, isCurrentUser: false }
+    { username: 'aarav_dev', jobRole: 'Backend Distributed Systems Engineer', points: 18, isCurrentUser: false },
+    { username: 'priya_cloud', jobRole: 'Cloud & Platform SRE', points: 15, isCurrentUser: false },
+    { username: 'rohit_analyst', jobRole: 'Enterprise Data & AI Platform Engineer', points: 12, isCurrentUser: false },
+    { username: 'ananya_swe', jobRole: 'Backend Distributed Systems Engineer', points: 9, isCurrentUser: false },
+    { username: 'vikram_sre', jobRole: 'Cloud & Platform SRE', points: 6, isCurrentUser: false },
+    { username: 'neha_data', jobRole: 'Enterprise Data & AI Platform Engineer', points: 3, isCurrentUser: false }
   ];
+
+  // Map other registered users into entries
+  const otherUserEntries = registeredUsers
+    .filter(u => u.username && u.username.toLowerCase() !== currentUsername.toLowerCase() && !u.username.includes('[object'))
+    .map(u => ({
+      username: u.username,
+      jobRole: getRoleDisplayName(u.role || 'cloud-sre'),
+      points: u.quiz_passed ? 1 : 0,
+      isCurrentUser: false
+    }));
 
   // Current active user entry
   const userEntry = {
@@ -2816,17 +2833,34 @@ function renderAdminView() {
     isCurrentUser: true
   };
 
-  // Filter out duplicate if username matches benchmark, then insert current user
-  const entries = benchmarkCandidates.filter(e => e.username.toLowerCase() !== currentUsername.toLowerCase());
-  entries.push(userEntry);
+  // Combine benchmark + registered users + current user without duplicates
+  const knownUsernames = new Set([currentUsername.toLowerCase()]);
+  const entries = [userEntry];
+
+  otherUserEntries.forEach(e => {
+    if (!knownUsernames.has(e.username.toLowerCase())) {
+      knownUsernames.add(e.username.toLowerCase());
+      entries.push(e);
+    }
+  });
+
+  benchmarkCandidates.forEach(e => {
+    if (!knownUsernames.has(e.username.toLowerCase())) {
+      knownUsernames.add(e.username.toLowerCase());
+      entries.push(e);
+    }
+  });
 
   // Sort descending by points (stars), then alphabetical
   entries.sort((a, b) => b.points - a.points || a.username.localeCompare(b.username));
 
   const rolePillClass = {
     'Software Developer': 'badge-indigo',
+    'Backend Distributed Systems Engineer': 'badge-indigo',
     'Cloud Engineer & SRE': 'badge-emerald',
-    'Data Analyst': 'badge-purple'
+    'Cloud & Platform SRE': 'badge-emerald',
+    'Data Analyst': 'badge-purple',
+    'Enterprise Data & AI Platform Engineer': 'badge-purple'
   };
 
   tbody.innerHTML = entries.map((entry, idx) => {
@@ -3140,6 +3174,18 @@ function renderProfileView() {
         </div>
       </div>
     `;
+
+    const certDlBtn = document.getElementById('btn-download-cert-pdf');
+    if (certDlBtn) {
+      certDlBtn.addEventListener('click', async (e) => {
+        try {
+          const res = await fetch(certDlBtn.getAttribute('href'), { method: 'HEAD' });
+          if (res.ok) return; // Allow normal browser download if backend is alive
+        } catch (err) {}
+        e.preventDefault();
+        printClientCertificate(learnerName, roleTitle, certId);
+      });
+    }
   }
 
   // Competencies list
@@ -3213,6 +3259,67 @@ function renderProfileView() {
       historyList.innerHTML = historyHtml;
     }
   }
+}
+
+function printClientCertificate(learnerName, roleTitle, certId) {
+  const printWin = window.open('', '_blank', 'width=1000,height=750');
+  if (!printWin) {
+    showToast('Please allow popups to open and print your certificate.', 'warning');
+    return;
+  }
+  const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  printWin.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Praxis Certificate - ${escapeHtml(learnerName)}</title>
+  <style>
+    @page { size: landscape; margin: 0.5in; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem; background: #0f172a; font-family: 'Inter', -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .cert-card { width: 100%; max-width: 900px; background: #ffffff; color: #0f172a; border: 10px double #d97706; padding: 3rem; border-radius: 12px; text-align: center; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .seal { font-size: 3.5rem; margin-bottom: 0.5rem; }
+    .badge-top { font-size: 0.85rem; font-weight: 800; letter-spacing: 0.15em; color: #4f46e5; text-transform: uppercase; }
+    h1 { font-size: 2.2rem; font-weight: 900; color: #0f172a; margin: 0.5rem 0 1.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .p-certify { font-size: 1.05rem; color: #475569; font-style: italic; margin-bottom: 0.5rem; }
+    .learner-name { font-size: 2.4rem; font-weight: 800; color: #1e1b4b; border-bottom: 2px solid #e2e8f0; display: inline-block; padding: 0 2rem 0.5rem; margin-bottom: 1.25rem; }
+    .desc { font-size: 1rem; color: #334155; max-width: 720px; margin: 0 auto 1.75rem; line-height: 1.6; }
+    .meta-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; font-size: 0.85rem; color: #64748b; }
+    @media print {
+      body { background: transparent; padding: 0; }
+      .cert-card { box-shadow: none; border-width: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cert-card">
+    <div class="seal">🏆</div>
+    <div class="badge-top">Praxis Engineering Workplace Readiness</div>
+    <h1>Certificate of Completion</h1>
+    <div class="p-certify">This officially certifies that</div>
+    <div class="learner-name">${escapeHtml(learnerName)}</div>
+    <div class="desc">
+      has successfully satisfied all rigorous operational requirements for the <strong>${escapeHtml(roleTitle)}</strong> career track, exhibiting verified competency in production triage, distributed telemetry analysis, and incident mitigation across the 40-problem curriculum.
+    </div>
+    <div class="meta-row">
+      <div style="text-align: left;">
+        <div><strong>Issue Date:</strong> ${dateStr}</div>
+        <div><strong>Verification ID:</strong> ${escapeHtml(certId)}</div>
+      </div>
+      <div>
+        <div style="font-weight: 800; color: #1e1b4b;">PRAXIS VERIFICATION BOARD</div>
+        <div style="font-size: 0.75rem;">Enterprise Simulation Authority</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 400);
+    };
+  </script>
+</body>
+</html>`);
+  printWin.document.close();
 }
 
 function exportLearnerTranscript() {
@@ -3500,7 +3607,7 @@ function bindAuthControls() {
     }
     const errorMsg = document.getElementById('auth-error-msg');
     if (errorMsg) errorMsg.style.display = 'none';
-    if (prefillUsername) {
+    if (typeof prefillUsername === 'string' && prefillUsername) {
       const uInput = document.getElementById('auth-username');
       if (uInput) uInput.value = prefillUsername;
     }
@@ -3525,15 +3632,15 @@ function bindAuthControls() {
     }
     const errorMsg = document.getElementById('auth-error-msg');
     if (errorMsg) errorMsg.style.display = 'none';
-    if (prefillUsername) {
+    if (typeof prefillUsername === 'string' && prefillUsername) {
       const uInput = document.getElementById('auth-username');
       if (uInput) uInput.value = prefillUsername;
     }
   }
 
   if (tabSignin && tabSignup) {
-    tabSignin.addEventListener('click', switchToSignIn);
-    tabSignup.addEventListener('click', switchToSignUp);
+    tabSignin.addEventListener('click', () => switchToSignIn());
+    tabSignup.addEventListener('click', () => switchToSignUp());
   }
 
   if (linkSwitch) {
@@ -4998,7 +5105,7 @@ async function runProblemPrecheck(problemId) {
         <div style="margin-top: 6px; font-size: 0.75rem; color: #94a3b8;">${passed ? 'All required criteria addressed. Ready to submit.' : 'Address missing concepts before submitting.'}</div>
       `;
     }
-    showToast(passed ? 'Pre-check passed!' : 'Pre-check found issues.', data.passed ? 'success' : 'info');
+    showToast(passed ? 'Pre-check passed!' : 'Pre-check found issues.', passed ? 'success' : 'info');
   }
 }
 
