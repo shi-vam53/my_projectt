@@ -4327,6 +4327,18 @@ body.dark-mode .reader-section-block.highlight-pulse {
   background: #ffffff !important;
 }
 
+.prob-catalog-card.dashboard-card-locked {
+  opacity: 0.72;
+  filter: grayscale(20%);
+  cursor: not-allowed !important;
+}
+
+.prob-catalog-card.dashboard-card-locked:hover {
+  transform: none !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: none !important;
+}
+
 .dashboard-card-locked-inner {
   opacity: 0.42;
   filter: grayscale(35%);

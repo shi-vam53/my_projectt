@@ -883,6 +883,29 @@ function switchView(viewName) {
     return;
   }
 
+  // Progressive gating: Questions require passed quiz, Quiz requires completed handbook
+  if (viewName === 'problems' && (!state.user || !state.user.quiz_passed)) {
+    const hasHandbook = isHandbookDone();
+    showToast(
+      hasHandbook
+        ? '🔒 Production Problems are locked! Pass the Phase 2 Readiness Quiz first.'
+        : '🔒 Production Problems are locked! Complete the Handbook & pass the Readiness Quiz first.',
+      'warning'
+    );
+    if (!hasHandbook) {
+      switchView('handbook');
+    } else {
+      switchView('quiz');
+    }
+    return;
+  }
+
+  if (viewName === 'quiz' && !isHandbookDone()) {
+    showToast('🔒 Readiness Assessment is locked! Please read the Industry Foundations Handbook (Phase 1) first.', 'warning');
+    switchView('handbook');
+    return;
+  }
+
   state.currentView = viewName;
   const views = {
     dashboard: document.getElementById('view-dashboard'),
@@ -940,6 +963,11 @@ function bindHeaderControls() {
 
   if (headerQuizBtn) {
     headerQuizBtn.addEventListener('click', () => {
+      if (!isHandbookDone()) {
+        showToast('🔒 Please read the Industry Foundations Handbook (Phase 1) first to unlock the Readiness Quiz.', 'warning');
+        switchView('handbook');
+        return;
+      }
       openReadinessQuiz(state.activeTrackId);
     });
   }
@@ -1877,6 +1905,11 @@ function bindQuizModal() {
 }
 
 function openReadinessQuiz(trackId) {
+  if (!isHandbookDone()) {
+    showToast('🔒 Readiness Assessment is locked! Please read the Industry Foundations Handbook (Phase 1) first.', 'warning');
+    switchView('handbook');
+    return;
+  }
   const track = TRACKS_DATA[trackId] || TRACKS_DATA['cloud-engineer'];
   state.quiz.trackId = track.id;
   state.quiz.currentIndex = 0;
@@ -3446,7 +3479,54 @@ function showAuthOverlay(visible) {
   if (overlay) overlay.style.display = visible ? 'flex' : 'none';
 }
 
+function updateSidebarLockIndicators() {
+  const quizPill = document.getElementById('quiz-sidebar-pill');
+  const probsPill = document.getElementById('problems-count-pill');
+  const navProblemsBtn = document.getElementById('nav-problems');
+  const navQuizBtn = document.getElementById('nav-quiz');
+
+  const hasHandbook = isHandbookDone();
+  const quizPassed = Boolean(state.user && state.user.quiz_passed);
+
+  if (quizPill) {
+    if (quizPassed) {
+      quizPill.textContent = 'Passed (5/5) ✓';
+      quizPill.style.background = 'rgba(16, 185, 129, 0.2)';
+      quizPill.style.color = '#10b981';
+    } else if (hasHandbook) {
+      quizPill.textContent = '⚡ Ready';
+      quizPill.style.background = 'rgba(245, 158, 11, 0.2)';
+      quizPill.style.color = '#f59e0b';
+    } else {
+      quizPill.textContent = '🔒 Locked';
+      quizPill.style.background = 'rgba(148, 163, 184, 0.15)';
+      quizPill.style.color = 'var(--text-muted)';
+    }
+  }
+
+  if (probsPill) {
+    if (quizPassed) {
+      const solved = (state.problemsList || []).filter(p => p.status === 'completed').length;
+      probsPill.textContent = `${solved}/40`;
+      probsPill.style.background = 'rgba(99, 102, 241, 0.2)';
+      probsPill.style.color = '#818cf8';
+    } else {
+      probsPill.textContent = '🔒 Locked';
+      probsPill.style.background = 'rgba(148, 163, 184, 0.15)';
+      probsPill.style.color = 'var(--text-muted)';
+    }
+  }
+
+  if (navProblemsBtn) {
+    navProblemsBtn.title = quizPassed ? '40 Production Engineering Problems' : '🔒 Locked: Complete Handbook & Pass Readiness Quiz First';
+  }
+  if (navQuizBtn) {
+    navQuizBtn.title = hasHandbook ? '5-Question Readiness Check' : '🔒 Locked: Complete Industry Foundations Handbook First';
+  }
+}
+
 function updateUserHeaderUI() {
+  updateSidebarLockIndicators();
   const avatar = document.getElementById('header-user-avatar');
   const name = document.getElementById('header-user-name');
   const role = document.getElementById('header-user-role');
@@ -4045,6 +4125,7 @@ function markHandbookCompleted() {
       safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
     } catch (e) {}
   }
+  updateSidebarLockIndicators();
 }
 
 function bindHandbookAndQuizControls() {
@@ -4378,8 +4459,40 @@ function updateHandbookForUserRole() {
 async function loadQuizQuestions() {
   const container = document.getElementById('quiz-questions-list');
   const banner = document.getElementById('quiz-results-banner');
+  const submitBtn = document.getElementById('submit-readiness-quiz-btn');
   if (banner) banner.style.display = 'none';
   if (!container) return;
+
+  if (!isHandbookDone()) {
+    container.innerHTML = `
+      <div class="card dashboard-card-locked" style="padding: 2.5rem 1.5rem; text-align: center; border: 2px dashed #cbd5e1; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px); margin-top: 1rem;">
+        <div class="lock-icon-circle" style="margin: 0 auto 0.75rem auto; width: 44px; height: 44px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.4rem 0;">Readiness Assessment is Locked</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted); max-width: 520px; margin: 0 auto 1.25rem auto;">
+          The 5 Multiple Elimination Questions require foundational knowledge from the 11-chapter field manual. Please review the Industry Foundations Handbook first.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btn-quiz-gate-handbook">
+            Read Industry Foundations Handbook (Phase 1) ➔
+          </button>
+          <button class="btn btn-outline" id="btn-quiz-gate-dash">
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    `;
+    document.getElementById('btn-quiz-gate-handbook')?.addEventListener('click', () => switchView('handbook'));
+    document.getElementById('btn-quiz-gate-dash')?.addEventListener('click', () => switchView('dashboard'));
+    if (submitBtn) submitBtn.style.display = 'none';
+    return;
+  }
+  if (submitBtn) submitBtn.style.display = 'inline-flex';
+
   container.innerHTML = `<div style="text-align: center; padding: 2rem; color: #64748b;">Loading randomized questions...</div>`;
   state.quizUserAnswers = {};
 
@@ -4441,6 +4554,10 @@ function renderQuizQuestions() {
 }
 
 async function submitReadinessQuiz() {
+  if (!isHandbookDone()) {
+    showToast('🔒 Please read the Industry Foundations Handbook (Phase 1) first before submitting.', 'warning');
+    return;
+  }
   if (!state.token) {
     showToast('Please sign in first.', 'error');
     return;
@@ -4563,12 +4680,8 @@ function renderQuizResults(data) {
         safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
       } catch (e) {}
     }
-    const sidebarPill = document.getElementById('quiz-sidebar-pill');
-    if (sidebarPill) {
-      sidebarPill.textContent = 'Passed (5/5)';
-      sidebarPill.style.background = 'rgba(16, 185, 129, 0.2)';
-      sidebarPill.style.color = '#10b981';
-    }
+    updateUserHeaderUI();
+    updateSidebarLockIndicators();
     if (unlockBtn) {
       unlockBtn.textContent = 'Go to Operations Dashboard ➔';
       unlockBtn.style.display = 'inline-flex';
@@ -4587,6 +4700,7 @@ function renderQuizResults(data) {
 // ----------------------------------------------------------------------------
 
 async function renderDashboardView() {
+  updateSidebarLockIndicators();
   if (state.problemsList.length === 0) {
     await loadProblemsBank();
   }
@@ -5084,6 +5198,18 @@ let currentProbSearch = '';
 let currentProbFilter = 'all';
 
 function openProblemInWorkspace(problemId) {
+  if (!state.user || !state.user.quiz_passed) {
+    const hasHandbook = isHandbookDone();
+    showToast(
+      hasHandbook
+        ? '🔒 Production Problems are locked! Pass the Phase 2 Readiness Quiz first.'
+        : '🔒 Production Problems are locked! Complete the Handbook & pass the Readiness Quiz first.',
+      'warning'
+    );
+    if (!hasHandbook) switchView('handbook');
+    else switchView('quiz');
+    return;
+  }
   state.activeProblemId = problemId;
   const catalogContainer = document.getElementById('problems-catalog-container');
   const detailContainer = document.getElementById('problem-detail-container');
@@ -5107,6 +5233,51 @@ function renderProblemsCatalog(filter = 'all') {
   if (!grid) return;
 
   updateProblemsSolvedCounter();
+
+  const quizPassed = Boolean(state.user && state.user.quiz_passed);
+  const hasHandbook = isHandbookDone();
+
+  const catalogHeader = document.querySelector('.problems-catalog-header');
+  let gate = document.getElementById('problems-locked-gate');
+
+  if (!quizPassed) {
+    if (!gate && catalogHeader) {
+      gate = document.createElement('div');
+      gate.id = 'problems-locked-gate';
+      gate.className = 'dashboard-card-locked';
+      gate.style.cssText = 'margin-top: 1rem; border-radius: 12px; padding: 2rem 1.5rem; text-align: center; border: 2px dashed #cbd5e1; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px);';
+      gate.innerHTML = `
+        <div class="lock-icon-circle" style="margin: 0 auto 0.75rem auto; width: 44px; height: 44px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.4rem 0;">40 Production Engineering Problems are Locked</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted); max-width: 540px; margin: 0 auto 1.25rem auto;">
+          To ensure readiness for real incident tickets, solving production problems requires completing the Industry Foundations Handbook and passing the 5-question Readiness Assessment.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-primary btn-sm" id="btn-gate-go-prereq">
+            ${hasHandbook ? 'Take Phase 2 Readiness Quiz (5 MEQs) ➔' : 'Read Phase 1 Foundations Handbook ➔'}
+          </button>
+          <button class="btn btn-outline btn-sm" id="btn-gate-go-dash">
+            Return to Dashboard
+          </button>
+        </div>
+      `;
+      catalogHeader.parentNode.insertBefore(gate, grid);
+      document.getElementById('btn-gate-go-prereq')?.addEventListener('click', () => {
+        if (hasHandbook) switchView('quiz');
+        else switchView('handbook');
+      });
+      document.getElementById('btn-gate-go-dash')?.addEventListener('click', () => {
+        switchView('dashboard');
+      });
+    }
+  } else {
+    if (gate) gate.remove();
+  }
 
   let filtered = state.problemsList;
   if (filter === 'basic') filtered = filtered.filter(p => p.phase === 1);
@@ -5164,7 +5335,7 @@ function renderProblemsCatalog(filter = 'all') {
   }
 
   grid.innerHTML = filtered.map(p => `
-    <div class="prob-catalog-card ${state.activeProblemId === p.id ? 'active' : ''}" data-problem-id="${p.id}">
+    <div class="prob-catalog-card ${state.activeProblemId === p.id ? 'active' : ''} ${!quizPassed ? 'dashboard-card-locked' : ''}" data-problem-id="${p.id}">
       <div class="prob-catalog-card-header">
         <div style="display: flex; gap: 6px; align-items: center;">
           <span style="font-weight: 800; font-size: 0.78rem; color: #6366f1;">${p.id.toUpperCase()}</span>
@@ -5172,15 +5343,17 @@ function renderProblemsCatalog(filter = 'all') {
             ${p.phase === 1 ? 'Phase 1: Basic' : 'Phase 2: Inter'}
           </span>
         </div>
-        <span class="badge ${p.status === 'completed' ? 'badge-emerald' : 'badge-outline'}" style="font-size: 0.68rem; padding: 1px 6px;">
-          ${p.status === 'completed' ? '✓ Solved' : 'Pending'}
+        <span class="badge ${p.status === 'completed' ? 'badge-emerald' : (!quizPassed ? 'badge-amber' : 'badge-outline')}" style="font-size: 0.68rem; padding: 1px 6px;">
+          ${p.status === 'completed' ? '✓ Solved' : (!quizPassed ? '🔒 Locked' : 'Pending')}
         </span>
       </div>
       <div class="prob-catalog-card-title">${escapeHtml(p.title)}</div>
       <div class="prob-catalog-card-scenario">${escapeHtml(p.scenario)}</div>
       <div class="prob-catalog-card-footer">
         <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.category)}</span>
-        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 10px;">Solve Ticket ➔</button>
+        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 10px;">
+          ${!quizPassed ? '🔒 Locked' : 'Solve Ticket ➔'}
+        </button>
       </div>
     </div>
   `).join('');
@@ -5197,6 +5370,10 @@ function renderProblemsList(filter = 'all') {
 }
 
 async function runProblemPrecheck(problemId) {
+  if (!state.user || !state.user.quiz_passed) {
+    showToast('🔒 Problem pre-check is locked. Complete the Handbook & pass the Readiness Quiz first.', 'warning');
+    return;
+  }
   const inputEl = document.getElementById('problem-solution-input');
   const precheckBtn = document.getElementById('btn-precheck-problem');
   const consoleEl = document.getElementById('problem-precheck-console');
@@ -5263,6 +5440,11 @@ async function runProblemPrecheck(problemId) {
 function renderProblemDetail(problemId) {
   const container = document.getElementById('problem-detail-container');
   if (!container) return;
+
+  if (!state.user || !state.user.quiz_passed) {
+    openProblemsCatalog();
+    return;
+  }
 
   const problem = state.problemsList.find(p => p.id === problemId);
   if (!problem) return;
@@ -5477,6 +5659,11 @@ function renderProblemDetail(problemId) {
 }
 
 async function submitProblemSolution(problemId) {
+  if (!state.user || !state.user.quiz_passed) {
+    showToast('🔒 Cannot submit solution: You must complete the Handbook & pass the Readiness Quiz first.', 'error');
+    return;
+  }
+
   if (!state.token) {
     showToast('Please sign in to submit solutions.', 'error');
     return;
