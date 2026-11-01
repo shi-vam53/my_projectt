@@ -1,2 +1,9 @@
 User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform
-971a4475-1eb7-435b-af52-4be6f0fcdb4d,fresher_rohit,Rohit Verma,Unassigned,No,Pending,0/5,2026-11-01T16:01:28Z,Praxis Workplace Simulation
+d6f3c45f-8cd5-4d13-955a-e8a5594eaec4,charliedev,Charlie Engineer,Backend & API Systems Engineer,Yes (Permanent),Passed (5/5),5/5,2026-10-22T06:40:04Z,Praxis Workplace Simulation
+347b88b0-68ff-4f84-afaf-fb7fedc05a9d,arjun_verma,Arjun Verma,Data & AI Systems Engineer,Yes (Permanent),Passed (5/5),5/5,2026-10-22T07:25:46Z,Praxis Workplace Simulation
+11b375f0-21f1-4f28-8428-5115af8ed812,testuser@gmail.com,Test User,Unassigned,No,Pending,0/5,2026-10-27T15:52:25Z,Praxis Workplace Simulation
+a777b279-af47-458f-931f-c220eaa49e79,randquizuser,Random Quiz Tester,Unassigned,No,Pending,3/5,2026-10-31T09:29:40Z,Praxis Workplace Simulation
+53e4fd03-d371-4225-a952-6d23db2259b4,alex_cloud,Alex Rivera,Cloud Engineer & SRE Specialist,Yes (Permanent),Passed (5/5),5/5,2026-11-01T16:24:03Z,Praxis Workplace Simulation
+ff5ecce1-2200-446f-9a6a-a566a66b433d,priya_devops,Priya Sharma,Software Developer & Systems Specialist,Yes (Permanent),Passed (5/5),5/5,2026-11-01T16:24:03Z,Praxis Workplace Simulation
+fce95f4e-9295-407b-bbee-0a833401aef6,marcus_cyber,Marcus Vance,Cloud Engineer & SRE Specialist,Yes (Permanent),Passed (5/5),5/5,2026-11-01T16:24:03Z,Praxis Workplace Simulation
+b8d0d349-46ef-412f-a08d-2ca6d52a972b,elena_backend,Elena Rostova,Data Analyst & Analytics Specialist,Yes (Permanent),Passed (5/5),5/5,2026-11-01T16:24:03Z,Praxis Workplace Simulation

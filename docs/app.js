@@ -2854,7 +2854,7 @@ function renderAdminView() {
     .map(u => ({
       username: u.username,
       jobRole: getRoleDisplayName(u.role || 'cloud-sre'),
-      points: u.quiz_passed ? 1 : 0,
+      points: typeof u.points === 'number' ? u.points : (typeof u.solved_count === 'number' ? u.solved_count : (u.quiz_passed ? 1 : 0)),
       isCurrentUser: false
     }));
 
@@ -3650,7 +3650,11 @@ async function handleLogoutAction() {
   safeStorage.removeItem('praxis_offline_user');
   state.token = null;
   state.user = null;
+  state.problemsList = [];
+  state.activeProblemId = null;
+  state.quizUserAnswers = {};
   updateUserHeaderUI();
+  updateSidebarLockIndicators();
   showAuthOverlay(true);
   showToast('Logged out successfully.', 'info');
 }
@@ -4108,21 +4112,26 @@ function jumpToHandbookSection(targetId) {
 }
 
 function isHandbookDone() {
-  if (state.user && state.user.quiz_passed) return true;
-  if (state.user && state.user.handbook_completed) return true;
-  return safeStorage.getItem('praxis_handbook_completed') === 'true';
+  if (!state.user) return false;
+  if (state.user.quiz_passed) return true;
+  if (state.user.handbook_completed) return true;
+  const userKey = 'praxis_handbook_done_' + (state.user.username || '').toLowerCase();
+  return safeStorage.getItem(userKey) === 'true';
 }
 
 function markHandbookCompleted() {
-  safeStorage.setItem('praxis_handbook_completed', 'true');
   if (state.user) {
+    const userKey = 'praxis_handbook_done_' + (state.user.username || '').toLowerCase();
+    safeStorage.setItem(userKey, 'true');
     state.user.handbook_completed = true;
     safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
     safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
     try {
       const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
-      usersDb[state.user.username.toLowerCase()] = state.user;
-      safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+      if (usersDb[state.user.username.toLowerCase()]) {
+        usersDb[state.user.username.toLowerCase()].handbook_completed = true;
+        safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+      }
     } catch (e) {}
   }
   updateSidebarLockIndicators();
@@ -5141,8 +5150,9 @@ async function loadProblemsBank() {
     if (res.ok) {
       state.problemsList = await res.json();
       renderProblemsList(state.problemsFilter);
-      if (state.problemsList.length > 0) {
-        openProblemInWorkspace(state.activeProblemId || state.problemsList[0].id);
+      state.activeProblemId = state.activeProblemId || (state.problemsList[0] ? state.problemsList[0].id : null);
+      if (state.user && state.user.quiz_passed && state.currentView === 'problems') {
+        openProblemInWorkspace(state.activeProblemId);
       }
       updateProblemsSolvedCounter();
       return;
@@ -5152,7 +5162,8 @@ async function loadProblemsBank() {
   }
 
   if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS) {
-    const savedProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const userProgKey = 'praxis_offline_problem_progress_' + (state.user ? state.user.username : 'guest').toLowerCase();
+    const savedProgress = JSON.parse(safeStorage.getItem(userProgKey) || safeStorage.getItem('praxis_offline_problem_progress') || '{}');
     state.problemsList = window.PRAXIS_OFFLINE_DATA.PROBLEMS.map(p => ({
       ...p,
       status: savedProgress[p.id] ? savedProgress[p.id].status : 'pending',
@@ -5160,8 +5171,9 @@ async function loadProblemsBank() {
       feedback: savedProgress[p.id] ? savedProgress[p.id].feedback : null
     }));
     renderProblemsList(state.problemsFilter);
-    if (state.problemsList.length > 0) {
-      openProblemInWorkspace(state.activeProblemId || state.problemsList[0].id);
+    state.activeProblemId = state.activeProblemId || (state.problemsList[0] ? state.problemsList[0].id : null);
+    if (state.user && state.user.quiz_passed && state.currentView === 'problems') {
+      openProblemInWorkspace(state.activeProblemId);
     }
     updateProblemsSolvedCounter();
   }
@@ -5172,7 +5184,19 @@ function updateProblemsSolvedCounter() {
   const total = state.problemsList.length || 40;
   const countPill = document.getElementById('problems-count-pill');
   const badge = document.getElementById('prob-catalog-solved-badge');
-  if (countPill) countPill.textContent = `${solved}/${total}`;
+  const quizPassed = Boolean(state.user && state.user.quiz_passed);
+  if (countPill) {
+    if (!quizPassed) {
+      countPill.textContent = '🔒 Locked';
+      countPill.style.background = 'rgba(148, 163, 184, 0.15)';
+      countPill.style.color = 'var(--text-muted)';
+    } else {
+      countPill.textContent = `${solved}/${total}`;
+      countPill.style.background = 'rgba(99, 102, 241, 0.2)';
+      countPill.style.color = '#818cf8';
+    }
+  }
+  if (badge) badge.textContent = `${solved} / ${total} Solved`;
   if (badge) badge.textContent = `${solved} / ${total} Solved`;
 
   const sbSolved = document.getElementById('sidebar-user-solved-count');
@@ -5734,6 +5758,23 @@ async function submitProblemSolution(problemId) {
         prob.status = data.status;
         prob.score = data.score;
       }
+      if (data.passed) {
+        const solvedCount = (state.problemsList || []).filter(p => p.status === 'completed').length;
+        if (state.user) {
+          state.user.solved_count = solvedCount;
+          state.user.points = solvedCount;
+          safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+          safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+          try {
+            const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+            if (usersDb[state.user.username.toLowerCase()]) {
+              usersDb[state.user.username.toLowerCase()].solved_count = solvedCount;
+              usersDb[state.user.username.toLowerCase()].points = solvedCount;
+              safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+            }
+          } catch (e) {}
+        }
+      }
       renderProblemsList(state.problemsFilter);
       updateProblemsSolvedCounter();
       showToast(data.passed ? 'Problem solved successfully!' : 'Review feedback and adjust solution.', data.passed ? 'success' : 'info');
@@ -5748,15 +5789,31 @@ async function submitProblemSolution(problemId) {
 
   const match = (window.PRAXIS_OFFLINE_DATA ? window.PRAXIS_OFFLINE_DATA.PROBLEMS : state.problemsList).find(p => p.id === problemId);
   if (match) {
-    const solLower = input.value.trim().toLowerCase();
+    const rawVal = input.value.trim();
+    const solLower = rawVal.toLowerCase();
+    const wordCount = rawVal.split(/\s+/).filter(Boolean).length;
     const keywords = match.expected_keywords || [];
     const hits = keywords.filter(k => solLower.includes(k.toLowerCase()));
     const scoreRatio = keywords.length > 0 ? (hits.length / keywords.length) : 1.0;
-    const score = Math.round(scoreRatio * 100);
-    const passed = score >= (match.passing_score || 70);
-    const feedback = passed
-      ? `Solution accepted! (${score}%). Addressed required concepts: ${hits.join(', ')}.`
-      : `Needs refinement (${score}%). Ensure you address: ${keywords.filter(k => !hits.includes(k)).join(', ')}.`;
+
+    let passed = false;
+    let score = 0;
+    let feedback = '';
+
+    if (wordCount < 15) {
+      passed = false;
+      score = 25;
+      feedback = 'Solution is too brief. Provide a thorough engineering analysis with root cause, code/config remedy, and verification steps.';
+    } else if (scoreRatio >= 0.6) {
+      passed = true;
+      score = Math.min(100, Math.round(75 + (scoreRatio * 25)));
+      feedback = `Excellent engineering solution! (${score}%). Successfully addressed core concepts: ${hits.join(', ')}. Meets production criteria.`;
+    } else {
+      passed = false;
+      score = Math.round(scoreRatio * 60);
+      const missing = keywords.filter(k => !hits.includes(k));
+      feedback = `Partially addressed (${score}%). Ensure your answer directly addresses production details such as: ${missing.slice(0, 3).join(', ')}.`;
+    }
 
     const evalData = {
       problem_id: problemId,
@@ -5766,8 +5823,10 @@ async function submitProblemSolution(problemId) {
       feedback: feedback
     };
 
-    const savedProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+    const userProgKey = 'praxis_offline_problem_progress_' + (state.user ? state.user.username : 'guest').toLowerCase();
+    const savedProgress = JSON.parse(safeStorage.getItem(userProgKey) || safeStorage.getItem('praxis_offline_problem_progress') || '{}');
     savedProgress[problemId] = evalData;
+    safeStorage.setItem(userProgKey, JSON.stringify(savedProgress));
     safeStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
 
     const evalCard = document.getElementById('problem-eval-result');
@@ -5812,6 +5871,23 @@ async function submitProblemSolution(problemId) {
     if (prob) {
       prob.status = evalData.status;
       prob.score = evalData.score;
+    }
+    if (passed) {
+      const solvedCount = (state.problemsList || []).filter(p => p.status === 'completed').length;
+      if (state.user) {
+        state.user.solved_count = solvedCount;
+        state.user.points = solvedCount;
+        safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+        safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+        try {
+          const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+          if (usersDb[state.user.username.toLowerCase()]) {
+            usersDb[state.user.username.toLowerCase()].solved_count = solvedCount;
+            usersDb[state.user.username.toLowerCase()].points = solvedCount;
+            safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+          }
+        } catch (e) {}
+      }
     }
     renderProblemsList(state.problemsFilter);
     updateProblemsSolvedCounter();

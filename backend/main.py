@@ -475,6 +475,10 @@ class SubmissionStore:
         ledger_file = self.database_path.parent / "registered_users_ledger.csv"
         csv_content = self.export_users_csv()
         ledger_file.write_text(csv_content, encoding="utf-8")
+        try:
+            sync_users_to_workspace_file(self.database_path, PROJECT_ROOT / "frontend" / "assets" / "Praxis_Registered_Users.csv")
+        except Exception:
+            pass
         return ledger_file
 
     def get_user_progress(self, user_id: str) -> dict[str, dict[str, Any]]:

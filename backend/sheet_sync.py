@@ -49,6 +49,9 @@ def generate_users_csv(database_path: str | Path) -> str:
         "backend-eng": "Backend & API Systems Engineer",
         "data-ai": "Data & AI Systems Engineer",
         "fullstack-prod": "Full-Stack Product Engineer",
+        "software-developer": "Software Developer & Systems Specialist",
+        "cloud-engineer": "Cloud Engineer & SRE Specialist",
+        "data-analyst": "Data Analyst & Analytics Specialist",
     }
 
     for r in rows:
