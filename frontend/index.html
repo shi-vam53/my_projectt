@@ -287,7 +287,7 @@
             <!-- Welcome Banner -->
             <div class="dashboard-welcome-banner">
               <div class="dashboard-welcome-text">
-                <div class="badge badge-emerald" style="background: rgba(16, 185, 129, 0.25); color: #34d399; margin-bottom: 0.5rem; width: fit-content;">
+                <div class="badge badge-emerald" id="dash-readiness-pill" style="background: rgba(16, 185, 129, 0.25); color: #34d399; margin-bottom: 0.5rem; width: fit-content;">
                   Readiness Assessment: Passed (5/5) ✓
                 </div>
                 <h1 id="dash-welcome-user">Welcome to Your Engineering Dashboard</h1>
@@ -309,81 +309,15 @@
               </div>
             </div>
 
-            <!-- The 4 Main Action Sections: 3 Incomplete Problem Sections + 1 Visit Handbook -->
+            <!-- The 4 Main Action Sections: Dynamically Rendered via renderDashboardView() -->
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Engineering Curriculum & Resources</h2>
-                <span style="font-size: 0.8rem; color: var(--text-muted);">Click any section below to jump directly</span>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);" id="dash-curriculum-title">Engineering Curriculum & Roadmap</h2>
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="dash-curriculum-subtitle">Click any section below to jump directly</span>
               </div>
 
-              <div class="dashboard-grid-4">
-                <!-- Section 1: Incomplete Basic Problems (1 - 20) -->
-                <div class="dashboard-section-card" id="dash-card-basic-problems">
-                  <div class="dashboard-card-top">
-                    <span class="dashboard-card-tag">Phase 01 • Basic</span>
-                    <span class="dashboard-card-badge-incomplete" id="dash-badge-basic">
-                      ● <span id="dash-badge-basic-text">20 Incomplete</span>
-                    </span>
-                  </div>
-                  <div class="dashboard-card-title">Basic Production Problems</div>
-                  <div class="dashboard-card-desc">
-                    20 fundamental production challenges covering OOM container crashes, connection pool leaks, unindexed foreign keys, and rate limiters. Features SOP reference & syntax guidance.
-                  </div>
-                  <div class="dashboard-card-link">
-                    Solve Incomplete Problems ➔
-                  </div>
-                </div>
-
-                <!-- Section 2: Incomplete Intermediate Problems (21 - 40) -->
-                <div class="dashboard-section-card" id="dash-card-inter-problems">
-                  <div class="dashboard-card-top">
-                    <span class="dashboard-card-tag">Phase 02 • Intermediate</span>
-                    <span class="dashboard-card-badge-incomplete" id="dash-badge-inter">
-                      ● <span id="dash-badge-inter-text">20 Incomplete</span>
-                    </span>
-                  </div>
-                  <div class="dashboard-card-title">Intermediate Production Problems</div>
-                  <div class="dashboard-card-desc">
-                    20 advanced distributed systems challenges: cascading thread pool exhaustion, distributed lock lease expiry, multi-region replication lag, and saga rollbacks without help statements.
-                  </div>
-                  <div class="dashboard-card-link">
-                    Tackle Incomplete Problems ➔
-                  </div>
-                </div>
-
-                <!-- Section 3: Incomplete Full Incident Simulation Labs -->
-                <div class="dashboard-section-card" id="dash-card-simulation-labs">
-                  <div class="dashboard-card-top">
-                    <span class="dashboard-card-tag">Guided & Independent Labs</span>
-                    <span class="dashboard-card-badge-incomplete" id="dash-badge-labs">
-                      ● <span id="dash-badge-labs-text">20 Guided Missions</span>
-                    </span>
-                  </div>
-                  <div class="dashboard-card-title">Practical Simulation Missions</div>
-                  <div class="dashboard-card-desc">
-                    20 Guided Missions per role with structured submission forms & rubric-based evaluations, plus independent production missions (up to 200 per role). Triage logs, metrics, and architecture.
-                  </div>
-                  <div class="dashboard-card-link">
-                    Explore Role Missions ➔
-                  </div>
-                </div>
-
-                <!-- Section 4: Visit Handbook (12-Page Field Manual) -->
-                <div class="dashboard-section-card" id="dash-card-visit-handbook">
-                  <div class="dashboard-card-top">
-                    <span class="dashboard-card-tag">Field Manual</span>
-                    <span class="dashboard-card-badge-handbook">
-                      ✓ Field Manual Ready
-                    </span>
-                  </div>
-                  <div class="dashboard-card-title">Visit Foundations Handbook</div>
-                  <div class="dashboard-card-desc">
-                    Revisit the publication-grade 12-page industry guide anytime. Review organizational topologies, agile ceremonies, Git etiquette, CI/CD, observability, and 40+ industry keywords.
-                  </div>
-                  <div class="dashboard-card-link">
-                    Visit Handbook & Reader (12p PDF) ➔
-                  </div>
-                </div>
+              <div class="dashboard-grid-4" id="dashboard-sections-grid">
+                <!-- Dynamically populated via renderDashboardView() in app.js based on onboarding vs completed status -->
               </div>
             </div>
 

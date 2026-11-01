@@ -2077,6 +2077,18 @@ function finishQuiz() {
     badgeEl.style.color = 'var(--amber-text)';
   }
 
+  if (score >= 4 && state.user) {
+    state.user.quiz_passed = true;
+    state.user.quiz_score = score;
+    safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    try {
+      const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+      usersDb[state.user.username.toLowerCase()] = state.user;
+      safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+    } catch (e) {}
+  }
+
   // Recap
   const recapContainer = document.getElementById('completed-recap-list');
   recapContainer.innerHTML = '<h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem;">Question-by-Question Review:</h4>';
@@ -4424,16 +4436,23 @@ async function renderDashboardView() {
 
   const welcomeUser = document.getElementById('dash-welcome-user');
   const welcomeTrack = document.getElementById('dash-welcome-track');
+  const readinessPill = document.getElementById('dash-readiness-pill');
   const statIncomplete = document.getElementById('dash-stat-incomplete-count');
   const statSolved = document.getElementById('dash-stat-solved-count');
   const statLabs = document.getElementById('dash-stat-labs-count');
+  const currTitle = document.getElementById('dash-curriculum-title');
+  const currSubtitle = document.getElementById('dash-curriculum-subtitle');
+  const gridEl = document.getElementById('dashboard-sections-grid');
 
   if (state.user) {
     if (welcomeUser) welcomeUser.textContent = `Welcome, ${state.user.full_name || state.user.username}!`;
     if (welcomeTrack) welcomeTrack.textContent = `Active Career Track: 🔒 ${getRoleDisplayName(state.user.role)}`;
+  } else {
+    if (welcomeUser) welcomeUser.textContent = 'Welcome to Your Engineering Dashboard';
+    if (welcomeTrack) welcomeTrack.textContent = 'Active Career Track: 🔒 Cloud & Platform SRE';
   }
 
-  // Calculate counts
+  // Calculate problem statistics
   const basicProbs = state.problemsList.filter(p => p.phase === 1);
   const interProbs = state.problemsList.filter(p => p.phase === 2);
 
@@ -4447,25 +4466,265 @@ async function renderDashboardView() {
 
   const userTrack = state.user ? (state.user.role === 'cloud-sre' ? 'cloud-engineer' : (state.user.role === 'backend-eng' ? 'software-developer' : (state.user.role === 'data-ai' ? 'data-analyst' : state.user.role))) : null;
   const roleMissions = state.allMissions.filter(m => !userTrack || m.track_id === userTrack);
-  const guidedMissions = roleMissions.filter(m => m.type === 'guided');
-  const indepMissions = roleMissions.filter(m => m.type === 'independent');
-
   const totalMissionCount = roleMissions.length || 70;
-  const guidedCount = guidedMissions.length || 20;
 
   if (statIncomplete) statIncomplete.textContent = totalIncomplete;
   if (statSolved) statSolved.textContent = totalSolved;
   if (statLabs) statLabs.textContent = totalMissionCount;
 
-  const badgeBasic = document.getElementById('dash-badge-basic-text');
-  const badgeInter = document.getElementById('dash-badge-inter-text');
-  const badgeLabs = document.getElementById('dash-badge-labs-text');
+  // Determine user state: completed (passed handbook & readiness quiz) vs new user
+  const isCompletedUser = Boolean(state.user && state.user.quiz_passed);
 
-  if (badgeBasic) badgeBasic.textContent = `${incompleteBasic} Incomplete`;
-  if (badgeInter) badgeInter.textContent = `${incompleteInter} Incomplete`;
-  if (badgeLabs) badgeLabs.textContent = `${guidedCount} Guided Missions`;
+  if (readinessPill) {
+    if (isCompletedUser) {
+      readinessPill.className = 'badge badge-emerald';
+      readinessPill.style.background = 'rgba(16, 185, 129, 0.25)';
+      readinessPill.style.color = '#34d399';
+      readinessPill.textContent = `Readiness Assessment: Passed (${state.user?.quiz_score || 5}/5) ✓`;
+    } else {
+      readinessPill.className = 'badge badge-amber';
+      readinessPill.style.background = 'rgba(245, 158, 11, 0.2)';
+      readinessPill.style.color = '#f59e0b';
+      readinessPill.textContent = 'Onboarding: Foundations & Readiness Quiz Pending';
+    }
+  }
 
-  // Render Up Next: 3 Incomplete Problems
+  if (currTitle) {
+    currTitle.textContent = isCompletedUser ? 'Incomplete Production Workflows' : 'Engineering Onboarding & Roadmap';
+  }
+  if (currSubtitle) {
+    currSubtitle.textContent = isCompletedUser ? 'Select an incomplete category or launch the next problem' : 'Complete Phase 1 & 2 to unlock operational production tickets';
+  }
+
+  // Find the next incomplete problem for Card 4 in completed state
+  const nextProblem = state.problemsList.find(p => p.status !== 'completed');
+
+  // Render the 4 Dynamic Action Cards
+  if (gridEl) {
+    if (!isCompletedUser) {
+      // NEW USER STATE: Phase 1 (Handbook), Phase 2 (Quiz), Phase 3 (Questions 1-20), Phase 4 (Questions 21-40)
+      gridEl.innerHTML = `
+        <!-- Phase 1: Industry Foundations Handbook -->
+        <div class="dashboard-section-card" id="dash-card-new-handbook" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #6366f1;">Phase 01 • Reading</span>
+            <span class="dashboard-card-badge-handbook">
+              📖 Mandatory Reading
+            </span>
+          </div>
+          <div class="dashboard-card-title">Industry Foundations Handbook</div>
+          <div class="dashboard-card-desc">
+            Master the publication-grade 11-chapter engineering field manual. Covers cross-functional team topologies, agile ceremonies, Git etiquette, CI/CD pipelines, observability, and root-cause analysis before taking the assessment.
+          </div>
+          <div class="dashboard-card-link" style="color: #4f46e5;">
+            Read Foundations Handbook (11 Ch) ➔
+          </div>
+        </div>
+
+        <!-- Phase 2: Role Readiness Assessment -->
+        <div class="dashboard-section-card" id="dash-card-new-quiz" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #d97706;">Phase 02 • Assessment</span>
+            <span class="dashboard-card-badge-amber">
+              ● 5 Questions • 80% to Pass
+            </span>
+          </div>
+          <div class="dashboard-card-title">Role Readiness Assessment</div>
+          <div class="dashboard-card-desc">
+            5 Multiple Elimination Questions verifying your comprehension of operational protocols, SLA/SLO tiers, deployment safety, and enterprise workflows. Required to unlock production engineering tickets.
+          </div>
+          <div class="dashboard-card-link" style="color: #d97706;">
+            Take Readiness Quiz (5 MEQs) ➔
+          </div>
+        </div>
+
+        <!-- Phase 3: Basic Production Problems (1 - 20) -->
+        <div class="dashboard-section-card" id="dash-card-new-basic" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #0284c7;">Phase 03 • Basic</span>
+            <span class="dashboard-card-badge-indigo">
+              ● Questions 1 to 20
+            </span>
+          </div>
+          <div class="dashboard-card-title">Basic Production Problems (1 - 20)</div>
+          <div class="dashboard-card-desc">
+            20 fundamental production challenges featuring guided SOP references and syntax hints: container OOM crashes, connection pool starvation, unindexed foreign keys, and rate limiters.
+          </div>
+          <div class="dashboard-card-link" style="color: #0284c7;">
+            Explore Basic Problems (1 - 20) ➔
+          </div>
+        </div>
+
+        <!-- Phase 4: Intermediate Problems (21 - 40) -->
+        <div class="dashboard-section-card" id="dash-card-new-inter" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #7c3aed;">Phase 04 • Intermediate</span>
+            <span class="dashboard-card-badge-indigo">
+              ● Questions 21 to 40
+            </span>
+          </div>
+          <div class="dashboard-card-title">Intermediate Problems (21 - 40)</div>
+          <div class="dashboard-card-desc">
+            20 advanced distributed systems scenarios without prompt hints: distributed lock lease expiry, cascading thread pool exhaustion, cross-region replication lag, and transactional saga rollbacks.
+          </div>
+          <div class="dashboard-card-link" style="color: #7c3aed;">
+            Explore Intermediate (21 - 40) ➔
+          </div>
+        </div>
+      `;
+
+      const cardNewHandbook = document.getElementById('dash-card-new-handbook');
+      if (cardNewHandbook) cardNewHandbook.onclick = () => switchView('handbook');
+
+      const cardNewQuiz = document.getElementById('dash-card-new-quiz');
+      if (cardNewQuiz) cardNewQuiz.onclick = () => switchView('quiz');
+
+      const cardNewBasic = document.getElementById('dash-card-new-basic');
+      if (cardNewBasic) {
+        cardNewBasic.onclick = () => {
+          state.problemsFilter = 'basic';
+          switchView('problems');
+          openProblemsCatalog();
+          renderProblemsCatalog('basic');
+        };
+      }
+
+      const cardNewInter = document.getElementById('dash-card-new-inter');
+      if (cardNewInter) {
+        cardNewInter.onclick = () => {
+          state.problemsFilter = 'inter';
+          switchView('problems');
+          openProblemsCatalog();
+          renderProblemsCatalog('inter');
+        };
+      }
+    } else {
+      // COMPLETED USER STATE: Incomplete Basic (1-20), Incomplete Inter (21-40), All Incomplete Bank, Next Question
+      gridEl.innerHTML = `
+        <!-- Card 1: Incomplete Basic Questions (1 - 20) -->
+        <div class="dashboard-section-card" id="dash-card-inc-basic" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #0284c7;">Phase 01 • Basic</span>
+            <span class="${incompleteBasic > 0 ? 'dashboard-card-badge-incomplete' : 'dashboard-card-badge-handbook'}">
+              ● ${incompleteBasic > 0 ? `${incompleteBasic} Incomplete` : 'All 20 Solved ✓'}
+            </span>
+          </div>
+          <div class="dashboard-card-title">Incomplete Basic Questions (1 - 20)</div>
+          <div class="dashboard-card-desc">
+            ${incompleteBasic > 0
+              ? `You have ${incompleteBasic} foundational production problem${incompleteBasic === 1 ? '' : 's'} remaining with standard operating procedure (SOP) guidance. Triage container crashes, DB connection leaks, and rate limiting.`
+              : 'All 20 basic production challenges successfully resolved! Review your solutions anytime.'}
+          </div>
+          <div class="dashboard-card-link" style="color: #0284c7;">
+            ${incompleteBasic > 0 ? 'Solve Incomplete Basic (1 - 20) ➔' : 'Review Basic Problems ➔'}
+          </div>
+        </div>
+
+        <!-- Card 2: Incomplete Intermediate Questions (21 - 40) -->
+        <div class="dashboard-section-card" id="dash-card-inc-inter" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #7c3aed;">Phase 02 • Intermediate</span>
+            <span class="${incompleteInter > 0 ? 'dashboard-card-badge-incomplete' : 'dashboard-card-badge-handbook'}">
+              ● ${incompleteInter > 0 ? `${incompleteInter} Incomplete` : 'All 20 Solved ✓'}
+            </span>
+          </div>
+          <div class="dashboard-card-title">Incomplete Intermediate Questions (21 - 40)</div>
+          <div class="dashboard-card-desc">
+            ${incompleteInter > 0
+              ? `You have ${incompleteInter} advanced standalone problem${incompleteInter === 1 ? '' : 's'} remaining without hint statements. Solve distributed lock starvation, replication lag, and cascading timeouts.`
+              : 'All 20 intermediate distributed systems challenges successfully resolved!'}
+          </div>
+          <div class="dashboard-card-link" style="color: #7c3aed;">
+            ${incompleteInter > 0 ? 'Solve Incomplete Intermediate (21 - 40) ➔' : 'Review Intermediate Problems ➔'}
+          </div>
+        </div>
+
+        <!-- Card 3: All Incomplete Questions Bank -->
+        <div class="dashboard-section-card" id="dash-card-inc-all" role="button" tabindex="0">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #e11d48;">Full Catalog</span>
+            <span class="${totalIncomplete > 0 ? 'dashboard-card-badge-incomplete' : 'dashboard-card-badge-handbook'}">
+              ● ${totalIncomplete > 0 ? `${totalIncomplete} Incomplete Total` : 'All 40 Solved ✓'}
+            </span>
+          </div>
+          <div class="dashboard-card-title">All Incomplete Questions Bank</div>
+          <div class="dashboard-card-desc">
+            ${totalIncomplete > 0
+              ? `Browse all ${totalIncomplete} unresolved tickets across the full engineering bank: Kubernetes, PostgreSQL, Redis, Network I/O, Kafka, and Security.`
+              : 'Outstanding work! All 40 production problems in the curriculum have been completed.'}
+          </div>
+          <div class="dashboard-card-link" style="color: #e11d48;">
+            ${totalIncomplete > 0 ? 'Open All Incomplete Bank ➔' : 'Explore All Problems ➔'}
+          </div>
+        </div>
+
+        <!-- Card 4: Next Question to Solve -->
+        <div class="dashboard-section-card" id="dash-card-next-prob" role="button" tabindex="0" style="border-left: 4px solid #4f46e5;">
+          <div class="dashboard-card-top">
+            <span class="dashboard-card-tag" style="color: #4f46e5;">Immediate Action</span>
+            <span class="dashboard-card-badge-handbook" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5; border-color: rgba(99, 102, 241, 0.3);">
+              ${nextProblem ? `⚡ Ticket #${nextProblem.id.toUpperCase()}` : '🏆 All Solved'}
+            </span>
+          </div>
+          <div class="dashboard-card-title">
+            ${nextProblem ? `Next Question: ${escapeHtml(nextProblem.title)}` : 'All 40 Problems Solved!'}
+          </div>
+          <div class="dashboard-card-desc">
+            ${nextProblem
+              ? `Jump directly into the workspace terminal & code editor to solve Ticket ${nextProblem.id.toUpperCase()} (${escapeHtml(nextProblem.category)} • ${nextProblem.phase === 1 ? 'Basic SOP' : 'Intermediate Standalone'}).`
+              : 'You have conquered the entire production problem catalog. Check the Reviewer Portal for your final assessment points and certificate.'}
+          </div>
+          <div class="dashboard-card-link" style="color: #4f46e5; font-weight: 800;">
+            ${nextProblem ? 'Launch Workspace & Solve Now ➔' : 'Go to Reviewer Portal ➔'}
+          </div>
+        </div>
+      `;
+
+      const cardIncBasic = document.getElementById('dash-card-inc-basic');
+      if (cardIncBasic) {
+        cardIncBasic.onclick = () => {
+          state.problemsFilter = 'basic';
+          switchView('problems');
+          openProblemsCatalog();
+          renderProblemsCatalog('basic');
+        };
+      }
+
+      const cardIncInter = document.getElementById('dash-card-inc-inter');
+      if (cardIncInter) {
+        cardIncInter.onclick = () => {
+          state.problemsFilter = 'inter';
+          switchView('problems');
+          openProblemsCatalog();
+          renderProblemsCatalog('inter');
+        };
+      }
+
+      const cardIncAll = document.getElementById('dash-card-inc-all');
+      if (cardIncAll) {
+        cardIncAll.onclick = () => {
+          state.problemsFilter = 'unsolved';
+          switchView('problems');
+          openProblemsCatalog();
+          renderProblemsCatalog('unsolved');
+        };
+      }
+
+      const cardNextProb = document.getElementById('dash-card-next-prob');
+      if (cardNextProb) {
+        cardNextProb.onclick = () => {
+          if (nextProblem) {
+            switchView('problems');
+            openProblemInWorkspace(nextProblem.id);
+          } else {
+            switchView('reviewer');
+          }
+        };
+      }
+    }
+  }
+
+  // Render Up Next: 3 Incomplete Problems (Priority Incomplete Problems Queue)
   const queueList = document.getElementById('dashboard-queue-list');
   if (queueList) {
     const nextIncomplete = state.problemsList.filter(p => p.status !== 'completed').slice(0, 3);
@@ -4496,45 +4755,6 @@ async function renderDashboardView() {
         });
       });
     }
-  }
-
-  // Bind clicks on the 4 dashboard section cards
-  const cardBasic = document.getElementById('dash-card-basic-problems');
-  if (cardBasic) {
-    cardBasic.onclick = () => {
-      state.problemsFilter = 'basic';
-      switchView('problems');
-      openProblemsCatalog();
-      const filterBtns = document.querySelectorAll('.prob-filter-btn');
-      filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'basic'));
-      renderProblemsList('basic');
-    };
-  }
-
-  const cardInter = document.getElementById('dash-card-inter-problems');
-  if (cardInter) {
-    cardInter.onclick = () => {
-      state.problemsFilter = 'inter';
-      switchView('problems');
-      openProblemsCatalog();
-      const filterBtns = document.querySelectorAll('.prob-filter-btn');
-      filterBtns.forEach(b => b.classList.toggle('active', b.dataset.filter === 'inter'));
-      renderProblemsList('inter');
-    };
-  }
-
-  const cardLabs = document.getElementById('dash-card-simulation-labs');
-  if (cardLabs) {
-    cardLabs.onclick = () => {
-      switchView('catalog');
-    };
-  }
-
-  const cardHandbook = document.getElementById('dash-card-visit-handbook');
-  if (cardHandbook) {
-    cardHandbook.onclick = () => {
-      switchView('handbook');
-    };
   }
 }
 
@@ -4634,7 +4854,7 @@ function renderProblemsCatalog(filter = 'all') {
   if (filter === 'basic') filtered = filtered.filter(p => p.phase === 1);
   if (filter === 'inter') filtered = filtered.filter(p => p.phase === 2);
   if (filter === 'solved') filtered = filtered.filter(p => p.status === 'completed');
-  if (filter === 'unsolved') filtered = filtered.filter(p => p.status !== 'completed');
+  if (filter === 'unsolved' || filter === 'incomplete') filtered = filtered.filter(p => p.status !== 'completed');
 
   if (currentProbSearch && currentProbSearch.trim()) {
     const q = currentProbSearch.trim().toLowerCase();
@@ -4664,7 +4884,8 @@ function renderProblemsCatalog(filter = 'all') {
   // Bind Filter Tabs
   const filterTabs = document.querySelectorAll('.problems-filter-tabs .prob-filter-btn');
   filterTabs.forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.filter === filter);
+    const bf = btn.dataset.filter;
+    btn.classList.toggle('active', bf === filter || ((bf === 'unsolved' || bf === 'pending') && (filter === 'unsolved' || filter === 'incomplete')));
     if (!btn.dataset.bound) {
       btn.dataset.bound = 'true';
       btn.addEventListener('click', () => {
