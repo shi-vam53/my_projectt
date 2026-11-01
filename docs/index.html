@@ -322,7 +322,7 @@
             </div>
 
             <!-- Priority Incomplete Problems Queue -->
-            <div class="dashboard-queue-box">
+            <div class="dashboard-queue-box" id="dashboard-queue-box">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                   <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary);">Up Next: 3 Incomplete Problems</h3>
@@ -357,7 +357,12 @@
                   <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin: 0;">Handbook Syllabus (Click to Jump Directly)</h2>
                   <p style="font-size: 0.825rem; color: var(--text-muted); margin: 4px 0 0 0;">Click any section below to read its in-depth production guide instantly.</p>
                 </div>
-                <span class="badge badge-indigo">11 Comprehensive Sections</span>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span class="badge badge-indigo">11 Comprehensive Sections</span>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-mark-handbook-done" style="font-size: 0.78rem; padding: 3px 10px; font-weight: 700; border-color: #10b981; color: #10b981;" title="Mark handbook as read to unlock readiness quiz">
+                    ✓ Mark Handbook as Completed
+                  </button>
+                </div>
               </div>
 
               <div class="handbook-chapters-grid">

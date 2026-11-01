@@ -4027,6 +4027,26 @@ function jumpToHandbookSection(targetId) {
   highlightSection(targetEl);
 }
 
+function isHandbookDone() {
+  if (state.user && state.user.quiz_passed) return true;
+  if (state.user && state.user.handbook_completed) return true;
+  return safeStorage.getItem('praxis_handbook_completed') === 'true';
+}
+
+function markHandbookCompleted() {
+  safeStorage.setItem('praxis_handbook_completed', 'true');
+  if (state.user) {
+    state.user.handbook_completed = true;
+    safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+    try {
+      const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+      usersDb[state.user.username.toLowerCase()] = state.user;
+      safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+    } catch (e) {}
+  }
+}
+
 function bindHandbookAndQuizControls() {
   // Clickable syllabus cards -> Jump directly to section
   const chapterCards = document.querySelectorAll('.chapter-card[data-target]');
@@ -4066,10 +4086,31 @@ function bindHandbookAndQuizControls() {
     });
   });
 
+  // Mark handbook done button in syllabus header
+  const markHandbookBtn = document.getElementById('btn-mark-handbook-done');
+  if (markHandbookBtn) {
+    if (isHandbookDone()) {
+      markHandbookBtn.textContent = '✓ Handbook Completed';
+      markHandbookBtn.style.borderColor = '#10b981';
+      markHandbookBtn.style.color = '#10b981';
+      markHandbookBtn.style.background = 'rgba(16, 185, 129, 0.12)';
+    }
+    markHandbookBtn.addEventListener('click', () => {
+      markHandbookCompleted();
+      markHandbookBtn.textContent = '✓ Handbook Completed';
+      markHandbookBtn.style.borderColor = '#10b981';
+      markHandbookBtn.style.color = '#10b981';
+      markHandbookBtn.style.background = 'rgba(16, 185, 129, 0.12)';
+      showToast('✓ Handbook marked as completed! Phase 2 Readiness Quiz is now unlocked.', 'success');
+      if (typeof renderDashboardView === 'function') renderDashboardView();
+    });
+  }
+
   // Bottom action in reader
   const readerProceedBtn = document.getElementById('reader-proceed-to-quiz-btn');
   if (readerProceedBtn) {
     readerProceedBtn.addEventListener('click', () => {
+      markHandbookCompleted();
       switchView('quiz');
       loadQuizQuestions();
     });
@@ -4078,6 +4119,7 @@ function bindHandbookAndQuizControls() {
   const proceedToQuizBtn = document.getElementById('proceed-to-quiz-btn');
   if (proceedToQuizBtn) {
     proceedToQuizBtn.addEventListener('click', () => {
+      markHandbookCompleted();
       switchView('quiz');
       loadQuizQuestions();
     });
@@ -4322,6 +4364,14 @@ function updateHandbookForUserRole() {
   const heroTitle = document.getElementById('handbook-hero-title');
   if (heroTitle) {
     heroTitle.textContent = `${roleTitle} Foundations Handbook`;
+  }
+
+  const markHandbookBtn = document.getElementById('btn-mark-handbook-done');
+  if (markHandbookBtn && isHandbookDone()) {
+    markHandbookBtn.textContent = '✓ Handbook Completed';
+    markHandbookBtn.style.borderColor = '#10b981';
+    markHandbookBtn.style.color = '#10b981';
+    markHandbookBtn.style.background = 'rgba(16, 185, 129, 0.12)';
   }
 }
 
@@ -4581,6 +4631,7 @@ async function renderDashboardView() {
 
   // Determine user state: completed (passed handbook & readiness quiz) vs new user
   const isCompletedUser = Boolean(state.user && state.user.quiz_passed);
+  const hasDoneHandbook = isHandbookDone();
 
   if (readinessPill) {
     if (isCompletedUser) {
@@ -4592,7 +4643,7 @@ async function renderDashboardView() {
       readinessPill.className = 'badge badge-amber';
       readinessPill.style.background = 'rgba(245, 158, 11, 0.2)';
       readinessPill.style.color = '#f59e0b';
-      readinessPill.textContent = 'Onboarding: Foundations & Readiness Quiz Pending';
+      readinessPill.textContent = hasDoneHandbook ? 'Onboarding: Phase 2 Readiness Quiz Ready' : 'Onboarding: Phase 1 Foundations Handbook Required';
     }
   }
 
@@ -4610,13 +4661,14 @@ async function renderDashboardView() {
   if (gridEl) {
     if (!isCompletedUser) {
       // NEW USER STATE: Phase 1 (Handbook), Phase 2 (Quiz), Phase 3 (Questions 1-20), Phase 4 (Questions 21-40)
+      // Phase 3 & 4 and Quiz (if handbook not done) are locked with minimal transparent lock overlay
       gridEl.innerHTML = `
-        <!-- Phase 1: Industry Foundations Handbook -->
+        <!-- Phase 1: Industry Foundations Handbook (Unlocked) -->
         <div class="dashboard-section-card" id="dash-card-new-handbook" role="button" tabindex="0">
           <div class="dashboard-card-top">
             <span class="dashboard-card-tag" style="color: #6366f1;">Phase 01 • Reading</span>
-            <span class="dashboard-card-badge-handbook">
-              📖 Mandatory Reading
+            <span class="${hasDoneHandbook ? 'dashboard-card-badge-handbook' : 'dashboard-card-badge-indigo'}">
+              ${hasDoneHandbook ? '✓ Completed (11 Ch)' : '📖 Mandatory Reading'}
             </span>
           </div>
           <div class="dashboard-card-title">Industry Foundations Handbook</div>
@@ -4624,58 +4676,104 @@ async function renderDashboardView() {
             Master the publication-grade 11-chapter engineering field manual. Covers cross-functional team topologies, agile ceremonies, Git etiquette, CI/CD pipelines, observability, and root-cause analysis before taking the assessment.
           </div>
           <div class="dashboard-card-link" style="color: #4f46e5;">
-            Read Foundations Handbook (11 Ch) ➔
+            ${hasDoneHandbook ? 'Review Foundations Handbook ➔' : 'Read Foundations Handbook (11 Ch) ➔'}
           </div>
         </div>
 
-        <!-- Phase 2: Role Readiness Assessment -->
-        <div class="dashboard-section-card" id="dash-card-new-quiz" role="button" tabindex="0">
-          <div class="dashboard-card-top">
-            <span class="dashboard-card-tag" style="color: #d97706;">Phase 02 • Assessment</span>
-            <span class="dashboard-card-badge-amber">
-              ● 5 Questions • 80% to Pass
-            </span>
+        <!-- Phase 2: Role Readiness Assessment (Locked if handbook not read, Unlocked if handbook done) -->
+        ${!hasDoneHandbook ? `
+          <div class="dashboard-section-card dashboard-card-locked" id="dash-card-new-quiz" role="button" tabindex="0">
+            <div class="dashboard-card-locked-inner">
+              <div class="dashboard-card-top">
+                <span class="dashboard-card-tag" style="color: #d97706;">Phase 02 • Assessment</span>
+                <span class="dashboard-card-badge-amber">🔒 Locked</span>
+              </div>
+              <div class="dashboard-card-title">Role Readiness Assessment</div>
+              <div class="dashboard-card-desc">
+                5 Multiple Elimination Questions verifying your comprehension of operational protocols, SLA/SLO tiers, deployment safety, and enterprise workflows. Required to unlock production engineering tickets.
+              </div>
+              <div class="dashboard-card-link" style="color: #d97706;">
+                Take Readiness Quiz (5 MEQs) ➔
+              </div>
+            </div>
+            <div class="dashboard-lock-overlay">
+              <div class="lock-icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div class="lock-overlay-title">Locked • Complete Phase 1 First</div>
+              <div class="lock-overlay-subtitle">Read the Industry Foundations Handbook to unlock this assessment</div>
+            </div>
           </div>
-          <div class="dashboard-card-title">Role Readiness Assessment</div>
-          <div class="dashboard-card-desc">
-            5 Multiple Elimination Questions verifying your comprehension of operational protocols, SLA/SLO tiers, deployment safety, and enterprise workflows. Required to unlock production engineering tickets.
+        ` : `
+          <div class="dashboard-section-card" id="dash-card-new-quiz" role="button" tabindex="0">
+            <div class="dashboard-card-top">
+              <span class="dashboard-card-tag" style="color: #d97706;">Phase 02 • Assessment</span>
+              <span class="dashboard-card-badge-amber">⚡ Ready • 5 Questions • 80% to Pass</span>
+            </div>
+            <div class="dashboard-card-title">Role Readiness Assessment</div>
+            <div class="dashboard-card-desc">
+              5 Multiple Elimination Questions verifying your comprehension of operational protocols, SLA/SLO tiers, deployment safety, and enterprise workflows. Required to unlock production engineering tickets.
+            </div>
+            <div class="dashboard-card-link" style="color: #d97706;">
+              Take Readiness Quiz (5 MEQs) ➔
+            </div>
           </div>
-          <div class="dashboard-card-link" style="color: #d97706;">
-            Take Readiness Quiz (5 MEQs) ➔
+        `}
+
+        <!-- Phase 3: Basic Production Problems (1 - 20) (Locked with Minimal Transparent Lock) -->
+        <div class="dashboard-section-card dashboard-card-locked" id="dash-card-new-basic" role="button" tabindex="0">
+          <div class="dashboard-card-locked-inner">
+            <div class="dashboard-card-top">
+              <span class="dashboard-card-tag" style="color: #0284c7;">Phase 03 • Basic</span>
+              <span class="dashboard-card-badge-indigo">🔒 Locked (1 - 20)</span>
+            </div>
+            <div class="dashboard-card-title">Basic Production Problems (1 - 20)</div>
+            <div class="dashboard-card-desc">
+              20 fundamental production challenges featuring guided SOP references and syntax hints: container OOM crashes, connection pool starvation, unindexed foreign keys, and rate limiters.
+            </div>
+            <div class="dashboard-card-link" style="color: #0284c7;">
+              Explore Basic Problems (1 - 20) ➔
+            </div>
+          </div>
+          <div class="dashboard-lock-overlay">
+            <div class="lock-icon-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <div class="lock-overlay-title">${hasDoneHandbook ? 'Locked • Pass Quiz to Unlock' : 'Locked • Complete Phase 1 & 2'}</div>
+            <div class="lock-overlay-subtitle">${hasDoneHandbook ? 'Pass the Phase 2 Readiness Quiz (80%) to unlock basic questions' : 'Read the handbook and pass the quiz to unlock basic questions'}</div>
           </div>
         </div>
 
-        <!-- Phase 3: Basic Production Problems (1 - 20) -->
-        <div class="dashboard-section-card" id="dash-card-new-basic" role="button" tabindex="0">
-          <div class="dashboard-card-top">
-            <span class="dashboard-card-tag" style="color: #0284c7;">Phase 03 • Basic</span>
-            <span class="dashboard-card-badge-indigo">
-              ● Questions 1 to 20
-            </span>
+        <!-- Phase 4: Intermediate Problems (21 - 40) (Locked with Minimal Transparent Lock) -->
+        <div class="dashboard-section-card dashboard-card-locked" id="dash-card-new-inter" role="button" tabindex="0">
+          <div class="dashboard-card-locked-inner">
+            <div class="dashboard-card-top">
+              <span class="dashboard-card-tag" style="color: #7c3aed;">Phase 04 • Intermediate</span>
+              <span class="dashboard-card-badge-indigo">🔒 Locked (21 - 40)</span>
+            </div>
+            <div class="dashboard-card-title">Intermediate Problems (21 - 40)</div>
+            <div class="dashboard-card-desc">
+              20 advanced distributed systems scenarios without prompt hints: distributed lock lease expiry, cascading thread pool exhaustion, cross-region replication lag, and transactional saga rollbacks.
+            </div>
+            <div class="dashboard-card-link" style="color: #7c3aed;">
+              Explore Intermediate (21 - 40) ➔
+            </div>
           </div>
-          <div class="dashboard-card-title">Basic Production Problems (1 - 20)</div>
-          <div class="dashboard-card-desc">
-            20 fundamental production challenges featuring guided SOP references and syntax hints: container OOM crashes, connection pool starvation, unindexed foreign keys, and rate limiters.
-          </div>
-          <div class="dashboard-card-link" style="color: #0284c7;">
-            Explore Basic Problems (1 - 20) ➔
-          </div>
-        </div>
-
-        <!-- Phase 4: Intermediate Problems (21 - 40) -->
-        <div class="dashboard-section-card" id="dash-card-new-inter" role="button" tabindex="0">
-          <div class="dashboard-card-top">
-            <span class="dashboard-card-tag" style="color: #7c3aed;">Phase 04 • Intermediate</span>
-            <span class="dashboard-card-badge-indigo">
-              ● Questions 21 to 40
-            </span>
-          </div>
-          <div class="dashboard-card-title">Intermediate Problems (21 - 40)</div>
-          <div class="dashboard-card-desc">
-            20 advanced distributed systems scenarios without prompt hints: distributed lock lease expiry, cascading thread pool exhaustion, cross-region replication lag, and transactional saga rollbacks.
-          </div>
-          <div class="dashboard-card-link" style="color: #7c3aed;">
-            Explore Intermediate (21 - 40) ➔
+          <div class="dashboard-lock-overlay">
+            <div class="lock-icon-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <div class="lock-overlay-title">${hasDoneHandbook ? 'Locked • Pass Quiz to Unlock' : 'Locked • Complete Phase 1 & 2'}</div>
+            <div class="lock-overlay-subtitle">${hasDoneHandbook ? 'Pass the Phase 2 Readiness Quiz (80%) to unlock intermediate challenges' : 'Read the handbook and pass the quiz to unlock intermediate challenges'}</div>
           </div>
         </div>
       `;
@@ -4684,25 +4782,40 @@ async function renderDashboardView() {
       if (cardNewHandbook) cardNewHandbook.onclick = () => switchView('handbook');
 
       const cardNewQuiz = document.getElementById('dash-card-new-quiz');
-      if (cardNewQuiz) cardNewQuiz.onclick = () => switchView('quiz');
+      if (cardNewQuiz) {
+        cardNewQuiz.onclick = () => {
+          if (!hasDoneHandbook) {
+            showToast('🔒 Please read the Industry Foundations Handbook (Phase 1) first to unlock the Readiness Quiz.', 'warning');
+            switchView('handbook');
+          } else {
+            switchView('quiz');
+          }
+        };
+      }
 
       const cardNewBasic = document.getElementById('dash-card-new-basic');
       if (cardNewBasic) {
         cardNewBasic.onclick = () => {
-          state.problemsFilter = 'basic';
-          switchView('problems');
-          openProblemsCatalog();
-          renderProblemsCatalog('basic');
+          if (!hasDoneHandbook) {
+            showToast('🔒 Questions are locked! Complete the Handbook & pass the Readiness Quiz to unlock.', 'warning');
+            switchView('handbook');
+          } else {
+            showToast('🔒 Basic Questions are locked until you pass the Phase 2 Readiness Quiz.', 'warning');
+            switchView('quiz');
+          }
         };
       }
 
       const cardNewInter = document.getElementById('dash-card-new-inter');
       if (cardNewInter) {
         cardNewInter.onclick = () => {
-          state.problemsFilter = 'inter';
-          switchView('problems');
-          openProblemsCatalog();
-          renderProblemsCatalog('inter');
+          if (!hasDoneHandbook) {
+            showToast('🔒 Questions are locked! Complete the Handbook & pass the Readiness Quiz to unlock.', 'warning');
+            switchView('handbook');
+          } else {
+            showToast('🔒 Intermediate Questions are locked until you pass the Phase 2 Readiness Quiz.', 'warning');
+            switchView('quiz');
+          }
         };
       }
     } else {
@@ -4832,7 +4945,43 @@ async function renderDashboardView() {
   }
 
   // Render Up Next: 3 Incomplete Problems (Priority Incomplete Problems Queue)
+  const queueBox = document.getElementById('dashboard-queue-box');
   const queueList = document.getElementById('dashboard-queue-list');
+
+  if (queueBox) {
+    const oldOverlay = queueBox.querySelector('.dashboard-queue-lock-overlay');
+    if (oldOverlay) oldOverlay.remove();
+
+    if (!isCompletedUser) {
+      queueBox.classList.add('queue-locked');
+      const lockOverlay = document.createElement('div');
+      lockOverlay.className = 'dashboard-queue-lock-overlay';
+      lockOverlay.id = 'dashboard-queue-lock-overlay';
+      lockOverlay.innerHTML = `
+        <div class="lock-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <div class="lock-overlay-title" style="font-size: 0.95rem; margin-top: 4px;">Priority Production Queue Locked</div>
+        <div class="lock-overlay-subtitle">${hasDoneHandbook ? 'Pass the Phase 2 Readiness Quiz (80%) to unlock active incident tickets' : 'Complete the Handbook & pass the Readiness Quiz to unlock active tickets'}</div>
+      `;
+      lockOverlay.onclick = () => {
+        if (!hasDoneHandbook) {
+          showToast('🔒 Priority incident tickets are locked! Complete the Handbook and pass the Readiness Quiz first.', 'warning');
+          switchView('handbook');
+        } else {
+          showToast('🔒 Priority incident tickets are locked until you pass the Phase 2 Readiness Quiz.', 'warning');
+          switchView('quiz');
+        }
+      };
+      queueBox.appendChild(lockOverlay);
+    } else {
+      queueBox.classList.remove('queue-locked');
+    }
+  }
+
   if (queueList) {
     const nextIncomplete = state.problemsList.filter(p => p.status !== 'completed').slice(0, 3);
     if (nextIncomplete.length === 0) {
@@ -4854,13 +5003,15 @@ async function renderDashboardView() {
         </div>
       `).join('');
 
-      queueList.querySelectorAll('.dashboard-queue-item').forEach(item => {
-        item.addEventListener('click', () => {
-          const pid = item.dataset.problemId;
-          switchView('problems');
-          openProblemInWorkspace(pid);
+      if (isCompletedUser) {
+        queueList.querySelectorAll('.dashboard-queue-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const pid = item.dataset.problemId;
+            switchView('problems');
+            openProblemInWorkspace(pid);
+          });
         });
-      });
+      }
     }
   }
 }
