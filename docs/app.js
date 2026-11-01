@@ -2758,108 +2758,96 @@ function renderCatalogView() {
 // ============================================================================
 
 function bindAdminControls() {
-  const refreshBtn = document.getElementById('admin-refresh-btn');
+  const refreshBtn = document.getElementById('leaderboard-refresh-btn') || document.getElementById('admin-refresh-btn');
   if (refreshBtn) refreshBtn.addEventListener('click', renderAdminView);
 }
 
-async function renderAdminView() {
-  const tbody = document.getElementById('admin-submissions-tbody');
+function renderAdminView() {
+  const tbody = document.getElementById('leaderboard-tbody') || document.getElementById('admin-submissions-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">Loading submissions from SQLite database...</td></tr>`;
+  const session = state.userSession || {};
+  const currentUsername = session.username || 'learner';
+  const lockedRole = session.locked_role || session.role || state.activeTrack || 'cloud-engineer';
 
-  let loadedFromBackend = false;
+  const roleDisplayNames = {
+    'software-developer': 'Software Developer',
+    'cloud-engineer': 'Cloud Engineer & SRE',
+    'data-analyst': 'Data Analyst'
+  };
+  const currentJobRole = roleDisplayNames[lockedRole] || (TRACKS_DATA[lockedRole] ? TRACKS_DATA[lockedRole].title : 'Cloud Engineer & SRE');
+
+  // Count user solved questions/problems (each solved question = 1 star)
+  let userSolvedCount = 0;
   try {
-    const res = await fetch('/api/submissions');
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('application/json') && res.ok) {
-      state.submissionsLedger = await res.json();
-      loadedFromBackend = true;
-    }
-  } catch (err) {}
-
-  if (!loadedFromBackend) {
-    try {
-      state.submissionsLedger = JSON.parse(safeStorage.getItem('praxis_offline_submissions') || '[]');
-    } catch (e) {
-      state.submissionsLedger = [];
-    }
+    const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+    userSolvedCount = Object.values(probProgress).filter(p => p.status === 'completed').length;
+  } catch (e) {
+    userSolvedCount = 0;
   }
 
-  const subs = state.submissionsLedger || [];
+  // Candidate Cohort Leaderboard entries
+  const benchmarkCandidates = [
+    { username: 'aarav_dev', jobRole: 'Software Developer', points: 18, isCurrentUser: false },
+    { username: 'priya_cloud', jobRole: 'Cloud Engineer & SRE', points: 15, isCurrentUser: false },
+    { username: 'rohit_analyst', jobRole: 'Data Analyst', points: 12, isCurrentUser: false },
+    { username: 'ananya_swe', jobRole: 'Software Developer', points: 9, isCurrentUser: false },
+    { username: 'vikram_sre', jobRole: 'Cloud Engineer & SRE', points: 6, isCurrentUser: false },
+    { username: 'neha_data', jobRole: 'Data Analyst', points: 3, isCurrentUser: false }
+  ];
 
-  // Update summary metrics
-  const totalEl = document.getElementById('admin-total-subs');
-  const approvedRateEl = document.getElementById('admin-approved-rate');
-  const pendingEl = document.getElementById('admin-pending-count');
-  const avgScoreEl = document.getElementById('admin-avg-score');
+  // Current active user entry
+  const userEntry = {
+    username: currentUsername,
+    jobRole: currentJobRole,
+    points: userSolvedCount,
+    isCurrentUser: true
+  };
 
-  if (totalEl) totalEl.textContent = subs.length;
+  // Filter out duplicate if username matches benchmark, then insert current user
+  const entries = benchmarkCandidates.filter(e => e.username.toLowerCase() !== currentUsername.toLowerCase());
+  entries.push(userEntry);
 
-  if (subs.length > 0) {
-    const approvedCount = subs.filter(s => (s.reviewer_status || s.approval_status) === 'approved').length;
-    const avgScore = Math.round(subs.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0) / subs.length);
-    const pendingCount = subs.filter(s => !s.reviewer_status).length;
+  // Sort descending by points (stars), then alphabetical
+  entries.sort((a, b) => b.points - a.points || a.username.localeCompare(b.username));
 
-    if (approvedRateEl) approvedRateEl.textContent = `${Math.round((approvedCount / subs.length) * 100)}%`;
-    if (pendingEl) pendingEl.textContent = pendingCount;
-    if (avgScoreEl) avgScoreEl.textContent = `${avgScore} / 100`;
-  } else {
-    if (approvedRateEl) approvedRateEl.textContent = '0%';
-    if (pendingEl) pendingEl.textContent = '0';
-    if (avgScoreEl) avgScoreEl.textContent = '--';
-  }
+  const rolePillClass = {
+    'Software Developer': 'badge-indigo',
+    'Cloud Engineer & SRE': 'badge-emerald',
+    'Data Analyst': 'badge-purple'
+  };
 
-  if (subs.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
-          No candidate submissions in database yet. Submit any mission to see live rubric and reviewer logs.
+  tbody.innerHTML = entries.map((entry, idx) => {
+    const rankNum = idx + 1;
+    let rankBadge = `#${rankNum}`;
+    if (rankNum === 1) rankBadge = '🥇 #1';
+    else if (rankNum === 2) rankBadge = '🥈 #2';
+    else if (rankNum === 3) rankBadge = '🥉 #3';
+
+    const pill = rolePillClass[entry.jobRole] || 'badge-indigo';
+    const isCurrent = entry.isCurrentUser;
+    const rowStyle = isCurrent ? 'style="background: rgba(99, 102, 241, 0.08); font-weight: 600;"' : '';
+
+    return `
+      <tr ${rowStyle}>
+        <td style="padding: 14px 18px; font-weight: 800; color: ${rankNum <= 3 ? '#f59e0b' : 'var(--text-muted)'}; white-space: nowrap;">
+          ${rankBadge}
+        </td>
+        <td style="padding: 14px 18px; font-weight: 700; color: var(--text-primary);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>@${escapeHtml(entry.username)}</span>
+            ${isCurrent ? '<span class="badge badge-indigo" style="font-size: 0.68rem; padding: 2px 6px;">You</span>' : ''}
+          </div>
+        </td>
+        <td style="padding: 14px 18px;">
+          <span class="badge ${pill}" style="font-size: 0.75rem; padding: 3px 8px;">${escapeHtml(entry.jobRole)}</span>
+        </td>
+        <td style="padding: 14px 18px; text-align: right; font-weight: 800; font-size: 0.95rem; color: #f59e0b; white-space: nowrap;">
+          <span>${entry.points} ⭐</span>
         </td>
       </tr>
     `;
-    return;
-  }
-
-  tbody.innerHTML = '';
-  subs.forEach(s => {
-    const tr = document.createElement('tr');
-    const mission = MISSIONS_DATA[s.mission_id] || { title: s.mission_id, track_id: 'cloud-engineer' };
-    const track = TRACKS_DATA[mission.track_id] || { title: 'Engineering' };
-    const scoreVal = s.score || s.overall_score || 0;
-    const revStatus = s.reviewer_status || (s.approval_status === 'approved' ? 'Staff Approved' : 'Pending Review');
-    const timeFormatted = (s.created_at || '').replace('T', ' ').substring(0, 19);
-
-    tr.innerHTML = `
-      <td style="font-family: monospace; font-size: 0.8rem;">${escapeHtml(timeFormatted)}</td>
-      <td><strong>${escapeHtml(mission.title || s.mission_id)}</strong></td>
-      <td><span class="badge badge-indigo">${escapeHtml(track.title)}</span></td>
-      <td><strong>${scoreVal} / 100</strong></td>
-      <td>
-        <span class="badge ${scoreVal >= 80 ? 'badge-emerald' : 'badge-amber'}">
-          ${escapeHtml(s.approval_status || 'Evaluated')}
-        </span>
-      </td>
-      <td>
-        <span class="badge ${s.reviewer_status === 'approved' ? 'badge-emerald' : (s.reviewer_status === 'needs_revision' ? 'badge-amber' : 'badge-indigo')}">
-          ${escapeHtml(revStatus)}
-        </span>
-      </td>
-      <td>
-        <button class="btn btn-outline btn-sm btn-inspect-sub" data-sub-id="${s.submission_id}">
-          Inspect & Review
-        </button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  tbody.querySelectorAll('.btn-inspect-sub').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const subId = e.currentTarget.getAttribute('data-sub-id');
-      openReviewerModal(subId);
-    });
-  });
+  }).join('');
 }
 
 function bindReviewerModal() {

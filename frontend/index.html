@@ -188,15 +188,12 @@
         </button>
 
         <div class="nav-section-label" style="margin-top: 1.25rem;">Governance</div>
-        <button class="nav-item" id="nav-admin" data-view="admin" title="Staff Reviewer Portal">
+        <button class="nav-item" id="nav-admin" data-view="admin" title="Leaderboard Standings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
-          <span>Reviewer Portal</span>
-          <span class="nav-pill" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">Review</span>
+          <span>Leaderboard</span>
+          <span class="nav-pill" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">⭐ Stars</span>
         </button>
         <button class="nav-item" id="nav-profile" data-view="profile" title="Learner Profile & App Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1220,107 +1217,47 @@
           </div>
         </section>
 
-        <!-- VIEW 4: Reviewer / Admin Portal View -->
+        <!-- VIEW 4: Reviewer Portal / Leaderboard View -->
         <section class="view-section" id="view-admin" style="display: none;">
           <div class="view-header">
-            <div class="view-badge badge-amber">Staff Reviewer Portal</div>
-            <h1 class="view-title">Assessment & Human-in-the-Loop Review Dashboard</h1>
+            <div class="view-badge badge-amber">Leaderboard & Standings</div>
+            <h1 class="view-title">Engineering Simulation Leaderboard</h1>
             <p class="view-description">
-              Inspect candidate incident investigations, review deterministic rubric scores, calibrate alternative defensible solutions, and issue official Staff Engineer approvals.
+              Real-time platform rankings across all engineering tracks. Each solved production problem awards 1 Star (⭐). Solve problems across the 40-problem curriculum to climb the cohort ranks!
             </p>
           </div>
 
-          <!-- Live Google Sheet Registration Sync Card -->
-          <div class="card" class="card admin-sheet-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <div style="width: 40px; height: 40px; background: #16a34a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.2rem; font-weight: 800;">
-                📊
-              </div>
+          <!-- Leaderboard Table Card -->
+          <div class="card leaderboard-card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--border-color);">
+            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: var(--bg-card);">
               <div>
-                <div class="admin-sheet-title" style="font-weight: 800; font-size: 0.95rem;">Live Google Sheet: Registered Users Master Ledger</div>
-                <div class="admin-sheet-desc" style="font-size: 0.8rem;">Active sync with Google Drive. Records all user signups, locked career tracks, and readiness assessment scores in real time.</div>
+                <h2 class="card-title" style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                  <span>🏆</span> Candidate Standings
+                </h2>
+                <p class="card-subtitle" style="margin: 4px 0 0 0; font-size: 0.8rem;">
+                  Rankings based on verified problem solutions. 1 solved problem = 1 ⭐ Point.
+                </p>
               </div>
-            </div>
-            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-              <a href="assets/Praxis_Registered_Users.csv" download="Praxis_Registered_Users.csv" class="btn btn-outline" class="btn btn-outline admin-sheet-csv-btn" style="text-decoration: none;">
-                Download CSV Ledger 📥
-              </a>
-              <a href="https://docs.google.com/spreadsheets/d/1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0/edit?usp=drivesdk" target="_blank" class="btn btn-primary" style="background: #16a34a; border-color: #15803d; text-decoration: none;">
-                Open Google Sheet ➔
-              </a>
-            </div>
-          </div>
-
-          <!-- Admin Metric Cards -->
-          <div class="admin-metrics-row">
-            <div class="metric-card card">
-              <div class="metric-icon bg-indigo">📋</div>
-              <div class="metric-info">
-                <div class="metric-val" id="admin-total-subs">0</div>
-                <div class="metric-label">Total Submissions</div>
-              </div>
-            </div>
-            <div class="metric-card card">
-              <div class="metric-icon bg-emerald">✓</div>
-              <div class="metric-info">
-                <div class="metric-val" id="admin-approved-rate">0%</div>
-                <div class="metric-label">Production Ready Rate</div>
-              </div>
-            </div>
-            <div class="metric-card card">
-              <div class="metric-icon bg-amber">⏳</div>
-              <div class="metric-info">
-                <div class="metric-val" id="admin-pending-count">0</div>
-                <div class="metric-label">Pending Review</div>
-              </div>
-            </div>
-            <div class="metric-card card">
-              <div class="metric-icon bg-purple">🎯</div>
-              <div class="metric-info">
-                <div class="metric-val" id="admin-avg-score">--</div>
-                <div class="metric-label">Average Rubric Score</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Submissions Table Card -->
-          <div class="admin-table-card card">
-            <div class="card-header-flex" style="flex-wrap: wrap; gap: 0.75rem;">
-              <div>
-                <h2 class="card-title">Candidate Submissions Ledger</h2>
-                <p class="card-subtitle">Real-time submissions evaluated and persisted to Praxis SQLite database.</p>
-              </div>
-              <div style="display: flex; gap: 0.5rem; align-items: center; margin-left: auto;">
-                <input type="text" id="admin-search-input" placeholder="🔍 Search candidate name/id..." style="padding: 5px 10px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; outline: none; background: var(--bg-input); color: var(--text-primary);">
-                <select id="admin-track-filter" style="padding: 5px 8px; font-size: 0.8rem; border: 1px solid var(--border-color); border-radius: 6px; outline: none; background: var(--bg-card); color: var(--text-primary);">
-                  <option value="all">All Tracks</option>
-                  <option value="software-developer">Software Developer</option>
-                  <option value="cloud-engineer">Cloud Engineer</option>
-                  <option value="data-analyst">Data Analyst</option>
-                </select>
-                <button class="btn btn-outline btn-sm" id="admin-refresh-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+              <button class="btn btn-outline btn-sm" id="leaderboard-refresh-btn" style="display: flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
                   <polyline points="23 4 23 10 17 10"></polyline>
                   <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                 </svg>
-                Refresh
+                Refresh Rankings
               </button>
             </div>
 
-            <div class="table-container">
-              <table class="data-table" id="admin-submissions-table">
+            <div class="table-container" style="overflow-x: auto;">
+              <table class="data-table leaderboard-table" id="leaderboard-table" style="width: 100%; border-collapse: collapse;">
                 <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>Mission / Incident</th>
-                    <th>Track</th>
-                    <th>Rubric Score</th>
-                    <th>Automated Verdict</th>
-                    <th>Reviewer Status</th>
-                    <th>Actions</th>
+                  <tr style="background: var(--bg-secondary);">
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); width: 80px;">Rank</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted);">Name</th>
+                    <th style="padding: 14px 18px; text-align: left; font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted);">Job Role</th>
+                    <th style="padding: 14px 18px; text-align: right; font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); width: 140px;">Points</th>
                   </tr>
                 </thead>
-                <tbody id="admin-submissions-tbody">
+                <tbody id="leaderboard-tbody">
                   <!-- Populated dynamically -->
                 </tbody>
               </table>
