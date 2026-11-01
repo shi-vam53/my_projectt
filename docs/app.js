@@ -3887,42 +3887,62 @@ async function confirmRoleLock() {
 // HANDBOOK & QUIZ CONTROLLER
 // ----------------------------------------------------------------------------
 
-function bindHandbookAndQuizControls() {
-  // Read Online in Browser button
-  const readOnlineBtn = document.getElementById('btn-read-online');
-  if (readOnlineBtn) {
-    readOnlineBtn.addEventListener('click', () => {
-      const reader = document.getElementById('handbook-reader-view');
-      if (reader) {
-        reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        const firstSec = document.getElementById('sec-01');
-        if (firstSec) highlightSection(firstSec);
-      }
-    });
+function jumpToHandbookSection(targetId) {
+  const targetEl = document.getElementById(targetId);
+  if (!targetEl) return;
+
+  // Ensure target section is visible
+  targetEl.style.display = 'block';
+
+  // Reliable scroll inside scrollable .content-container
+  const container = document.querySelector('.content-container');
+  if (container) {
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = targetEl.getBoundingClientRect();
+    const scrollOffset = targetRect.top - containerRect.top + container.scrollTop - 24;
+    container.scrollTo({ top: Math.max(0, scrollOffset), behavior: 'smooth' });
+  } else {
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  highlightSection(targetEl);
+}
+
+function bindHandbookAndQuizControls() {
   // Clickable syllabus cards -> Jump directly to section
   const chapterCards = document.querySelectorAll('.chapter-card[data-target]');
   chapterCards.forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
       const targetId = card.dataset.target;
-      const targetEl = document.getElementById(targetId);
-      if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        highlightSection(targetEl);
-      }
+      jumpToHandbookSection(targetId);
     });
   });
 
-  // Sticky Section jump pills
-  const navPills = document.querySelectorAll('.reader-nav-pill-btn[data-target]');
-  navPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      const targetId = pill.dataset.target;
-      const targetEl = document.getElementById(targetId);
-      if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        highlightSection(targetEl);
+  // Next section buttons inside articles
+  document.querySelectorAll('.btn-jump-next[data-next]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const nextId = btn.dataset.next;
+      jumpToHandbookSection(nextId);
+    });
+  });
+
+  // Back to syllabus buttons
+  document.querySelectorAll('.btn-back-syllabus').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const syllabusCard = document.getElementById('handbook-syllabus-card');
+      if (syllabusCard) {
+        const container = document.querySelector('.content-container');
+        if (container) {
+          const containerRect = container.getBoundingClientRect();
+          const targetRect = syllabusCard.getBoundingClientRect();
+          const scrollOffset = targetRect.top - containerRect.top + container.scrollTop - 24;
+          container.scrollTo({ top: Math.max(0, scrollOffset), behavior: 'smooth' });
+        } else {
+          syllabusCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
     });
   });
@@ -3992,27 +4012,8 @@ function bindHandbookAndQuizControls() {
     });
   });
 
-  const handbookSearchInput = document.getElementById('handbook-search-input');
-  const handbookSearchCount = document.getElementById('handbook-search-count');
-  if (handbookSearchInput) {
-    handbookSearchInput.addEventListener('input', () => {
-      const q = handbookSearchInput.value.trim().toLowerCase();
-      const sections = document.querySelectorAll('.reader-section-block');
-      let matches = 0;
-      sections.forEach(sec => {
-        const text = sec.textContent.toLowerCase();
-        if (!q || text.includes(q)) {
-          sec.style.display = 'block';
-          if (q) matches++;
-        } else {
-          sec.style.display = 'none';
-        }
-      });
-      if (handbookSearchCount) {
-        handbookSearchCount.textContent = q ? `${matches} chapter(s) found` : '';
-      }
-    });
-  }
+  // Handbook Keyword Search with Highlighting & Auto-Filter
+  bindHandbookSearch();
 
   const quizReviewCloseBtn = document.getElementById('quiz-review-modal-close-btn');
   const quizReviewDoneBtn = document.getElementById('quiz-review-done-btn');
@@ -4025,6 +4026,144 @@ function bindHandbookAndQuizControls() {
   if (quizReviewDoneBtn && quizReviewModal) {
     quizReviewDoneBtn.addEventListener('click', () => {
       quizReviewModal.style.display = 'none';
+    });
+  }
+}
+
+function bindHandbookSearch() {
+  const searchInput = document.getElementById('handbook-search-input');
+  const searchCount = document.getElementById('handbook-search-count');
+  const clearBtn = document.getElementById('handbook-search-clear-btn');
+  if (!searchInput) return;
+
+  // Cache original HTML of sections for clean restoration
+  const originalSectionHtml = new Map();
+  document.querySelectorAll('.reader-section-block').forEach(sec => {
+    originalSectionHtml.set(sec.id, sec.innerHTML);
+  });
+
+  function executeSearch() {
+    const q = searchInput.value.trim();
+    const qLower = q.toLowerCase();
+
+    // Reset all sections to original HTML before applying new highlights
+    document.querySelectorAll('.reader-section-block').forEach(sec => {
+      if (originalSectionHtml.has(sec.id)) {
+        sec.innerHTML = originalSectionHtml.get(sec.id);
+      }
+    });
+
+    // Rebind next buttons inside restored HTML
+    document.querySelectorAll('.btn-jump-next[data-next]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        jumpToHandbookSection(btn.dataset.next);
+      });
+    });
+    document.querySelectorAll('.btn-back-syllabus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const syllabusCard = document.getElementById('handbook-syllabus-card');
+        if (syllabusCard) {
+          const container = document.querySelector('.content-container');
+          if (container) {
+            const containerRect = container.getBoundingClientRect();
+            const targetRect = syllabusCard.getBoundingClientRect();
+            const scrollOffset = targetRect.top - containerRect.top + container.scrollTop - 24;
+            container.scrollTo({ top: Math.max(0, scrollOffset), behavior: 'smooth' });
+          } else {
+            syllabusCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    if (clearBtn) {
+      clearBtn.style.display = q ? 'inline-flex' : 'none';
+    }
+
+    if (!q) {
+      document.querySelectorAll('.reader-section-block').forEach(sec => {
+        sec.style.display = 'block';
+      });
+      document.querySelectorAll('.chapter-card').forEach(card => {
+        card.style.opacity = '1';
+        card.style.borderColor = '';
+      });
+      if (searchCount) searchCount.textContent = '';
+      return;
+    }
+
+    let matchingSections = 0;
+    let firstMatchId = null;
+
+    document.querySelectorAll('.reader-section-block').forEach(sec => {
+      const text = sec.textContent.toLowerCase();
+      if (text.includes(qLower)) {
+        sec.style.display = 'block';
+        matchingSections++;
+        if (!firstMatchId) firstMatchId = sec.id;
+        applyKeywordHighlight(sec, q);
+      } else {
+        sec.style.display = 'none';
+      }
+    });
+
+    // Update syllabus cards
+    document.querySelectorAll('.chapter-card').forEach(card => {
+      const targetId = card.dataset.target;
+      const targetSec = document.getElementById(targetId);
+      if (targetSec && targetSec.style.display !== 'none') {
+        card.style.opacity = '1';
+        card.style.borderColor = 'var(--indigo-500)';
+      } else {
+        card.style.opacity = '0.35';
+        card.style.borderColor = '';
+      }
+    });
+
+    if (searchCount) {
+      searchCount.textContent = matchingSections > 0
+        ? `${matchingSections} section(s) match`
+        : 'No matches found';
+    }
+  }
+
+  function applyKeywordHighlight(element, keyword) {
+    if (!keyword) return;
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+
+    function walkNodes(node) {
+      if (node.nodeType === 3) {
+        const val = node.nodeValue;
+        if (regex.test(val)) {
+          const wrapper = document.createElement('span');
+          wrapper.innerHTML = val.replace(regex, '<mark class="search-highlight">$1</mark>');
+          node.parentNode.replaceChild(wrapper, node);
+        }
+      } else if (node.nodeType === 1 && !['SCRIPT', 'STYLE', 'BUTTON', 'A', 'MARK'].includes(node.nodeName)) {
+        Array.from(node.childNodes).forEach(walkNodes);
+      }
+    }
+    walkNodes(element);
+  }
+
+  searchInput.addEventListener('input', executeSearch);
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const firstVisible = document.querySelector('.reader-section-block:not([style*="display: none"])');
+      if (firstVisible) {
+        jumpToHandbookSection(firstVisible.id);
+      }
+    }
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      executeSearch();
+      searchInput.focus();
     });
   }
 }

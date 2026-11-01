@@ -404,105 +404,90 @@
           </div>
         </section>
 
-        <!-- VIEW: 12-Page Industry Foundations Handbook -->
+                <!-- VIEW: 12-Page Industry Foundations Handbook -->
         <section class="view-section" id="view-handbook" style="display: none;">
-          <div class="handbook-container">
-            <div class="handbook-hero-card">
-              <div class="handbook-hero-text">
-                <div class="badge badge-indigo" style="background: rgba(255,255,255,0.2); color: #ffffff; width: fit-content; margin-bottom: 0.5rem;">Mandatory Field Manual</div>
-                <h1 id="handbook-hero-title">Industry Foundations & Production Handbook</h1>
-                <p>Master corporate engineering topologies, agile rituals, PR etiquette, environment isolation, CI/CD, observability, SRE error budgets, zero-trust security, and 40+ vital keywords.</p>
-              </div>
-              <div class="handbook-hero-actions">
-                <a href="/api/handbook/download" id="btn-download-handbook-pdf" class="btn btn-primary" download="Praxis_Industry_Foundations_Handbook.pdf" style="text-align: center; text-decoration: none; justify-content: center;">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  Download 12-Page PDF
-                </a>
-                <button type="button" class="btn btn-secondary" id="btn-read-online" style="text-align: center; justify-content: center; background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); cursor: pointer;">
-                  Read Online in Browser
-                </button>
-              </div>
+          <div class="handbook-container" style="padding-bottom: 6rem;">
+
+            <!-- Handbook Search Bar -->
+            <div class="handbook-search-bar" style="display: flex; gap: 0.75rem; align-items: center; background: var(--bg-card); padding: 0.85rem 1.15rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
+              <span style="font-size: 1.15rem;">🔍</span>
+              <input type="text" id="handbook-search-input" placeholder="Search keywords across all 11 handbook chapters (e.g. RACI, SLI, Fibonacci, Trunk-Based, Canary, PoLP, Idempotency)..." style="flex: 1; border: none; outline: none; font-size: 0.9rem; background: transparent; color: var(--text-primary);">
+              <button type="button" id="handbook-search-clear-btn" style="display: none; background: var(--bg-hover); border: 1px solid var(--border-color); border-radius: 999px; width: 22px; height: 22px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; align-items: center; justify-content: center; padding: 0;" title="Clear Search">✕</button>
+              <span id="handbook-search-count" style="font-size: 0.78rem; font-weight: 700; color: var(--indigo-500); white-space: nowrap;"></span>
             </div>
 
-            <!-- Chapters Preview (Clickable to jump directly to section) -->
-            <div class="handbook-search-bar" style="margin-top: 1.25rem; margin-bottom: 0.5rem; display: flex; gap: 0.75rem; align-items: center; background: var(--bg-card); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border-color);">
-              <span style="font-size: 1rem;">🔍</span>
-              <input type="text" id="handbook-search-input" placeholder="Search keywords across 11 handbook chapters (e.g. SLI, Postmortem, CI/CD, Git)..." style="flex: 1; border: none; outline: none; font-size: 0.85rem; background: transparent; color: var(--text-primary);">
-              <span id="handbook-search-count" style="font-size: 0.75rem; font-weight: 700; color: var(--indigo-500);"></span>
-            </div>
-
-            <!-- Chapters Preview (Clickable to jump directly to section) -->
+            <!-- Handbook Syllabus Grid (Clickable to jump directly to section) -->
             <div class="card" style="padding: 1.5rem;" id="handbook-syllabus-card">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
                 <div>
-                  <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Handbook Syllabus (Click to Jump Directly)</h2>
-                  <p style="font-size: 0.825rem; color: var(--text-muted); margin-top: 2px;">Click any section below to read its in-depth production guide instantly.</p>
+                  <h2 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin: 0;">Handbook Syllabus (Click to Jump Directly)</h2>
+                  <p style="font-size: 0.825rem; color: var(--text-muted); margin: 4px 0 0 0;">Click any section below to read its in-depth production guide instantly.</p>
                 </div>
-                <span class="badge badge-indigo">11 Core Sections</span>
+                <span class="badge badge-indigo">11 Comprehensive Sections</span>
               </div>
 
               <div class="handbook-chapters-grid">
-                <div class="chapter-card" data-target="sec-01">
+                <div class="chapter-card" data-target="sec-01" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 01</span>
                   <span class="chapter-card-title">Engineering Org Topology</span>
                   <span class="chapter-card-desc">Roles (EM, PM, Staff, SRE, QA), decision ownership, and RACI matrix.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-02">
+                <div class="chapter-card" data-target="sec-02" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 02</span>
                   <span class="chapter-card-title">Agile Delivery Lifecycle</span>
                   <span class="chapter-card-desc">Sprint ceremonies, standups, Fibonacci story points, and Jira ticket states.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-03">
+                <div class="chapter-card" data-target="sec-03" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 03</span>
                   <span class="chapter-card-title">Version Control & PRs</span>
                   <span class="chapter-card-desc">Trunk-based development, semantic commits, PR anatomy, and review etiquette.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-04">
+                <div class="chapter-card" data-target="sec-04" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 04</span>
                   <span class="chapter-card-title">Environment Tiers</span>
                   <span class="chapter-card-desc">Dev, Preview, Staging, Production parity, and secret vault management.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-05">
+                <div class="chapter-card" data-target="sec-05" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 05</span>
                   <span class="chapter-card-title">CI/CD & Deployments</span>
                   <span class="chapter-card-desc">Automated test gates, Canary releases, Blue/Green, and feature flags.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-06">
+                <div class="chapter-card" data-target="sec-06" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 06</span>
                   <span class="chapter-card-title">Observability Pillars</span>
                   <span class="chapter-card-desc">Metrics, structured JSON logs, distributed trace IDs, and p95/p99 tail latency.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-07">
+                <div class="chapter-card" data-target="sec-07" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 07</span>
                   <span class="chapter-card-title">SRE & Incident Triage</span>
                   <span class="chapter-card-desc">SLIs, SLOs, SLAs, error budget policies, SEV-1 to SEV-3, and postmortems.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-08">
+                <div class="chapter-card" data-target="sec-08" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 08</span>
                   <span class="chapter-card-title">Zero Trust Security</span>
                   <span class="chapter-card-desc">Least Privilege (PoLP), input sanitization, PII masking, and SOC2 compliance.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-09">
+                <div class="chapter-card" data-target="sec-09" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 09</span>
                   <span class="chapter-card-title">Architectural Lexicon</span>
                   <span class="chapter-card-desc">Idempotency, Circuit Breakers, CQRS, DLQ, Connection Pooling, WAL, etc.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-10">
+                <div class="chapter-card" data-target="sec-10" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 10</span>
                   <span class="chapter-card-title">Operational Lexicon</span>
                   <span class="chapter-card-desc">Tech Debt, Yak Shaving, Bike-Shedding, Bus Factor, MTTR/MTTD, and RCA.</span>
                   <span class="chapter-card-link">Read Section ➔</span>
                 </div>
-                <div class="chapter-card" data-target="sec-11">
+                <div class="chapter-card" data-target="sec-11" style="cursor: pointer;">
                   <span class="chapter-card-num">Section 11</span>
                   <span class="chapter-card-title">The First 90 Days</span>
                   <span class="chapter-card-desc">30-min rule for being stuck, PR frequency, and building team credibility.</span>
@@ -512,66 +497,52 @@
             </div>
 
             <!-- IN-APP COMPREHENSIVE ONLINE READER -->
-            <div id="handbook-reader-view" style="margin-top: 1rem;">
-              <!-- Sticky Section Quick Jump Bar -->
-              <div class="reader-nav-pills">
-                <span style="font-size: 0.72rem; font-weight: 800; color: #6366f1; text-transform: uppercase; align-self: center; margin-right: 4px;">Jump to:</span>
-                <button class="reader-nav-pill-btn" data-target="sec-01">01. Org Topology</button>
-                <button class="reader-nav-pill-btn" data-target="sec-02">02. Agile Lifecycle</button>
-                <button class="reader-nav-pill-btn" data-target="sec-03">03. Git & PRs</button>
-                <button class="reader-nav-pill-btn" data-target="sec-04">04. Environments</button>
-                <button class="reader-nav-pill-btn" data-target="sec-05">05. CI/CD</button>
-                <button class="reader-nav-pill-btn" data-target="sec-06">06. Observability</button>
-                <button class="reader-nav-pill-btn" data-target="sec-07">07. SRE & Incidents</button>
-                <button class="reader-nav-pill-btn" data-target="sec-08">08. Security</button>
-                <button class="reader-nav-pill-btn" data-target="sec-09">09. Arch Lexicon</button>
-                <button class="reader-nav-pill-btn" data-target="sec-10">10. Ops Lexicon</button>
-                <button class="reader-nav-pill-btn" data-target="sec-11">11. First 90 Days</button>
-              </div>
+            <div id="handbook-reader-view" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1.5rem;">
 
               <!-- SECTION 01: Engineering Org Topology -->
               <article class="reader-section-block" id="sec-01">
                 <span class="reader-section-tag">Section 01 • Organizational Structure</span>
                 <h2 class="reader-section-title">Modern Engineering Organization Topology & Decision Ownership</h2>
-                <p >
-                  Software in modern tech companies is built by cross-functional teams rather than isolated individuals. Understanding who owns which decisions prevents friction, accelerates feature delivery, and ensures operational accountability.
+                <p>
+                  Software in modern tech enterprises is built by cross-functional product engineering squads rather than isolated silos. Understanding organizational topology and decision boundaries prevents friction, accelerates feature velocity, and enforces operational accountability across the release lifecycle.
                 </p>
 
+                <h3 style="margin-top: 1.25rem;">Core Roles in an Engineering Product Squad</h3>
                 <table class="reader-table">
                   <thead>
                     <tr>
-                      <th style="width: 200px;">Engineering Role</th>
+                      <th style="width: 210px;">Engineering Role</th>
                       <th>Primary Mandate & Scope of Decision</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
                       <td><strong>Engineering Manager (EM)</strong></td>
-                      <td>People manager focused on career progression, sprint velocity, unblocking cross-team bottlenecks, performance reviews, and psychological safety.</td>
+                      <td>People manager focused on career progression, engineering velocity, unblocking cross-team bottlenecks, performance reviews, hiring, and team psychological safety.</td>
                     </tr>
                     <tr>
                       <td><strong>Product Manager (PM)</strong></td>
-                      <td>Owns the "Why" and "What". Researches customer pain points, writes Product Requirement Documents (PRDs), defines acceptance criteria, and manages feature roadmaps.</td>
+                      <td>Owns the "Why" and "What". Researches customer pain points, authors Product Requirement Documents (PRDs), defines user stories & acceptance criteria, and manages feature roadmap prioritization.</td>
                     </tr>
                     <tr>
                       <td><strong>Product Designer (UI/UX)</strong></td>
-                      <td>Designs user flows, Figma component libraries, user journey wireframes, and ensures accessibility (a11y) and design consistency.</td>
+                      <td>Designs user flows, Figma design system component tokens, wireframes, and customer prototypes. Validates accessibility (WCAG a11y) and UX consistency across devices.</td>
                     </tr>
                     <tr>
-                      <td><strong>Tech Lead / Staff Engineer</strong></td>
-                      <td>Owns the "How" and long-term technical architecture. Authors Architecture Decision Records (ADRs), guides engineers on scalability, and guards system health.</td>
+                      <td><strong>Staff / Principal Engineer</strong></td>
+                      <td>Owns the "How" and multi-quarter technical strategy. Authors Architecture Decision Records (ADRs), guides engineers on high-scale distributed systems, and guards platform health across squads.</td>
                     </tr>
                     <tr>
                       <td><strong>Software Engineer (SWE)</strong></td>
-                      <td>Writes modular, tested, clean application code, authors pull requests, designs database schemas, and participates in peer code reviews.</td>
+                      <td>Writes modular, tested, clean application code, authors pull requests, designs database schemas, handles API contracts, and actively reviews peer pull requests.</td>
                     </tr>
                     <tr>
                       <td><strong>Site Reliability Engineer (SRE)</strong></td>
-                      <td>Ensures production availability, latency, performance monitoring, and capacity planning. Builds automated infrastructure and manages deployment pipelines.</td>
+                      <td>Ensures production availability, latency, performance monitoring, and capacity planning. Builds automated infrastructure (IaC), incident runbooks, and deployment safety gates.</td>
                     </tr>
                     <tr>
                       <td><strong>QA / SDET</strong></td>
-                      <td>Automates end-to-end regression, integration, and load test suites, verifying releases meet business and SLA standards before rollout.</td>
+                      <td>Automates end-to-end regression, integration, and load test suites, verifying releases meet business requirements and SLA standards before rollout.</td>
                     </tr>
                     <tr>
                       <td><strong>Security Operations (SecOps)</strong></td>
@@ -580,12 +551,24 @@
                   </tbody>
                 </table>
 
+                <h3 style="margin-top: 1.25rem;">The RACI Framework in Production Decisions</h3>
+                <p>
+                  High-velocity engineering teams prevent decision gridlock by establishing explicit RACI mappings for major engineering milestones:
+                </p>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>R (Responsible):</strong> The engineer doing the work and writing the code/configuration.</li>
+                  <li><strong>A (Accountable):</strong> The single individual who must sign off and owns the outcome (usually Tech Lead or EM).</li>
+                  <li><strong>C (Consulted):</strong> Subject matter experts (DBA, Security, SRE) who must review and provide input before merging.</li>
+                  <li><strong>I (Informed):</strong> Stakeholders and adjacent squad leads who are notified upon release.</li>
+                </ul>
+
                 <div class="reader-callout">
-                  <strong>The RACI Framework in Production Decisions:</strong> Engineering teams use RACI to prevent confusion:
-                  <strong>R (Responsible)</strong> = Engineer writing the code;
-                  <strong>A (Accountable)</strong> = Tech Lead who approves and signs off;
-                  <strong>C (Consulted)</strong> = SMEs (DBA, Security, SRE) who provide feedback;
-                  <strong>I (Informed)</strong> = Stakeholders notified upon release.
+                  <strong>Two-Way Door vs. One-Way Door Decisions:</strong> Modern engineering leaders categorize decisions into reversible ("Two-Way Doors", such as changing an internal cache key or tweaking a UI color) and irreversible ("One-Way Doors", such as choosing a database storage engine or signing a multi-year vendor contract). Move fast on two-way doors without bureaucratic committee meetings; write formal ADRs for one-way doors.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-02">Next: Agile Delivery Lifecycle ➔</button>
                 </div>
               </article>
 
@@ -593,30 +576,61 @@
               <article class="reader-section-block" id="sec-02">
                 <span class="reader-section-tag">Section 02 • Agile Operations</span>
                 <h2 class="reader-section-title">The Agile Delivery Engine & Work Tracking</h2>
-                <p >
-                  Engineering teams work in 1- to 2-week iterations known as <strong>Sprints</strong>. Work is organized into backlogs and tracked in tools like Jira, Linear, or GitHub Projects.
+                <p>
+                  Engineering teams operate in 1- to 2-week iterations known as <strong>Sprints</strong>. Work is organized into backlogs and tracked in modern issue tracking platforms such as Jira, Linear, or GitHub Projects.
                 </p>
 
-                <h3 >Core Scrum Ceremonies</h3>
-                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
-                  <li><strong>Sprint Planning:</strong> At the start of each cycle, the team breaks backlog user stories into engineering tasks and commits to a specific deliverable scope.</li>
-                  <li><strong>Daily Standup (15 mins):</strong> Three concise updates: (1) What was completed yesterday, (2) What is planned for today, and (3) Any blockers preventing progress.</li>
+                <h3 style="margin-top: 1.25rem;">Core Scrum Ceremonies</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
+                  <li><strong>Sprint Planning:</strong> At the start of each cycle, the team reviews backlog user stories, clarifies requirements with the PM, breaks them into engineering sub-tasks, and commits to a specific deliverable scope.</li>
+                  <li><strong>Daily Standup (15 mins):</strong> Three concise updates: (1) What was completed yesterday, (2) What is planned for today, and (3) Any blockers preventing progress. Focus on blockers rather than micromanagement.</li>
                   <li><strong>Backlog Refinement (Grooming):</strong> Engineers and PMs review upcoming proposals, clarify ambiguous acceptance criteria, identify dependencies, and assign story points.</li>
+                  <li><strong>Sprint Demo / Review:</strong> The engineering squad demonstrates completed features to internal stakeholders and gathers usability feedback.</li>
                   <li><strong>Sprint Retrospective:</strong> A blameless review at sprint end: What went well? What slowed us down? What concrete action items will we implement next cycle?</li>
                 </ul>
 
-                <h3 >Story Pointing & Estimation (Fibonacci Scale)</h3>
-                <p >
-                  Story points measure relative complexity and uncertainty, not literal calendar hours. Common scale:
-                  <strong>1 point</strong> (trivial change, e.g. text copy or config bump),
-                  <strong>2 points</strong> (routine task with clear patterns),
-                  <strong>3 points</strong> (moderate feature with unit tests),
-                  <strong>5 points</strong> (significant logic spanning multiple components),
-                  <strong>8+ points</strong> (too large; must be decomposed into smaller sub-tasks).
+                <h3 style="margin-top: 1.25rem;">Story Pointing & Estimation (Fibonacci Scale)</h3>
+                <p>
+                  Story points measure relative complexity, risk, and unknown factors, not literal calendar hours. Tech companies use modified Fibonacci sequences:
                 </p>
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 120px;">Points</th>
+                      <th>Complexity Profile & Concrete Production Examples</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>1 Point</strong></td>
+                      <td>Trivial, well-understood change with zero unknowns (e.g., updating copy, modifying CSS padding, bumping an internal package version).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>2 Points</strong></td>
+                      <td>Routine engineering task following existing patterns (e.g., adding a new field to an existing API and database schema with unit tests).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>3 Points</strong></td>
+                      <td>Standard feature involving business logic across frontend and backend, requiring integration tests and error handling.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>5 Points</strong></td>
+                      <td>Complex task touching multiple services, third-party webhook integrations, or data transformations with noticeable blast radius.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>8+ Points</strong></td>
+                      <td>High uncertainty or architectural overhaul. Red flag: Story is too large for a single sprint and must be broken into smaller sub-tasks or preceded by a research Spike ticket.</td>
+                    </tr>
+                  </tbody>
+                </table>
 
                 <div class="reader-callout">
-                  <strong>Pro-Tip on Standups:</strong> Never say "I worked on tickets." State your specific technical goal, such as: <em>"Yesterday I finished the Redis token cache migration; today I am writing integration tests for the rate limiter. I need a review from @Alex on PR #214."</em>
+                  <strong>Standup Etiquette Pro-Tip:</strong> Never give vague updates like "I worked on tickets." Always state: (1) The specific technical goal, (2) Current status, and (3) Any PR review or dependency need. Example: <em>"Yesterday I completed the Redis token cache migration; today I am writing integration tests for the rate limiter. I need a review from @Alex on PR #214."</em>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-03">Next: Version Control & PRs ➔</button>
                 </div>
               </article>
 
@@ -624,26 +638,62 @@
               <article class="reader-section-block" id="sec-03">
                 <span class="reader-section-tag">Section 03 • Code Hygiene</span>
                 <h2 class="reader-section-title">Version Control Hygiene & Pull Request Etiquette</h2>
-                <p >
-                  In production teams, Git is not just backup storage; it is the official audit trail of why, when, and how your software evolved.
+                <p>
+                  In production environments, Git is not merely a backup tool; it is the official, legally auditable record of why, how, and when software changed. Maintaining clean Git hygiene is a hallmark of senior engineering.
                 </p>
 
-                <h3 >Trunk-Based Development vs. Long-Lived Branches</h3>
-                <p >
-                  High-performing teams practice <strong>Trunk-Based Development</strong>: engineers create short-lived feature branches (lasting hours to 2 days maximum), rebase frequently onto <code>main</code>, and merge often via automated CI checks. Long-lived feature branches lead to painful merge conflicts ("merge hell") and risky, high-blast-radius releases.
+                <h3 style="margin-top: 1.25rem;">Trunk-Based Development vs. Long-Lived Branches</h3>
+                <p>
+                  High-performing technology companies practice <strong>Trunk-Based Development</strong>: engineers create short-lived feature branches (lasting hours to 2 days maximum), rebase frequently onto <code>main</code>, and merge often via automated CI checks. Long-lived feature branches lead to painful merge conflicts ("merge hell") and risky, high-blast-radius releases.
                 </p>
 
-                <h3 >Conventional Commit Standards</h3>
-                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 4px;">
-                  <li><code>feat(auth): add stripe webhook handler</code> — Adds a new user-facing capability.</li>
-                  <li><code>fix(db): handle connection pool timeout</code> — Patches an unexpected bug or error.</li>
-                  <li><code>refactor(api): extract validation middleware</code> — Modifies code structure without altering external behavior.</li>
-                  <li><code>test(gateway): add rate limiting integration tests</code> — Adds missing unit or integration tests.</li>
-                  <li><code>chore(deps): bump pydantic to v2.14.1</code> — Routine maintenance or dependency upgrades.</li>
-                </ul>
+                <h3 style="margin-top: 1.25rem;">Conventional Commit Standards</h3>
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 180px;">Prefix</th>
+                      <th>Intent & Example Production Commit Message</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>feat(scope):</code></td>
+                      <td>Adds new user-facing functionality. Example: <code>feat(auth): add OAuth2 refresh token rotation</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>fix(scope):</code></td>
+                      <td>Patches a bug or regression. Example: <code>fix(db): handle connection pool timeout gracefully</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>refactor(scope):</code></td>
+                      <td>Modifies internal code structure without changing external behavior. Example: <code>refactor(billing): extract invoice PDF generator into service</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>perf(scope):</code></td>
+                      <td>Improves runtime performance. Example: <code>perf(query): add composite index on user_id and created_at</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>test(scope):</code></td>
+                      <td>Adds or repairs test suites. Example: <code>test(api): add mock integration tests for Stripe webhook</code></td>
+                    </tr>
+                    <tr>
+                      <td><code>chore(scope):</code></td>
+                      <td>Tooling, config, or dependency bumps. Example: <code>chore(deps): upgrade fastapi to v0.115.0</code></td>
+                    </tr>
+                  </tbody>
+                </table>
 
                 <div class="reader-callout">
-                  <strong>The Anatomy of a World-Class PR:</strong> (1) <strong>Problem & Context:</strong> What Jira ticket does this resolve? (2) <strong>Solution Approach:</strong> High-level architecture of changes, (3) <strong>Verification & Testing:</strong> CLI test output or screenshots proving it works, and (4) <strong>Rollback Plan:</strong> What flag or command undoes this if an alert fires in production?
+                  <strong>The Anatomy of a World-Class PR:</strong>
+                  (1) <strong>Problem & Context:</strong> Link the Jira/Linear ticket and describe user pain.
+                  (2) <strong>Technical Solution:</strong> Explain architectural approach and tradeoffs.
+                  (3) <strong>Verification:</strong> Attach CLI test output, curl commands, or screenshots.
+                  (4) <strong>Rollback Plan:</strong> State exact feature flag or revert command if production alerts trigger.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-04">Next: Environment Tiers ➔</button>
                 </div>
               </article>
 
@@ -651,10 +701,11 @@
               <article class="reader-section-block" id="sec-04">
                 <span class="reader-section-tag">Section 04 • Infrastructure</span>
                 <h2 class="reader-section-title">Environment Tiers & Infrastructure Parity</h2>
-                <p >
-                  Code progresses through distinct, isolated runtime environments before reaching paying users. Never test or debug experimental logic in production.
+                <p>
+                  Production code progresses through distinct, strictly isolated runtime environments before reaching paying users. Testing experimental logic in production or hardcoding environment-specific URLs is strictly prohibited in modern engineering teams.
                 </p>
 
+                <h3 style="margin-top: 1.25rem;">The Four Core Environment Tiers</h3>
                 <table class="reader-table">
                   <thead>
                     <tr>
@@ -665,7 +716,7 @@
                   <tbody>
                     <tr>
                       <td><strong>Localhost / Dev</strong></td>
-                      <td>Developer workstation running local servers, mock databases, and unit tests. Fast feedback loop, zero risk to external data.</td>
+                      <td>Developer workstation running local containers, mock databases, and unit tests. Fast feedback loop, zero risk to external data.</td>
                     </tr>
                     <tr>
                       <td><strong>Ephemeral / Preview</strong></td>
@@ -682,8 +733,23 @@
                   </tbody>
                 </table>
 
+                <h3 style="margin-top: 1.25rem;">The Twelve-Factor App & Config Parity</h3>
+                <p>
+                  Enterprise services adhere to Twelve-Factor principles:
+                </p>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Config in Environment:</strong> Never hardcode API keys, database credentials, or domain names into source code. Inject configuration via environment variables at container startup.</li>
+                  <li><strong>Stateless Processes:</strong> Applications must be stateless and share-nothing. Session data and file uploads must reside in external datastores (Redis, S3), allowing any instance to be killed or replaced at will.</li>
+                  <li><strong>Strict Environment Parity:</strong> Keep development, staging, and production as similar as possible. The exact same Docker container image built in CI must be deployed to Staging and then promoted to Production without rebuilding.</li>
+                </ul>
+
                 <div class="reader-callout">
-                  <strong>The Twelve-Factor App & Config Parity:</strong> Never hardcode environment-specific URLs, API keys, or credentials into source code. Store configuration in environment variables injected at runtime. Code that runs in Staging should be identical (same Docker container image tag) to code deployed to Production.
+                  <strong>Secrets Management:</strong> Never commit <code>.env</code> files to Git repositories. Production secrets are managed through centralized vaults (HashiCorp Vault, AWS Secrets Manager, Doppler) and mounted into memory at runtime with automatic rotation.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-05">Next: CI/CD & Deployments ➔</button>
                 </div>
               </article>
 
@@ -691,20 +757,55 @@
               <article class="reader-section-block" id="sec-05">
                 <span class="reader-section-tag">Section 05 • Deployment Engineering</span>
                 <h2 class="reader-section-title">CI/CD Pipelines & Modern Deployment Strategies</h2>
-                <p >
-                  High-performing engineering teams deploy multiple times per day using automated delivery pipelines that eliminate manual human error.
+                <p>
+                  Continuous Integration and Continuous Deployment (CI/CD) pipelines automate quality gates, security checks, and production releases. Eliminating manual deployment commands eliminates human error and guarantees repeatable, auditable releases.
                 </p>
 
-                <h3 >Zero-Downtime Deployment Patterns</h3>
-                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
-                  <li><strong>Rolling Update:</strong> Containers are incrementally replaced one-by-one. The load balancer stops routing to old instances as new healthy instances pass health check probes.</li>
-                  <li><strong>Blue/Green Deployment:</strong> Two identical production environments exist. "Blue" serves live traffic. You deploy new version to "Green". Once verified, the load balancer router instantly flips traffic from Blue to Green.</li>
-                  <li><strong>Canary Release:</strong> Route 2% of live traffic to the new version while 98% remains on stable. Monitor error rates, memory usage, and latency for 15 minutes. If metrics remain healthy, ramp to 10%, 50%, and 100%.</li>
-                  <li><strong>Feature Flags (Dark Launching):</strong> Code is merged and deployed to production with functionality hidden behind a dynamic toggle (e.g. LaunchDarkly). Allows testing in prod with internal users before turning on globally.</li>
-                </ul>
+                <h3 style="margin-top: 1.25rem;">Standard Enterprise CI Pipeline Stages</h3>
+                <ol style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Static Analysis & Linting:</strong> Verifies syntax formatting (Prettier, Black, ESLint) and checks for code style violations before tests run.</li>
+                  <li><strong>Security Scanning:</strong> SAST (Static Application Security Testing) and dependency auditing (Trivy, Snyk) check for known CVE vulnerabilities in packages.</li>
+                  <li><strong>Automated Test Suites:</strong> Executes unit tests, contract tests, and database migration checks. Merges are blocked if test coverage drops or tests fail.</li>
+                  <li><strong>Container Build & Artifact Signing:</strong> Compiles the container image, tags it with the immutable Git commit SHA, signs the image, and pushes to a container registry.</li>
+                </ol>
+
+                <h3 style="margin-top: 1.25rem;">Zero-Downtime Deployment Strategies</h3>
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 200px;">Strategy</th>
+                      <th>Mechanism & Blast Radius Characteristics</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Rolling Update</strong></td>
+                      <td>Replaces old container instances one by one. The load balancer routes traffic only to new pods after they pass HTTP readiness probes. Simple, but old and new code run simultaneously.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Blue/Green</strong></td>
+                      <td>Two identical production clusters exist. Live traffic points to Blue. Green is deployed with new code and tested. Router flips 100% of traffic to Green instantly. Fast rollback by flipping router back.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Canary Release</strong></td>
+                      <td>Routes 2% of live traffic to the new version while 98% remains on stable. Automated telemetry monitors error rates and latency. If healthy for 15 minutes, traffic scales to 10%, 50%, and 100%.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Feature Flags</strong></td>
+                      <td>Code is shipped to production dormant behind dynamic feature toggles (LaunchDarkly, Unleash). Decouples code deployment from feature release; features can be enabled per tenant or rolled back in milliseconds without redeploying.</td>
+                    </tr>
+                  </tbody>
+                </table>
 
                 <div class="reader-callout">
-                  <strong>SOP Standard:</strong> Always decouple deployment from feature release. Deploying code (shipping the bytes) should be a low-risk non-event; releasing features to users is controlled independently via feature toggles.
+                  <strong>Health Probes: Readiness vs. Liveness:</strong> Kubernetes and ECS use probes to manage container health:
+                  <strong>Readiness Probe:</strong> Determines if container is ready to accept traffic (e.g., database connection pool initialized).
+                  <strong>Liveness Probe:</strong> Detects if process has deadlocked or frozen; if it fails, container is automatically restarted.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-06">Next: Observability Pillars ➔</button>
                 </div>
               </article>
 
@@ -712,19 +813,36 @@
               <article class="reader-section-block" id="sec-06">
                 <span class="reader-section-tag">Section 06 • Telemetry</span>
                 <h2 class="reader-section-title">Production Observability: Telemetry in the Wild</h2>
-                <p >
-                  You cannot fix what you cannot measure. When an incident occurs at 2:00 AM, observability is the only lens through which engineers understand internal system state.
+                <p>
+                  You cannot debug what you cannot measure. When an incident occurs in a distributed microservices environment, observability is the only lens through which engineers deduce internal system state from external telemetry signals.
                 </p>
 
-                <h3 >The Three Pillars of Observability</h3>
+                <h3 style="margin-top: 1.25rem;">The Three Pillars of Observability</h3>
                 <ol style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
-                  <li><strong>Metrics (Aggregated Numerics):</strong> Numeric measurements collected over time intervals. Key primitives include <strong>Counters</strong> (monotonically increasing requests), <strong>Gauges</strong> (current memory in MB), and <strong>Histograms</strong> (latency distributions). Fast to query, cheap to store.</li>
-                  <li><strong>Structured Logs (Events & Context):</strong> Structured JSON log entries containing contextual metadata: timestamp, log level (DEBUG, INFO, WARN, ERROR), service name, customer ID, and trace ID. Human-readable and indexable in Datadog, Elasticsearch, or Loki.</li>
-                  <li><strong>Distributed Tracing (Request Journeys):</strong> Tracks a single user request as it traverses 10+ microservices. Propagates a <code>Trace-ID</code> and child <code>Span-IDs</code> across HTTP/gRPC boundaries to pinpoint exact millisecond bottlenecks.</li>
+                  <li><strong>Metrics (Aggregated Numerics):</strong> Compact numeric data points recorded over time intervals. Key types:
+                    <strong>Counters</strong> (monotonically increasing count, e.g. total HTTP requests),
+                    <strong>Gauges</strong> (current instant value, e.g. memory in use), and
+                    <strong>Histograms</strong> (duration buckets for calculating percentiles). Cheap to store and fast to query.
+                  </li>
+                  <li><strong>Structured Logs (Event Context):</strong> Machine-readable JSON logs containing contextual key-value pairs: timestamp, log level (DEBUG, INFO, WARN, ERROR), service name, customer ID, and trace ID. Avoid unstructured plain text print statements.</li>
+                  <li><strong>Distributed Tracing (Request Journeys):</strong> Follows a single user request as it traverses 15+ microservices. Propagates a <code>Trace-ID</code> and child <code>Span-IDs</code> across HTTP and gRPC network boundaries, revealing exact millisecond database and network latency bottlenecks.</li>
                 </ol>
 
+                <h3 style="margin-top: 1.25rem;">The SRE Four Golden Signals</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+                  <li><strong>Latency:</strong> Time taken to service a request (distinguishing between successful and failed request durations).</li>
+                  <li><strong>Traffic:</strong> Demand placed on your system (e.g., HTTP requests/sec or message queue throughput).</li>
+                  <li><strong>Errors:</strong> Rate of requests that fail explicitly (HTTP 500s) or implicitly (returning wrong content or timing out).</li>
+                  <li><strong>Saturation:</strong> How full your service resources are (e.g., connection pool 92% full, memory buffer 88%).</li>
+                </ul>
+
                 <div class="reader-callout">
-                  <strong>Why Average Latency is a Trap (p50 vs p95 vs p99):</strong> Never report "average latency is 40ms". Averages hide catastrophic outliers. If 99 requests take 10ms but 1 request stalls for 10,000ms, the average is 109ms (which looks acceptable), but 1% of your highest-value customers experienced a total freeze. Production teams monitor <strong>p95</strong> and <strong>p99 percentiles</strong>.
+                  <strong>Why Average Latency is Dangerous (p50 vs. p95 vs. p99):</strong> Never report "average latency is 45ms". Averages hide catastrophic outliers. If 99 requests take 10ms but 1 request stalls for 10,000ms, the average is 109ms (which looks acceptable), but 1% of your highest-value customers experienced a total system freeze. Production teams monitor <strong>p95</strong> and <strong>p99 percentiles</strong>.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-07">Next: SRE & Incident Triage ➔</button>
                 </div>
               </article>
 
@@ -732,20 +850,52 @@
               <article class="reader-section-block" id="sec-07">
                 <span class="reader-section-tag">Section 07 • Reliability Engineering</span>
                 <h2 class="reader-section-title">Reliability Engineering, SLAs & Incident Triage</h2>
-                <p >
-                  No distributed system achieves 100% uptime. SRE is the discipline of treating operational reliability as a software problem with mathematically defined boundaries.
+                <p>
+                  Distributed systems will fail. Site Reliability Engineering (SRE) treats reliability as a software problem with mathematically defined boundaries, ensuring business growth does not compromise operational stability.
                 </p>
 
-                <h3 >SLI, SLO, SLA & Error Budgets</h3>
-                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
-                  <li><strong>Service Level Indicator (SLI):</strong> A quantifiable metric of service performance (e.g. "% of HTTP requests returning &lt; 200ms without 5xx errors").</li>
-                  <li><strong>Service Level Objective (SLO):</strong> Target reliability goal agreed upon by engineering and product (e.g. "99.9% of requests succeed over rolling 30-day window").</li>
-                  <li><strong>Service Level Agreement (SLA):</strong> Formal legal contract specifying financial penalties if reliability breaches thresholds (e.g. 99.5%).</li>
-                  <li><strong>Error Budget:</strong> Permissible downtime (100% - SLO). For a 99.9% SLO, you have an error budget of 0.1% (approx. 43 minutes/month). When exhausted, feature deployments freeze and all focus shifts to reliability.</li>
+                <h3 style="margin-top: 1.25rem;">SLI, SLO, SLA & Error Budgets</h3>
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 170px;">Concept</th>
+                      <th>Definition & Production Application</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>SLI (Indicator)</strong></td>
+                      <td>A quantifiable real-time measurement of service level (e.g., % of HTTP requests returning &lt; 200ms without 5xx errors over a 10-minute window).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>SLO (Objective)</strong></td>
+                      <td>The internal reliability target agreed upon between engineering and product (e.g., "99.9% of user requests succeed over a rolling 30-day window").</td>
+                    </tr>
+                    <tr>
+                      <td><strong>SLA (Agreement)</strong></td>
+                      <td>Formal contract with legal and financial penalties if reliability falls below a threshold (e.g., 99.5% uptime guarantee or refund customers).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Error Budget</strong></td>
+                      <td>Allowable downtime (100% - SLO). For a 99.9% SLO, you have an error budget of 0.1% (~43 mins/month). If exhausted, feature deployments freeze and all focus pivots to reliability fixes.</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <h3 style="margin-top: 1.25rem;">Incident Severity Levels & War Room Protocol</h3>
+                <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
+                  <li><strong>SEV-1 (Critical Outage):</strong> Core revenue workflow or primary service completely down. Immediate 24/7 War Room bridge; Incident Commander appointed; updates posted every 15 minutes.</li>
+                  <li><strong>SEV-2 (Major Degradation):</strong> Significant feature impaired for large percentage of users with no clean workaround. Handled urgently by on-call engineers.</li>
+                  <li><strong>SEV-3 (Minor Bug / Degradation):</strong> Low customer impact with existing workaround. Addressed during standard business hours.</li>
                 </ul>
 
                 <div class="reader-callout">
-                  <strong>The Blameless Postmortem (5 Whys):</strong> When things break, never ask "Who caused this?" Ask "What systemic failure allowed a human error to bypass our safeguards?" Human error is never the root cause; lack of automated validation, poor runbooks, or missing rollback safety is.
+                  <strong>The Blameless Postmortem (5 Whys):</strong> When systems fail, never ask "Who caused this?" Ask "What systemic vulnerability allowed a normal human action to cause an outage?" The root cause is never human error; it is missing automated validation, lack of rollback mechanisms, or inadequate runbook documentation.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-08">Next: Zero Trust Security ➔</button>
                 </div>
               </article>
 
@@ -753,19 +903,25 @@
               <article class="reader-section-block" id="sec-08">
                 <span class="reader-section-tag">Section 08 • Application Security</span>
                 <h2 class="reader-section-title">Enterprise Security, Zero Trust & Compliance</h2>
-                <p >
-                  Security is not a department; it is a fundamental property of every line of code you commit. Modern architectures assume the network is already hostile.
+                <p>
+                  Security is not an afterthought handled by an audit team; it is an intrinsic property of every line of code committed. Modern architectures assume network perimeters have already been compromised.
                 </p>
 
+                <h3 style="margin-top: 1.25rem;">Foundational Security Pillars</h3>
                 <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 8px;">
-                  <li><strong>Principle of Least Privilege (PoLP):</strong> A service, database user, or engineer should possess only the absolute minimum permissions necessary to perform their specific job—nothing more. Avoid granting <code>admin</code> or <code>root</code> roles.</li>
-                  <li><strong>Zero Trust Architecture:</strong> Never trust internal network boundaries. Authenticate and authorize every single inter-service request using mutual TLS (mTLS) and cryptographically signed tokens (JWTs).</li>
-                  <li><strong>Defense in Depth:</strong> Layer multiple defenses: WAF rate limiting at the edge, input sanitization in the API layer, parameterized queries at the ORM layer, and disk encryption at rest.</li>
-                  <li><strong>Sanitize All Inputs (OWASP Top 10):</strong> Never concatenate strings into SQL queries. Always use parameterized queries or trusted ORMs. Sanitize user-generated content to prevent Cross-Site Scripting (XSS).</li>
+                  <li><strong>Principle of Least Privilege (PoLP):</strong> A service account, database role, or engineer must possess only the absolute minimum permissions required to perform their specific job. Never run application servers as <code>root</code> or database queries as <code>superuser</code>.</li>
+                  <li><strong>Zero Trust Architecture:</strong> Never trust internal network traffic. Every single inter-service request is authenticated and authorized via mutual TLS (mTLS) and cryptographically signed JWT tokens.</li>
+                  <li><strong>Defense in Depth:</strong> Layer multiple controls: WAF rate limiting at the edge, strict schema validation at the controller, parameterized queries at the ORM layer, and disk encryption at rest (AES-256).</li>
+                  <li><strong>OWASP Top 10 Mitigation:</strong> Sanitize all user input, escape output to prevent Cross-Site Scripting (XSS), implement CSRF protections, and enforce strict Content Security Policies (CSP).</li>
                 </ul>
 
                 <div class="reader-callout">
-                  <strong>Security Incident Escalation:</strong> If you discover a security vulnerability or active exploit in production, do not discuss it in public Slack channels. Immediately escalate to your company's dedicated incident response team (#sec-ops-private) according to your security handbook.
+                  <strong>Data Privacy & PII Redaction:</strong> Personally Identifiable Information (PII) such as passwords, credit card numbers, phone numbers, and social security numbers must NEVER be written to application logs. Implement log scrubbing middleware before shipping logs to Datadog or CloudWatch.
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-09">Next: Architectural Lexicon ➔</button>
                 </div>
               </article>
 
@@ -773,8 +929,8 @@
               <article class="reader-section-block" id="sec-09">
                 <span class="reader-section-tag">Section 09 • Architecture Lexicon</span>
                 <h2 class="reader-section-title">The Essential Industry Lexicon (Architectural Terms)</h2>
-                <p >
-                  Master these 10 architectural and infrastructure terms to navigate technical design reviews with confidence:
+                <p>
+                  Master these foundational architectural and infrastructure terms to navigate technical design reviews with fluency and confidence:
                 </p>
 
                 <table class="reader-table">
@@ -787,54 +943,67 @@
                   <tbody>
                     <tr>
                       <td><code>Idempotency</code></td>
-                      <td>Property where an operation can be applied multiple times without changing the result beyond the initial application (crucial for payment APIs and webhook retries).</td>
+                      <td>Property where an operation can be applied multiple times without changing the result beyond the initial application. Crucial for payment APIs, webhook retries, and network timeout recovery using unique <code>Idempotency-Key</code> headers.</td>
                     </tr>
                     <tr>
                       <td><code>Circuit Breaker</code></td>
-                      <td>Design pattern that halts requests to a failing downstream service after an error threshold, preventing cascading thread exhaustion across the cluster.</td>
+                      <td>Pattern that halts requests to a failing downstream service after reaching an error threshold, preventing cascading thread exhaustion. Moves between Closed (normal), Open (failing fast), and Half-Open (trial requests).</td>
                     </tr>
                     <tr>
                       <td><code>Eventual Consistency</code></td>
-                      <td>Database consistency model where all replicas will eventually yield the same value, but immediate reads right after write may return slightly stale data.</td>
+                      <td>Distributed consistency model where all replicas eventually converge to the same value, but immediate reads right after write may temporarily return stale data (CAP Theorem tradeoff).</td>
                     </tr>
                     <tr>
                       <td><code>Dead Letter Queue (DLQ)</code></td>
-                      <td>A secondary queue holding messages that failed processing after maximum retry attempts, allowing manual inspection and replay without losing data.</td>
+                      <td>A secondary queue holding messages that failed processing after maximum retry attempts (e.g. malformed JSON poison pills), allowing manual inspection and replay without stalling the primary pipeline.</td>
                     </tr>
                     <tr>
                       <td><code>Backpressure</code></td>
-                      <td>Mechanism where a downstream consumer signals an upstream producer to slow down message rate when internal buffers are nearing capacity.</td>
+                      <td>Flow-control mechanism where a downstream consumer signals an upstream producer to throttle message rates when internal processing buffers are nearing capacity.</td>
                     </tr>
                     <tr>
                       <td><code>CDN (Content Delivery)</code></td>
-                      <td>Geographically distributed network of edge proxy servers caching static assets (images, JS) near end-users to reduce origin server load.</td>
+                      <td>Geographically distributed network of edge proxy servers caching static assets and API responses near end-users to reduce origin server load and latency.</td>
                     </tr>
                     <tr>
                       <td><code>WAF (Web App Firewall)</code></td>
-                      <td>Edge security filter protecting APIs against common web exploits such as SQL injection, cross-site scripting, and bot scraping floods.</td>
+                      <td>Edge security filter inspecting HTTP traffic to protect APIs against common web exploits such as SQL injection, cross-site scripting, and bot scraping floods.</td>
                     </tr>
                     <tr>
                       <td><code>Rate Limiting</code></td>
-                      <td>Restricting the number of requests a client can make in a given timeframe (e.g. Token Bucket algorithm allowing max 100 req/min).</td>
+                      <td>Restricting the number of requests a client can make in a given timeframe (e.g. Token Bucket or Leaky Bucket algorithm allowing max 100 req/min per IP/API token).</td>
                     </tr>
                     <tr>
                       <td><code>Connection Pooling</code></td>
-                      <td>Maintaining a cache of open database connections (e.g. HikariCP, PgBouncer) so queries reuse connections rather than paying TCP handshake costs.</td>
+                      <td>Maintaining a cache of open database connections (e.g. HikariCP, PgBouncer) so queries reuse existing connections rather than paying expensive TCP/TLS handshake costs for every query.</td>
                     </tr>
                     <tr>
                       <td><code>Write-Ahead Log (WAL)</code></td>
-                      <td>Technique where database modifications are recorded to append-only disk logs before writing to data files, guaranteeing ACID durability upon crash.</td>
+                      <td>Technique where database modifications are recorded to append-only disk logs before writing to data files, guaranteeing ACID durability and fast crash recovery.</td>
+                    </tr>
+                    <tr>
+                      <td><code>CQRS</code></td>
+                      <td>Command Query Responsibility Segregation: Separating read operations (optimized query projections) from write operations (commands enforcing business invariants).</td>
+                    </tr>
+                    <tr>
+                      <td><code>Saga Pattern</code></td>
+                      <td>Pattern managing distributed transactions across microservices as a sequence of local transactions, with compensating transactions to undo steps if a failure occurs.</td>
                     </tr>
                   </tbody>
                 </table>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-10">Next: Operational Lexicon ➔</button>
+                </div>
               </article>
 
               <!-- SECTION 10: Operational Lexicon -->
               <article class="reader-section-block" id="sec-10">
                 <span class="reader-section-tag">Section 10 • Operations Lexicon</span>
                 <h2 class="reader-section-title">The Essential Industry Lexicon (Operations & Culture)</h2>
-                <p >
-                  Engineering culture has its own operational vernacular. Understanding these terms helps decode everyday team communication:
+                <p>
+                  Engineering culture has its own operational vernacular. Understanding these terms helps decode everyday team communication, postmortems, and sprint retrospectives:
                 </p>
 
                 <table class="reader-table">
@@ -847,27 +1016,27 @@
                   <tbody>
                     <tr>
                       <td><code>Technical Debt</code></td>
-                      <td>The implied cost of additional rework caused by choosing an easy or shortcut solution now instead of a better, scalable approach.</td>
+                      <td>The implied cost of future rework caused by choosing an expedient, hacky solution now instead of a scalable, tested approach. Accumulates interest in the form of bugs and slowed velocity.</td>
                     </tr>
                     <tr>
                       <td><code>Yak Shaving</code></td>
-                      <td>A chain of seemingly unrelated, tedious micro-tasks you must complete before you can make progress on your original engineering goal.</td>
+                      <td>A chain of seemingly unrelated, tedious micro-tasks you must complete before you can make progress on your original engineering goal (e.g., updating a dependency requires upgrading the OS compiler).</td>
                     </tr>
                     <tr>
                       <td><code>Bike-Shedding</code></td>
-                      <td>The tendency of teams to spend disproportionate time debating minor details (like button color) while ignoring difficult architectural issues.</td>
+                      <td>The tendency of teams to spend disproportionate time debating minor details (like button color) while ignoring difficult, high-stakes architectural issues (Law of Triviality).</td>
                     </tr>
                     <tr>
                       <td><code>Bus Factor</code></td>
-                      <td>The minimum number of team members that, if suddenly unavailable, would stall the project due to undocumented institutional knowledge.</td>
+                      <td>The minimum number of team members that, if suddenly unavailable, would stall the project due to undocumented institutional knowledge. Teams aim for a bus factor &gt; 2 via documentation.</td>
                     </tr>
                     <tr>
                       <td><code>Runbook / SOP</code></td>
-                      <td>A step-by-step Standard Operating Procedure document detailing exact commands to diagnose, mitigate, and resolve common production outages.</td>
+                      <td>A step-by-step Standard Operating Procedure document detailing exact commands and verification steps to diagnose, mitigate, and resolve common production outages.</td>
                     </tr>
                     <tr>
                       <td><code>MTTR & MTTD</code></td>
-                      <td><strong>Mean Time to Detect (MTTD):</strong> Time between incident onset and alert firing. <strong>Mean Time to Resolve (MTTR):</strong> Time from alert to full restoration.</td>
+                      <td><strong>MTTD (Mean Time to Detect):</strong> Time between incident onset and alert firing. <strong>MTTR (Mean Time to Resolve):</strong> Time from alert notification to full service restoration.</td>
                     </tr>
                     <tr>
                       <td><code>RCA</code></td>
@@ -875,24 +1044,34 @@
                     </tr>
                     <tr>
                       <td><code>Feature Freeze</code></td>
-                      <td>A temporary policy period (e.g. Black Friday or holiday peak) where no non-critical code changes are deployed to minimize outage risks.</td>
+                      <td>A temporary policy period (e.g. holiday shopping peak or major product launch) where no non-critical code changes are deployed to minimize outage risks.</td>
                     </tr>
                     <tr>
                       <td><code>Graceful Degradation</code></td>
-                      <td>System architecture that continues operating with limited functionality when components fail (e.g. Netflix showing default recommendations if ML service dies).</td>
+                      <td>Architecture that continues operating with limited functionality when components fail (e.g., streaming service showing cached videos if recommendation engine is offline).</td>
+                    </tr>
+                    <tr>
+                      <td><code>Chaos Engineering</code></td>
+                      <td>Proactively injecting controlled failures into production (e.g. killing random containers) to verify automated self-healing resilience before real disasters strike.</td>
                     </tr>
                   </tbody>
                 </table>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button type="button" class="btn btn-primary btn-sm btn-jump-next" data-next="sec-11">Next: The First 90 Days ➔</button>
+                </div>
               </article>
 
               <!-- SECTION 11: The First 90 Days Survival Guide -->
               <article class="reader-section-block" id="sec-11">
                 <span class="reader-section-tag">Section 11 • Career Acceleration</span>
                 <h2 class="reader-section-title">The First 90 Days Survival & Acceleration Guide</h2>
-                <p >
-                  Transitioning from academic coursework to corporate production engineering can feel overwhelming. Follow these five high-leverage principles to establish credibility quickly:
+                <p>
+                  Transitioning from academic coursework to corporate production engineering can feel overwhelming. Follow these five high-leverage principles to establish credibility, build trust, and ramp up quickly:
                 </p>
 
+                <h3 style="margin-top: 1.25rem;">High-Leverage Engineering Principles</h3>
                 <ul style="padding-left: 1.25rem; display: flex; flex-direction: column; gap: 10px;">
                   <li><strong>The 30-Minute Rule for Being Stuck:</strong> Spend 30 minutes researching logs, searching the codebase, and reading internal documentation. If still stuck, ask for help! When asking, document: (1) What you are trying to accomplish, (2) What you tried, (3) The exact error message, and (4) Your current hypothesis.</li>
                   <li><strong>Improve Documentation as You Onboard:</strong> When you encounter out-of-date README steps or broken local setup scripts, submit a PR fixing them immediately. Your teammates will appreciate it.</li>
@@ -901,22 +1080,46 @@
                   <li><strong>Own Your Outages and Mistakes:</strong> If your PR triggers an alert, don't hide it or make excuses. Acknowledge it immediately in the incident channel, trigger a rollback, and assist in authoring the blameless postmortem.</li>
                 </ul>
 
-                <div class="reader-callout" style="background: #eef2ff; border-left-color: #4f46e5; margin-top: 1.5rem;">
+                <h3 style="margin-top: 1.25rem;">30-60-90 Day Milestones</h3>
+                <table class="reader-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 140px;">Milestone</th>
+                      <th>Target Execution Scope</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Days 1 – 30</strong></td>
+                      <td>Local dev setup running, fix small documentation bugs, merge first small bugfix PR, shadow senior engineers on secondary on-call rotation.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Days 31 – 60</strong></td>
+                      <td>Take ownership of sprint feature tickets, write comprehensive unit and integration tests, participate constructively in peer code reviews.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Days 61 – 90</strong></td>
+                      <td>Deliver end-to-end user stories independently, handle primary on-call shifts with runbooks, author first Architecture Decision Record (ADR).</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div class="reader-callout" style="background: rgba(99, 102, 241, 0.12); border-left-color: #4f46e5; margin-top: 1.5rem;">
                   <strong>You are ready!</strong> You have reviewed the complete engineering handbook. Proceed to the 5-question Readiness Assessment to test your knowledge and unlock the 40 production problems.
                 </div>
 
-                <div style="text-align: center; margin-top: 1.5rem;">
-                  <button class="btn btn-primary btn-lg" id="reader-proceed-to-quiz-btn" style="padding: 0.85rem 2rem; border-radius: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); flex-wrap: wrap; gap: 1rem;">
+                  <a href="#handbook-syllabus-card" class="btn btn-outline btn-sm btn-back-syllabus" style="text-decoration: none;">↑ Back to Syllabus</a>
+                  <button class="btn btn-primary btn-lg" id="reader-proceed-to-quiz-btn" style="padding: 0.85rem 2rem; border-radius: 10px; font-weight: 700;">
                     Take Industry Readiness Assessment (5 Qs) ➔
                   </button>
                 </div>
               </article>
             </div>
 
-
-            <!-- Proceed to Quiz Action -->
-            <div style="text-align: center; padding: 1rem 0;">
-              <button class="btn btn-primary btn-lg" id="proceed-to-quiz-btn" style="padding: 0.9rem 2rem; font-size: 1rem; border-radius: 10px;">
+            <!-- Proceed to Quiz Action at bottom -->
+            <div style="text-align: center; padding: 2rem 0 1rem 0;">
+              <button class="btn btn-primary btn-lg" id="proceed-to-quiz-btn" style="padding: 0.9rem 2.25rem; font-size: 1.05rem; border-radius: 10px; font-weight: 800;">
                 I've Read the Handbook ➔ Proceed to Readiness Assessment (5 Qs)
               </button>
             </div>

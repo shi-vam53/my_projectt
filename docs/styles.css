@@ -4027,6 +4027,12 @@ kbd {
   background: #fafbff;
 }
 
+body.dark-mode .reader-section-block.highlight-pulse {
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.35), 0 12px 24px -4px rgba(0, 0, 0, 0.5) !important;
+  background: #1e293b !important;
+}
+
 .reader-section-tag {
   display: inline-flex;
   align-items: center;
