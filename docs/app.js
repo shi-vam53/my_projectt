@@ -32,6 +32,104 @@ const safeStorage = (() => {
   };
 })();
 
+// ============================================================================
+// SUPABASE CLOUD DATABASE INTEGRATION (Real-time Cloud Sync for All Devices)
+// ============================================================================
+const SUPABASE_CONFIG = {
+  url: 'https://awaxsbdimvatdlawkzai.supabase.co',
+  anonKey: 'sb_publishable_N8cJzBJvsdDceCTs-Bq3ng_XPD_3nET'
+};
+
+async function supabaseRequest(path, options = {}) {
+  try {
+    const url = `${SUPABASE_CONFIG.url}/rest/v1/${path}`;
+    const headers = {
+      'apikey': SUPABASE_CONFIG.anonKey,
+      'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+    return await fetch(url, { ...options, headers });
+  } catch (err) {
+    console.warn('Supabase network error (using local cache):', err);
+    return null;
+  }
+}
+
+async function supabaseGetUser(username) {
+  try {
+    const res = await supabaseRequest(`users?username=eq.${encodeURIComponent(username.toLowerCase())}&select=*`);
+    if (res && res.ok) {
+      const users = await res.json();
+      return users && users.length > 0 ? users[0] : null;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function supabaseCreateUser(userObj) {
+  try {
+    const res = await supabaseRequest('users', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=representation' },
+      body: JSON.stringify({
+        username: userObj.username.toLowerCase(),
+        full_name: userObj.full_name,
+        password_hash: userObj.password,
+        role: userObj.role || null,
+        role_locked: Boolean(userObj.role_locked),
+        quiz_passed: Boolean(userObj.quiz_passed),
+        quiz_score: userObj.quiz_score || 0,
+        solved_count: userObj.solved_count || 0
+      })
+    });
+    if (res && res.ok) {
+      const data = await res.json();
+      return Array.isArray(data) && data.length > 0 ? data[0] : userObj;
+    }
+  } catch (e) {}
+  return userObj;
+}
+
+async function supabaseUpdateUser(username, patchObj) {
+  try {
+    if (!username) return;
+    await supabaseRequest(`users?username=eq.${encodeURIComponent(username.toLowerCase())}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patchObj)
+    });
+  } catch (e) {}
+}
+
+async function supabaseSaveProgress(userId, problemId, status, score, solution, feedback) {
+  try {
+    if (!userId) return;
+    await supabaseRequest('user_progress', {
+      method: 'POST',
+      headers: { 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({
+        user_id: userId,
+        problem_id: problemId,
+        status: status,
+        score: score,
+        solution: solution,
+        feedback: feedback,
+        updated_at: new Date().toISOString()
+      })
+    });
+  } catch (e) {}
+}
+
+async function supabaseGetLeaderboardUsers() {
+  try {
+    const res = await supabaseRequest('users?select=username,full_name,role,solved_count,quiz_passed,created_at&order=solved_count.desc');
+    if (res && res.ok) {
+      return await res.json();
+    }
+  } catch (e) {}
+  return [];
+}
+
 /**
  * WorkSim Frontend Application
  * Practical-work simulation platform: dashboard, evidence tabs, readiness quiz, and rubric evaluation.
@@ -2808,7 +2906,7 @@ function bindAdminControls() {
   if (refreshBtn) refreshBtn.addEventListener('click', renderAdminView);
 }
 
-function renderAdminView() {
+async function renderAdminView() {
   const tbody = document.getElementById('leaderboard-tbody') || document.getElementById('admin-submissions-tbody');
   if (!tbody) return;
 
@@ -2829,13 +2927,29 @@ function renderAdminView() {
     }
   }
 
-  // Load registered users from offline/local DB to show real users on the leaderboard
+  // Load registered users from Supabase cloud DB (fallback to local DB)
   let registeredUsers = [];
   try {
-    const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
-    registeredUsers = Object.values(usersDb);
-  } catch (e) {
-    registeredUsers = [];
+    const sbUsers = await supabaseGetLeaderboardUsers();
+    if (sbUsers && sbUsers.length > 0) {
+      registeredUsers = sbUsers.map(u => ({
+        username: u.username,
+        full_name: u.full_name,
+        role: u.role,
+        solved_count: u.solved_count || 0,
+        points: u.solved_count || 0,
+        quiz_passed: u.quiz_passed
+      }));
+    }
+  } catch (e) {}
+
+  if (registeredUsers.length === 0) {
+    try {
+      const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+      registeredUsers = Object.values(usersDb);
+    } catch (e) {
+      registeredUsers = [];
+    }
   }
 
   // Candidate Cohort Benchmark entries
@@ -3868,7 +3982,14 @@ function bindAuthControls() {
 
       if (isSignup) {
         // CREATING A NEW ACCOUNT
-        if (usersDb[username]) {
+        let existingUser = usersDb[username];
+        if (!existingUser) {
+          try {
+            existingUser = await supabaseGetUser(username);
+          } catch (e) {}
+        }
+
+        if (existingUser) {
           if (errorMsg) {
             errorMsg.innerHTML = `An account with username "<strong>${escapeHtml(rawUsername)}</strong>" is already registered. <br><button type="button" class="btn btn-outline btn-sm" id="btn-quick-signin-off" style="margin-top: 6px; padding: 2px 10px; font-size: 0.78rem; font-weight: 600;">Sign in to this account</button>`;
             errorMsg.style.display = 'block';
@@ -3889,8 +4010,17 @@ function bindAuthControls() {
           role_locked: false,
           quiz_passed: false,
           quiz_score: 0,
+          solved_count: 0,
           created_at: new Date().toISOString()
         };
+
+        // Real-time Cloud Sync to Supabase
+        try {
+          const createdSb = await supabaseCreateUser(newUser);
+          if (createdSb && createdSb.user_id) {
+            newUser.user_id = createdSb.user_id;
+          }
+        } catch (e) {}
 
         usersDb[username] = newUser;
         safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
@@ -3898,7 +4028,29 @@ function bindAuthControls() {
         saveSessionAndProceed(newUser, localToken);
       } else {
         // SIGNING IN TO AN EXISTING ACCOUNT
-        const existing = usersDb[username];
+        let existing = usersDb[username];
+        if (!existing) {
+          try {
+            const sbUser = await supabaseGetUser(username);
+            if (sbUser) {
+              existing = {
+                user_id: sbUser.user_id,
+                username: sbUser.username,
+                full_name: sbUser.full_name,
+                password: sbUser.password_hash || password,
+                role: sbUser.role,
+                role_locked: Boolean(sbUser.role_locked),
+                quiz_passed: Boolean(sbUser.quiz_passed),
+                quiz_score: sbUser.quiz_score || 0,
+                solved_count: sbUser.solved_count || 0,
+                created_at: sbUser.created_at
+              };
+              usersDb[username] = existing;
+              safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+            }
+          } catch (e) {}
+        }
+
         if (!existing) {
           // ACCOUNT DOES NOT EXIST! STRICT VERIFICATION: MUST NOT LET RANDOM USERS IN!
           if (errorMsg) {
@@ -4078,6 +4230,7 @@ async function confirmRoleLock() {
       usersDb[state.user.username.toLowerCase()] = state.user;
       safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
     } catch (e) {}
+    supabaseUpdateUser(state.user.username, { role: state.user.role, role_locked: true });
   }
 
   closeRoleOnboardingModal();
@@ -4688,6 +4841,7 @@ function renderQuizResults(data) {
         usersDb[state.user.username.toLowerCase()] = state.user;
         safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
       } catch (e) {}
+      supabaseUpdateUser(state.user.username, { quiz_passed: true, quiz_score: data.score });
     }
     updateUserHeaderUI();
     updateSidebarLockIndicators();
@@ -5773,6 +5927,8 @@ async function submitProblemSolution(problemId) {
               safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
             }
           } catch (e) {}
+          supabaseUpdateUser(state.user.username, { solved_count: solvedCount });
+          supabaseSaveProgress(state.user.user_id, problemId, 'completed', data.score, input.value.trim(), data.feedback);
         }
       }
       renderProblemsList(state.problemsFilter);
@@ -5887,6 +6043,8 @@ async function submitProblemSolution(problemId) {
             safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
           }
         } catch (e) {}
+        supabaseUpdateUser(state.user.username, { solved_count: solvedCount });
+        supabaseSaveProgress(state.user.user_id, problemId, 'completed', evalData.score, rawVal, evalData.feedback);
       }
     }
     renderProblemsList(state.problemsFilter);

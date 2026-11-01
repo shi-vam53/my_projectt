@@ -58,6 +58,59 @@ def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://awaxsbdimvatdlawkzai.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_N8cJzBJvsdDceCTs-Bq3ng_XPD_3nET")
+
+
+def _supabase_sync_user(user_dict: dict[str, Any]) -> None:
+    try:
+        import httpx
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates",
+        }
+        payload = {
+            "user_id": user_dict["user_id"],
+            "username": user_dict["username"],
+            "full_name": user_dict["full_name"],
+            "role": user_dict.get("role"),
+            "role_locked": bool(user_dict.get("role_locked")),
+            "quiz_passed": bool(user_dict.get("quiz_passed")),
+            "quiz_score": user_dict.get("quiz_score", 0),
+            "created_at": user_dict.get("created_at"),
+        }
+        with httpx.Client(timeout=2.0) as client:
+            client.post(f"{SUPABASE_URL}/rest/v1/users", json=payload, headers=headers)
+    except Exception:
+        pass
+
+
+def _supabase_sync_progress(user_id: str, problem_id: str, status: str, score: int, solution: str, feedback: str) -> None:
+    try:
+        import httpx
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates",
+        }
+        payload = {
+            "user_id": user_id,
+            "problem_id": problem_id,
+            "status": status,
+            "score": score,
+            "solution": solution,
+            "feedback": feedback,
+            "updated_at": _now_utc(),
+        }
+        with httpx.Client(timeout=2.0) as client:
+            client.post(f"{SUPABASE_URL}/rest/v1/user_progress", json=payload, headers=headers)
+    except Exception:
+        pass
+
+
 # ==============================================================================
 # PYDANTIC SCHEMAS
 # ==============================================================================
@@ -300,6 +353,7 @@ class SubmissionStore:
             "created_at": now,
         }
         self.sync_users_to_ledger()
+        _supabase_sync_user(user)
         return user, token
 
     def authenticate_user(self, username: str, password: str) -> tuple[dict[str, Any], str]:
@@ -420,6 +474,7 @@ class SubmissionStore:
                 self.sync_users_to_ledger()
             except Exception:
                 pass
+            _supabase_sync_user(res)
             return res
         finally:
             connection.close()
@@ -436,6 +491,9 @@ class SubmissionStore:
                 self.sync_users_to_ledger()
             except Exception:
                 pass
+            updated = connection.execute("SELECT * FROM users WHERE user_id = ?", (user_id,)).fetchone()
+            if updated:
+                _supabase_sync_user(dict(updated))
         finally:
             connection.close()
 
@@ -516,6 +574,7 @@ class SubmissionStore:
                 (user_id, problem_id, status, solution, score, feedback, _now_utc()),
             )
             connection.commit()
+            _supabase_sync_progress(user_id, problem_id, status, score, solution, feedback)
         finally:
             connection.close()
 
