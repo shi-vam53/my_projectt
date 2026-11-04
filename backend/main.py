@@ -608,6 +608,40 @@ class SubmissionStore:
         finally:
             connection.close()
 
+    def get_leaderboard_data(self) -> list[dict[str, Any]]:
+        connection = self._connect()
+        try:
+            rows = connection.execute(
+                """
+                SELECT 
+                    u.username,
+                    u.full_name,
+                    u.role,
+                    COUNT(CASE WHEN p.status = 'completed' THEN 1 END) as solved_count,
+                    u.quiz_passed,
+                    u.created_at
+                FROM users u
+                LEFT JOIN user_progress p ON u.user_id = p.user_id
+                WHERE u.username != 'shivam'
+                GROUP BY u.user_id
+                ORDER BY solved_count DESC, u.username ASC
+                """
+            ).fetchall()
+            return [
+                {
+                    "username": row["username"],
+                    "full_name": row["full_name"],
+                    "role": row["role"],
+                    "solved_count": row["solved_count"] or 0,
+                    "points": row["solved_count"] or 0,
+                    "quiz_passed": bool(row["quiz_passed"]),
+                    "created_at": row["created_at"],
+                }
+                for row in rows
+            ]
+        finally:
+            connection.close()
+
     def save(self, submission: dict[str, Any]) -> None:
         connection = self._connect()
         try:
@@ -820,6 +854,10 @@ def create_app(
             "total_users": total_users,
             "message": "Live Google Sheet actively records all user registrations."
         }
+
+    @application.get("/api/leaderboard", tags=["leaderboard"])
+    def get_leaderboard() -> list[dict[str, Any]]:
+        return store.get_leaderboard_data()
 
     @application.post("/api/admin/login", tags=["admin"])
     def admin_login(payload: LoginRequest, request: Request) -> dict[str, Any]:

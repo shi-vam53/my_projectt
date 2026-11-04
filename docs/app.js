@@ -3159,21 +3159,33 @@ async function renderAdminView() {
     }
   }
 
-  // Load registered users from Supabase cloud DB (fallback to local DB)
+  // Load registered users from backend API, then Supabase cloud DB, then local DB
   let registeredUsers = [];
   try {
-    const sbUsers = await supabaseGetLeaderboardUsers();
-    if (sbUsers && sbUsers.length > 0) {
-      registeredUsers = sbUsers.map(u => ({
-        username: u.username,
-        full_name: u.full_name,
-        role: u.role,
-        solved_count: u.solved_count || 0,
-        points: u.solved_count || 0,
-        quiz_passed: u.quiz_passed
-      }));
+    const res = await fetch('/api/leaderboard');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        registeredUsers = data;
+      }
     }
   } catch (e) {}
+
+  if (registeredUsers.length === 0) {
+    try {
+      const sbUsers = await supabaseGetLeaderboardUsers();
+      if (sbUsers && sbUsers.length > 0) {
+        registeredUsers = sbUsers.map(u => ({
+          username: u.username,
+          full_name: u.full_name,
+          role: u.role,
+          solved_count: u.solved_count || 0,
+          points: u.solved_count || 0,
+          quiz_passed: u.quiz_passed
+        }));
+      }
+    } catch (e) {}
+  }
 
   if (registeredUsers.length === 0) {
     try {
@@ -3184,49 +3196,58 @@ async function renderAdminView() {
     }
   }
 
-  // Candidate Cohort Benchmark entries
-  const benchmarkCandidates = [
-    { username: 'aarav_dev', jobRole: 'Backend Distributed Systems Engineer', points: 18, isCurrentUser: false },
-    { username: 'priya_cloud', jobRole: 'Cloud & Platform SRE', points: 15, isCurrentUser: false },
-    { username: 'rohit_analyst', jobRole: 'Enterprise Data & AI Platform Engineer', points: 12, isCurrentUser: false },
-    { username: 'ananya_swe', jobRole: 'Backend Distributed Systems Engineer', points: 9, isCurrentUser: false },
-    { username: 'vikram_sre', jobRole: 'Cloud & Platform SRE', points: 6, isCurrentUser: false },
-    { username: 'neha_data', jobRole: 'Enterprise Data & AI Platform Engineer', points: 3, isCurrentUser: false }
+  // Filter and map all registered candidate users
+  const isViewingAsAdmin = currentUsername.toLowerCase() === 'shivam';
+  const knownUsernames = new Set();
+  const entries = [];
+
+  // If viewing as a regular candidate, include the candidate entry
+  if (!isViewingAsAdmin) {
+    knownUsernames.add(currentUsername.toLowerCase());
+    entries.push({
+      username: currentUsername,
+      jobRole: currentJobRole,
+      points: userSolvedCount,
+      isCurrentUser: true
+    });
+  }
+
+  // Map all other registered candidate users
+  registeredUsers
+    .filter(u => u.username && u.username.toLowerCase() !== 'shivam' && (!isViewingAsAdmin || u.username.toLowerCase() !== currentUsername.toLowerCase()))
+    .forEach(u => {
+      const uname = u.username.toLowerCase();
+      if (!knownUsernames.has(uname)) {
+        knownUsernames.add(uname);
+        entries.push({
+          username: u.username,
+          jobRole: getRoleDisplayName(u.role || 'cloud-sre'),
+          points: typeof u.points === 'number' ? u.points : (typeof u.solved_count === 'number' ? u.solved_count : (u.quiz_passed ? 1 : 0)),
+          isCurrentUser: false
+        });
+      }
+    });
+
+  // Simulated 12 candidate cohort agents fallback (guarantees leaderboard visibility in all environments)
+  const simulatedAgents = [
+    { username: 'elena_sre', jobRole: 'Cloud Engineer & SRE', points: 12, isCurrentUser: false },
+    { username: 'liam_cloud', jobRole: 'Cloud Engineer & SRE', points: 10, isCurrentUser: false },
+    { username: 'sophia_dev', jobRole: 'Software Developer', points: 9, isCurrentUser: false },
+    { username: 'tariq_data', jobRole: 'Data Analyst', points: 8, isCurrentUser: false },
+    { username: 'chloe_dev', jobRole: 'Software Developer', points: 7, isCurrentUser: false },
+    { username: 'kenji_ops', jobRole: 'Cloud Engineer & SRE', points: 6, isCurrentUser: false },
+    { username: 'fatima_sec', jobRole: 'Cloud Engineer & SRE', points: 5, isCurrentUser: false },
+    { username: 'lucas_cloud', jobRole: 'Cloud Engineer & SRE', points: 4, isCurrentUser: false },
+    { username: 'ananya_data', jobRole: 'Data Analyst', points: 4, isCurrentUser: false },
+    { username: 'marcus_swe', jobRole: 'Software Developer', points: 3, isCurrentUser: false },
+    { username: 'zoya_dev', jobRole: 'Software Developer', points: 2, isCurrentUser: false },
+    { username: 'noah_sre', jobRole: 'Cloud Engineer & SRE', points: 1, isCurrentUser: false }
   ];
 
-  // Map other registered users into entries
-  const otherUserEntries = registeredUsers
-    .filter(u => u.username && u.username.toLowerCase() !== currentUsername.toLowerCase() && !u.username.includes('[object'))
-    .map(u => ({
-      username: u.username,
-      jobRole: getRoleDisplayName(u.role || 'cloud-sre'),
-      points: typeof u.points === 'number' ? u.points : (typeof u.solved_count === 'number' ? u.solved_count : (u.quiz_passed ? 1 : 0)),
-      isCurrentUser: false
-    }));
-
-  // Current active user entry
-  const userEntry = {
-    username: currentUsername,
-    jobRole: currentJobRole,
-    points: userSolvedCount,
-    isCurrentUser: true
-  };
-
-  // Combine benchmark + registered users + current user without duplicates
-  const knownUsernames = new Set([currentUsername.toLowerCase()]);
-  const entries = [userEntry];
-
-  otherUserEntries.forEach(e => {
-    if (!knownUsernames.has(e.username.toLowerCase())) {
-      knownUsernames.add(e.username.toLowerCase());
-      entries.push(e);
-    }
-  });
-
-  benchmarkCandidates.forEach(e => {
-    if (!knownUsernames.has(e.username.toLowerCase())) {
-      knownUsernames.add(e.username.toLowerCase());
-      entries.push(e);
+  simulatedAgents.forEach(a => {
+    if (!knownUsernames.has(a.username.toLowerCase())) {
+      knownUsernames.add(a.username.toLowerCase());
+      entries.push(a);
     }
   });
 
