@@ -3024,9 +3024,45 @@ function updateAdminNavBadge() {
   }
 }
 
+async function handleAdminLogout() {
+  try {
+    if (state.token) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${state.token}` }
+      });
+    }
+  } catch (e) {}
+
+  safeStorage.removeItem('praxis_token');
+  safeStorage.removeItem('praxis_active_user');
+  safeStorage.removeItem('praxis_offline_user');
+  state.token = null;
+  state.user = null;
+  state.problemsList = [];
+  state.activeProblemId = null;
+  state.quizUserAnswers = {};
+
+  updateUserHeaderUI();
+  updateSidebarLockIndicators();
+  updateAdminNavBadge();
+
+  renderAdminView();
+  showToast('🔒 Logged out of administrator session. Admin Panel is now locked.', 'info');
+}
+
 function bindAdminControls() {
   const refreshBtn = document.getElementById('leaderboard-refresh-btn') || document.getElementById('admin-refresh-btn');
   if (refreshBtn) refreshBtn.addEventListener('click', renderAdminView);
+
+  const topRefreshBtn = document.getElementById('btn-admin-refresh-top');
+  if (topRefreshBtn) topRefreshBtn.addEventListener('click', renderAdminView);
+
+  const logoutBtn = document.getElementById('btn-admin-logout');
+  if (logoutBtn) logoutBtn.addEventListener('click', handleAdminLogout);
+
+  const quickLogoutBtn = document.getElementById('btn-admin-quick-logout');
+  if (quickLogoutBtn) quickLogoutBtn.addEventListener('click', handleAdminLogout);
 
   const unlockForm = document.getElementById('admin-gate-unlock-form');
   if (unlockForm) {

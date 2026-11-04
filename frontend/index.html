@@ -1427,6 +1427,44 @@
               </p>
             </div>
 
+            <!-- Admin Active Session Control Bar -->
+            <div class="card admin-session-card" style="margin-bottom: 1.5rem; padding: 1.1rem 1.5rem; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.3); background: var(--bg-card); box-shadow: 0 4px 16px -2px rgba(16, 185, 129, 0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; border: 1px solid rgba(16, 185, 129, 0.3); flex-shrink: 0;">
+                  👑
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.96rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                    <span>Administrator: @shivam</span>
+                    <span class="badge badge-emerald" style="font-size: 0.7rem; padding: 2px 8px;">Full Governance</span>
+                  </div>
+                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
+                    <span>Admin Session Active • Reviewer Controls Enabled</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" id="btn-admin-refresh-top" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; font-weight: 600; border-radius: 8px; font-size: 0.82rem;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                  </svg>
+                  Refresh Data
+                </button>
+
+                <button class="btn btn-sm" id="btn-admin-logout" style="display: flex; align-items: center; gap: 7px; padding: 8px 16px; font-weight: 700; border-radius: 8px; background: #ef4444; color: #ffffff; border: 1px solid #dc2626; cursor: pointer; font-size: 0.82rem; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25); transition: all 0.2s;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  Exit & Log Out of Admin
+                </button>
+              </div>
+            </div>
+
             <!-- Leaderboard Table Card -->
             <div class="card leaderboard-card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--border-color);">
               <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: var(--bg-card);">
@@ -1438,13 +1476,23 @@
                     Rankings based on verified problem solutions. 1 solved problem = 1 ⭐ Point.
                   </p>
                 </div>
-                <button class="btn btn-outline btn-sm" id="leaderboard-refresh-btn" style="display: flex; align-items: center; gap: 6px;">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                  </svg>
-                  Refresh Rankings
-                </button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button class="btn btn-outline btn-sm" id="leaderboard-refresh-btn" style="display: flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Refresh Rankings
+                  </button>
+                  <button class="btn btn-outline btn-sm" id="btn-admin-quick-logout" title="Lock Admin & Sign Out" style="display: flex; align-items: center; gap: 6px; color: #ef4444; border-color: rgba(239, 68, 68, 0.35); font-weight: 600;">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Log Out
+                  </button>
+                </div>
               </div>
 
               <div class="table-container" style="overflow-x: auto;">
