@@ -1073,10 +1073,14 @@ function bindNavigation() {
 
 function switchView(viewName) {
   if (viewName === 'reviewer') viewName = 'admin';
-  if (!state.user) {
+  if (!state.user && viewName !== 'admin') {
     showAuthOverlay(true);
     showToast('Please sign in or create an account to access ' + viewName + '.', 'warning');
     return;
+  }
+
+  if (viewName === 'admin' && !isAdminUser()) {
+    showToast('🔒 Admin Panel is locked. Administrator credentials (shivam) required.', 'warning');
   }
 
   // Progressive gating: Questions require passed quiz, Quiz requires completed handbook
@@ -2996,15 +3000,145 @@ function renderCatalogView() {
 }
 
 // ============================================================================
-// 11. STAFF REVIEWER & ADMIN PORTAL
+// 11. STAFF REVIEWER & ADMIN PORTAL (LOCKED TO USER: shivam)
 // ============================================================================
+
+function isAdminUser() {
+  if (!state.user) return false;
+  if (state.user.is_admin === true) return true;
+  const uname = (state.user.username || '').toLowerCase().trim();
+  return uname === 'shivam';
+}
+
+function updateAdminNavBadge() {
+  const badge = document.getElementById('admin-nav-lock-badge');
+  if (!badge) return;
+  if (isAdminUser()) {
+    badge.textContent = '👑 Active';
+    badge.style.background = 'rgba(16, 185, 129, 0.15)';
+    badge.style.color = '#10b981';
+  } else {
+    badge.textContent = '🔒 Locked';
+    badge.style.background = 'rgba(245, 158, 11, 0.15)';
+    badge.style.color = '#d97706';
+  }
+}
 
 function bindAdminControls() {
   const refreshBtn = document.getElementById('leaderboard-refresh-btn') || document.getElementById('admin-refresh-btn');
   if (refreshBtn) refreshBtn.addEventListener('click', renderAdminView);
+
+  const unlockForm = document.getElementById('admin-gate-unlock-form');
+  if (unlockForm) {
+    unlockForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uInput = document.getElementById('admin-gate-username');
+      const pInput = document.getElementById('admin-gate-password');
+      const errEl = document.getElementById('admin-gate-error');
+      const submitBtn = document.getElementById('admin-gate-submit-btn');
+
+      const rawUname = (uInput ? uInput.value : '').trim();
+      const username = rawUname.toLowerCase();
+      const password = (pInput ? pInput.value : '').trim();
+
+      if (errEl) errEl.style.display = 'none';
+
+      if (username !== 'shivam' || password !== 'shivam') {
+        if (errEl) {
+          errEl.textContent = 'Access Denied: Invalid administrator credentials. Only authorized user "shivam" with password "shivam" can access the Admin Panel.';
+          errEl.style.display = 'block';
+        }
+        showToast('🔒 Access denied. Invalid administrator credentials.', 'error');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳</span> Verifying Admin Access...';
+      }
+
+      try {
+        let verified = false;
+        let adminUser = null;
+        let adminToken = null;
+
+        try {
+          const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: 'shivam', password: 'shivam' })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.user) {
+              verified = true;
+              adminUser = data.user;
+              adminToken = data.token;
+            }
+          }
+        } catch (netErr) {}
+
+        if (!verified) {
+          adminUser = {
+            user_id: 'usr_admin_shivam',
+            username: 'shivam',
+            full_name: 'shivam',
+            role: 'cloud-sre',
+            role_locked: true,
+            quiz_passed: true,
+            quiz_score: 100,
+            solved_count: 40,
+            is_admin: true,
+            created_at: new Date().toISOString()
+          };
+          adminToken = 'praxis-admin-token-shivam';
+        }
+
+        adminUser.is_admin = true;
+        adminUser.password = 'shivam';
+        saveSessionAndProceed(adminUser, adminToken);
+        showToast('👑 Administrator access granted. Welcome, shivam!', 'success');
+        updateAdminNavBadge();
+        renderAdminView();
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>🔓</span> Unlock Admin Panel';
+        }
+      }
+    });
+  }
 }
 
 async function renderAdminView() {
+  updateAdminNavBadge();
+  const gateEl = document.getElementById('admin-locked-gate');
+  const contentEl = document.getElementById('admin-unlocked-content');
+  const statusEl = document.getElementById('admin-gate-current-status');
+
+  if (!isAdminUser()) {
+    if (gateEl) gateEl.style.display = 'block';
+    if (contentEl) contentEl.style.display = 'none';
+    if (statusEl) {
+      if (state.user) {
+        statusEl.innerHTML = `Signed in as <strong>@${escapeHtml(state.user.username || 'user')}</strong> (Candidate). Administrator privileges required.`;
+        statusEl.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusEl.style.color = '#ef4444';
+        statusEl.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+      } else {
+        statusEl.innerHTML = `You are not currently authenticated as an administrator.`;
+        statusEl.style.background = 'rgba(245, 158, 11, 0.1)';
+        statusEl.style.color = '#f59e0b';
+        statusEl.style.borderColor = 'rgba(245, 158, 11, 0.25)';
+      }
+    }
+    return;
+  }
+
+  // Admin session verified! Display governance leaderboard
+  if (gateEl) gateEl.style.display = 'none';
+  if (contentEl) contentEl.style.display = 'block';
+
   const tbody = document.getElementById('leaderboard-tbody') || document.getElementById('admin-submissions-tbody');
   if (!tbody) return;
 
@@ -3674,6 +3808,10 @@ async function checkAuthAndSession() {
   }
 
   if (state.user) {
+    if (state.user.username && state.user.username.toLowerCase() === 'shivam') {
+      state.user.is_admin = true;
+    }
+    updateAdminNavBadge();
     showAuthOverlay(false);
     updateUserHeaderUI();
     if (!state.user.role_locked) {
@@ -3822,6 +3960,9 @@ function getRoleDisplayName(roleId) {
 }
 
 function saveSessionAndProceed(user, token) {
+  if (user && user.username && user.username.toLowerCase() === 'shivam') {
+    user.is_admin = true;
+  }
   state.token = token;
   state.user = user;
   safeStorage.setItem('praxis_token', token);
@@ -3834,6 +3975,7 @@ function saveSessionAndProceed(user, token) {
     safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
   } catch (e) {}
 
+  updateAdminNavBadge();
   showAuthOverlay(false);
   updateUserHeaderUI();
   showToast(`Welcome, ${user.full_name || user.username}!`, 'success');
@@ -4147,6 +4289,25 @@ function bindAuthControls() {
               safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
             }
           } catch (e) {}
+        }
+
+        // Platform administrator account seed
+        if (!existing && username === 'shivam') {
+          existing = {
+            user_id: 'usr_admin_shivam',
+            username: 'shivam',
+            full_name: 'shivam',
+            password: 'shivam',
+            role: 'cloud-sre',
+            role_locked: true,
+            quiz_passed: true,
+            quiz_score: 100,
+            solved_count: 40,
+            is_admin: true,
+            created_at: '2026-01-01T00:00:00.000Z'
+          };
+          usersDb['shivam'] = existing;
+          safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
         }
 
         if (!existing) {

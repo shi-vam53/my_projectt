@@ -301,6 +301,31 @@ class SubmissionStore:
                 )
                 """
             )
+            try:
+                connection.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0")
+            except Exception:
+                pass
+
+            # Pre-seed or ensure platform administrator: shivam / shivam
+            admin_pwd_hash, admin_pwd_salt = _hash_password("shivam")
+            now = _now_utc()
+            row_admin = connection.execute("SELECT user_id FROM users WHERE username = 'shivam'").fetchone()
+            if row_admin is None:
+                connection.execute(
+                    """
+                    INSERT INTO users (user_id, username, full_name, password_hash, password_salt, role, role_locked, quiz_passed, quiz_score, is_admin, created_at)
+                    VALUES (?, 'shivam', 'shivam', ?, ?, 'Platform Administrator', 1, 1, 100, 1, ?)
+                    """,
+                    (str(uuid4()), admin_pwd_hash, admin_pwd_salt, now),
+                )
+            else:
+                connection.execute(
+                    """
+                    UPDATE users SET password_hash = ?, password_salt = ?, is_admin = 1, full_name = 'shivam'
+                    WHERE username = 'shivam'
+                    """,
+                    (admin_pwd_hash, admin_pwd_salt),
+                )
             connection.commit()
         finally:
             connection.close()
@@ -350,6 +375,7 @@ class SubmissionStore:
             "role_locked": False,
             "quiz_passed": False,
             "quiz_score": 0,
+            "is_admin": (uname == "shivam"),
             "created_at": now,
         }
         self.sync_users_to_ledger()
@@ -377,6 +403,7 @@ class SubmissionStore:
             )
             connection.commit()
 
+            is_adm = bool(row["is_admin"]) if "is_admin" in row.keys() else (row["username"] == "shivam")
             user = {
                 "user_id": row["user_id"],
                 "username": row["username"],
@@ -385,6 +412,7 @@ class SubmissionStore:
                 "role_locked": bool(row["role_locked"]),
                 "quiz_passed": bool(row["quiz_passed"]),
                 "quiz_score": row["quiz_score"],
+                "is_admin": is_adm,
                 "created_at": row["created_at"],
             }
             return user, token
@@ -406,6 +434,7 @@ class SubmissionStore:
             ).fetchone()
             if row is None:
                 return None
+            is_adm = bool(row["is_admin"]) if "is_admin" in row.keys() else (row["username"] == "shivam")
             return {
                 "user_id": row["user_id"],
                 "username": row["username"],
@@ -414,6 +443,7 @@ class SubmissionStore:
                 "role_locked": bool(row["role_locked"]),
                 "quiz_passed": bool(row["quiz_passed"]),
                 "quiz_score": row["quiz_score"],
+                "is_admin": is_adm,
                 "created_at": row["created_at"],
             }
         finally:
@@ -790,6 +820,23 @@ def create_app(
             "total_users": total_users,
             "message": "Live Google Sheet actively records all user registrations."
         }
+
+    @application.post("/api/admin/login", tags=["admin"])
+    def admin_login(payload: LoginRequest, request: Request) -> dict[str, Any]:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        _check_rate_limit(client_ip)
+        uname = payload.username.strip().casefold()
+        if uname != "shivam" or payload.password != "shivam":
+            raise HTTPException(
+                status_code=401,
+                detail="Access restricted. Invalid administrator credentials for 'shivam'."
+            )
+        try:
+            user, token = store.authenticate_user("shivam", "shivam")
+            user["is_admin"] = True
+            return {"user": user, "token": token, "is_admin": True, "message": "Admin session unlocked."}
+        except ValueError as exc:
+            raise HTTPException(status_code=401, detail=str(exc)) from exc
 
     # --------------------------------------------------------------------------
     # AUTHENTICATION & ROLE LOCKING
