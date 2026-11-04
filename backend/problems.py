@@ -836,7 +836,7 @@ PROBLEMS: list[dict[str, Any]] = [
 ]
 
 
-def evaluate_problem_submission(problem: dict[str, Any], solution_text: str) -> dict[str, Any]:
+def evaluate_problem_submission_heuristic(problem: dict[str, Any], solution_text: str) -> dict[str, Any]:
     """Evaluates learner problem submission against required keywords and structural completeness."""
     text_clean = solution_text.strip().casefold()
     word_count = len(solution_text.split())
@@ -869,3 +869,13 @@ def evaluate_problem_submission(problem: dict[str, Any], solution_text: str) -> 
             "feedback": f"Partially addressed. Ensure your answer directly addresses production details such as: {', '.join(missing_kw[:3])}.",
             "passed": False,
         }
+
+
+def evaluate_problem_submission(problem: dict[str, Any], solution_text: str) -> dict[str, Any]:
+    """Evaluates problem submission using Dual-LLM Consensus review with heuristic fallback."""
+    try:
+        from .llm_evaluator import evaluate_dual_llm
+        return evaluate_dual_llm(problem, solution_text)
+    except Exception as exc:
+        print(f"[Evaluator] LLM fallback due to: {exc}")
+        return evaluate_problem_submission_heuristic(problem, solution_text)
