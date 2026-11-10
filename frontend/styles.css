@@ -938,19 +938,22 @@ html, body {
 
 .btn-outline {
   background-color: #ffffff;
-  border-color: var(--border-color);
-  color: var(--text-secondary);
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  font-weight: 600;
+  transition: all 0.15s ease;
 }
 
 .btn-outline:hover {
-  background-color: var(--bg-subtle);
-  color: var(--text-primary);
-  border-color: #d1d5db;
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .btn-ghost {
   background-color: transparent;
   color: var(--text-secondary);
+  transition: all 0.15s ease;
 }
 
 .btn-ghost:hover {
@@ -966,6 +969,45 @@ html, body {
 .btn-icon {
   width: 16px;
   height: 16px;
+}
+
+/* Dedicated Problem Catalog Action Button */
+.prob-solve-btn {
+  background-color: #4f46e5;
+  color: #ffffff !important;
+  border: 1px solid #4338ca;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.prob-solve-btn:hover {
+  background-color: #4338ca;
+  color: #ffffff !important;
+  border-color: #3730a3;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.4);
+  transform: translateY(-1px);
+}
+
+.prob-solve-btn.prob-solve-btn-solved {
+  background-color: #059669;
+  border-color: #047857;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.25);
+}
+
+.prob-solve-btn.prob-solve-btn-solved:hover {
+  background-color: #047857;
+  color: #ffffff !important;
+  border-color: #065f46;
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.4);
 }
 
 /* Badges */
@@ -1004,7 +1046,8 @@ html, body {
   border: 1px solid var(--rose-100);
 }
 
-.badge-gray {
+.badge-gray,
+.badge-outline {
   background-color: var(--bg-subtle);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
@@ -4561,10 +4604,96 @@ body.dark-mode .profile-card,
 body.dark-mode .skills-card,
 body.dark-mode .history-card,
 body.dark-mode .certificate-card,
-body.dark-mode .dashboard-section-card {
+body.dark-mode .dashboard-section-card,
+body.dark-mode .problem-eval-card {
   background-color: #151d2a !important;
   border-color: #334155 !important;
   color: #f8fafc !important;
+}
+
+/* Universal Buttons & Outlines in Dark Mode */
+body.dark-mode .btn-outline {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+body.dark-mode .btn-outline:hover {
+  background-color: #273549 !important;
+  border-color: #6366f1 !important;
+  color: #818cf8 !important;
+}
+
+body.dark-mode .btn-ghost {
+  background-color: transparent !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+/* Problem Catalog Solve Button in Dark Mode */
+body.dark-mode .prob-solve-btn {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  border: 1px solid #6366f1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .prob-solve-btn:hover {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5) !important;
+}
+
+body.dark-mode .prob-solve-btn.prob-solve-btn-solved {
+  background-color: #059669 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .prob-solve-btn.prob-solve-btn-solved:hover {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;
+}
+
+/* Badges in Dark Mode */
+body.dark-mode .badge-indigo {
+  background-color: rgba(99, 102, 241, 0.18) !important;
+  color: #c7d2fe !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+body.dark-mode .badge-emerald {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #a7f3d0 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+body.dark-mode .badge-amber {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #fde68a !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+body.dark-mode .badge-rose {
+  background-color: rgba(244, 63, 94, 0.18) !important;
+  color: #fecdd3 !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+body.dark-mode .badge-gray,
+body.dark-mode .badge-outline {
+  background-color: rgba(148, 163, 184, 0.12) !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
 }
 
 /* Quiz Option Buttons in Dark Mode */
@@ -5389,5 +5518,208 @@ body.dark-mode .leaderboard-table tr:hover td {
   font-size: 0.82rem;
   line-height: 1.5;
   border: 1px solid #334155;
+}
+
+/* ==========================================================================
+   Comprehensive Button, Badge & Contrast Rules (Light & Dark Mode)
+   Eliminates all unreadable color combinations across the application
+   ========================================================================== */
+
+/* Catalog Action Button */
+.prob-solve-btn {
+  background-color: #4f46e5;
+  color: #ffffff !important;
+  border: 1px solid #4338ca;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.prob-solve-btn:hover {
+  background-color: #4338ca;
+  color: #ffffff !important;
+  border-color: #3730a3;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.4);
+  transform: translateY(-1px);
+}
+
+.prob-solve-btn.prob-solve-btn-solved {
+  background-color: #059669;
+  border-color: #047857;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.25);
+}
+
+.prob-solve-btn.prob-solve-btn-solved:hover {
+  background-color: #047857;
+  color: #ffffff !important;
+  border-color: #065f46;
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Dark Mode Overrides for Buttons, Badges, Modals and Controls */
+body.dark-mode .btn-outline {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+body.dark-mode .btn-outline:hover {
+  background-color: #273549 !important;
+  border-color: #6366f1 !important;
+  color: #818cf8 !important;
+}
+
+body.dark-mode .btn-ghost {
+  background-color: transparent !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .prob-solve-btn {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  border: 1px solid #6366f1 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .prob-solve-btn:hover {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5) !important;
+}
+
+body.dark-mode .prob-solve-btn.prob-solve-btn-solved {
+  background-color: #059669 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .prob-solve-btn.prob-solve-btn-solved:hover {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5) !important;
+}
+
+body.dark-mode .badge-indigo {
+  background-color: rgba(99, 102, 241, 0.18) !important;
+  color: #c7d2fe !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+body.dark-mode .badge-emerald {
+  background-color: rgba(16, 185, 129, 0.18) !important;
+  color: #a7f3d0 !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+}
+
+body.dark-mode .badge-amber {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  color: #fde68a !important;
+  border-color: rgba(245, 158, 11, 0.4) !important;
+}
+
+body.dark-mode .badge-rose {
+  background-color: rgba(244, 63, 94, 0.18) !important;
+  color: #fecdd3 !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+body.dark-mode .badge-gray,
+body.dark-mode .badge-outline {
+  background-color: rgba(148, 163, 184, 0.12) !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+body.dark-mode .btn-close-modal {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .btn-close-modal:hover {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .btn-copy-cmd {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-copy-cmd:hover {
+  background: #273549 !important;
+  color: #f8fafc !important;
+  border-color: #6366f1 !important;
+}
+
+body.dark-mode #btn-shuffle-quiz {
+  border-color: #475569 !important;
+  color: #a5b4fc !important;
+  background: rgba(99, 102, 241, 0.12) !important;
+}
+
+body.dark-mode #btn-shuffle-quiz:hover {
+  background: rgba(99, 102, 241, 0.22) !important;
+  border-color: #6366f1 !important;
+  color: #c7d2fe !important;
+}
+
+body.dark-mode #btn-mark-handbook-done {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  color: #34d399 !important;
+}
+
+body.dark-mode #btn-mark-handbook-done:hover {
+  background: rgba(16, 185, 129, 0.25) !important;
+  color: #6ee7b7 !important;
+}
+
+body.dark-mode #btn-admin-quick-logout {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #f87171 !important;
+}
+
+body.dark-mode #btn-admin-quick-logout:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
+}
+
+body.dark-mode .prob-filter-btn {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .prob-filter-btn:hover {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .prob-filter-btn.active {
+  background: #334155 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .problem-eval-card {
+  background-color: #151d2a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
 }
 

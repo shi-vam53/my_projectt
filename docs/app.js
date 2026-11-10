@@ -5841,8 +5841,8 @@ function renderProblemsCatalog(filter = 'all') {
       <div class="prob-catalog-card-scenario">${escapeHtml(p.scenario)}</div>
       <div class="prob-catalog-card-footer">
         <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">${escapeHtml(p.category)}</span>
-        <button type="button" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 10px;">
-          ${!quizPassed ? '🔒 Locked' : 'Solve Ticket ➔'}
+        <button type="button" class="btn btn-sm prob-solve-btn ${p.status === 'completed' ? 'prob-solve-btn-solved' : ''}">
+          ${!quizPassed ? '🔒 Locked' : (p.status === 'completed' ? 'Review Ticket ➔' : 'Solve Ticket ➔')}
         </button>
       </div>
     </div>
