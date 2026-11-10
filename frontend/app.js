@@ -136,8 +136,9 @@ async function supabaseGetLeaderboardUsers() {
 const GROQ_CONFIG = {
   url: 'https://api.groq.com/openai/v1/chat/completions',
   apiKey: (() => {
-    return (typeof safeStorage !== 'undefined' ? safeStorage.getItem('praxis_groq_key') : null) ||
-           ['gs', 'k_', 'gTMfB5AtzDT1AcoO', 'zkFGWGdyb3FYRraL', 'zYiLqdDZPqc27fb5aDFe'].join('');
+    // Zero hardcoded API keys in client-side code; evaluation proxies through backend /api/problems/evaluate
+    // or optionally uses learner-provided key stored strictly in local browser storage
+    return (typeof safeStorage !== 'undefined' ? safeStorage.getItem('praxis_groq_key') : null) || '';
   })(),
   modelA: 'openai/gpt-oss-120b',
   modelB: 'qwen/qwen3.8-27b'

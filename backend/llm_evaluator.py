@@ -21,12 +21,12 @@ def _get_groq_key() -> str:
     key = os.environ.get("GROQ_API_KEY", "")
     if key:
         return key
-    env_file = Path(__file__).resolve().parent / ".env"
-    if env_file.is_file():
-        for line in env_file.read_text(encoding="utf-8").splitlines():
-            if line.startswith("GROQ_API_KEY="):
-                return line.split("=", 1)[1].strip()
-    return "".join(["gs", "k_", "gTMfB5AtzDT1AcoO", "zkFGWGdyb3FYRraL", "zYiLqdDZPqc27fb5aDFe"])
+    for p in [Path(__file__).resolve().parent / ".env", Path(__file__).resolve().parents[1] / ".env"]:
+        if p.is_file():
+            for line in p.read_text(encoding="utf-8").splitlines():
+                if line.strip().startswith("GROQ_API_KEY="):
+                    return line.split("=", 1)[1].strip()
+    return ""
 
 GROQ_API_KEY = _get_groq_key()
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"

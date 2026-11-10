@@ -1,10 +1,26 @@
-# Praxis | Practical Workplace Simulation Platform
+# Praxis | Practical Workplace Engineering Simulation Platform
 
-[![Live on GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-success?style=for-the-badge&logo=github)](https://shi-vam53.github.io/my_projectt/)
-[![Python 3.13](https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python)](https://fastapi.tiangolo.com)
+[![Live on GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-22c55e?style=for-the-badge&logo=github)](https://shi-vam53.github.io/my_projectt/)
+[![CI Pipeline](https://img.shields.io/badge/CI%20Pipeline-Passing-success?style=for-the-badge&logo=githubactions)](https://github.com/shi-vam53/my_projectt/actions)
+[![Dual-LLM Engine](https://img.shields.io/badge/Dual--LLM-OpenAI%20120B%20%2B%20Qwen%2027B-6366f1?style=for-the-badge&logo=openai)](https://groq.com)
+[![Python 3.13](https://img.shields.io/badge/Python-3.13-3b82f6?style=for-the-badge&logo=python)](https://fastapi.tiangolo.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
-[![Tests Passing](https://img.shields.io/badge/Tests-33%2F33%20Passing-brightgreen?style=for-the-badge&logo=pytest)](./backend)
-[![ReportLab 12p PDF](https://img.shields.io/badge/Handbook-12%20Pages%20PDF-indigo?style=for-the-badge)](./docs/assets)
+[![Tests Passing](https://img.shields.io/badge/Tests-36%2F36%20Passing-emerald?style=for-the-badge&logo=pytest)](./backend)
+[![Security Hardened](https://img.shields.io/badge/Security-Zero%20Plaintext%20Secrets-brightgreen?style=for-the-badge&logo=securityscorecard)](./SECURITY.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-amber?style=for-the-badge)](./LICENSE)
+
+---
+
+## 💡 Why Praxis vs Traditional Platforms?
+
+| Traditional Platforms (LeetCode, HackerRank) | Praxis Workplace Simulation |
+| :--- | :--- |
+| Inverting binary trees & abstract algorithm puzzles | **40 Real Production Incidents** (OOMKilled 137, DB connection pool leaks, unindexed FKs, HTTP 429 rate limiters) |
+| Hardcoded brittle regex pass/fail checks | **Dual-LLM Consensus Engine** (`openai/gpt-oss-120b` + `qwen/qwen3.8-27b`) with "Benefit of the Doubt" evaluation |
+| Scattered blog posts without structure | **Role-Specific 12-Page PDF Handbooks** (ReportLab) with 40 industry terms & agile runbooks |
+| No real-world context or triage telemetry | **Real telemetry charts, live log streams, and on-call runbook SOPs** |
+| Local-only progress lost on refresh | **Real-time cross-device cloud sync via Supabase + SQLite + Google Sheets** |
+| Arbitrary problem ordering | **Progressive Gating**: Phase 1 Handbook ➔ Phase 2 Readiness Quiz ➔ Phase 3 & 4 Problem Bank |
 
 ---
 
@@ -254,12 +270,18 @@ git clone https://github.com/shi-vam53/my_projectt.git
 cd my_projectt
 ```
 
-### 3. Install Dependencies
+### 3. Configure Environment Variables
+```bash
+cp .env.example .env
+```
+*(Optional)* Add your `GROQ_API_KEY` to `.env` to enable the Dual-LLM evaluation engine with OpenAI 120B and Qwen 27B models.
+
+### 4. Install Dependencies
 ```bash
 pip install -r backend/requirements.txt
 ```
 
-### 4. Run the Backend API & Frontend Server
+### 5. Run the Backend API & Frontend Server
 ```bash
 python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
@@ -269,21 +291,35 @@ Open your browser at:
 
 ---
 
+## 🤖 Dual-LLM Consensus Evaluation Engine
+
+When learners submit technical incident resolutions or run pre-checks, Praxis evaluates their answers using two frontier models in parallel over Groq's high-speed API:
+1. **`openai/gpt-oss-120b`**: Evaluates deep root cause reasoning, architectural trade-offs, and verification logic.
+2. **`qwen/qwen3.8-27b`**: Evaluates operational syntax, configuration parameters, and boundary conditions.
+3. **Benefit of the Doubt Arbiter**: If either model recognizes a non-standard, novel, or creative approach as sound (score $\ge 70$), the candidate passes with the higher score and constructive feedback.
+4. **Zero-Downtime Fallback**: Automatically falls back to deterministic heuristic evaluation if offline or rate-limited.
+
+---
+
 ## 🛡️ Automated Test Suite & Security
 
-The platform includes **33 automated tests** executed via `pytest`:
+The platform includes **36 automated tests** executed via `pytest`:
 
 ```bash
 pytest backend/ -v
 ```
 
 ### Test Coverage Highlights:
+* **Admin Panel Gating (`test_admin_lock.py`):**
+  * Credential gate restricts Admin & Reviewer Leaderboard strictly to authorized administrator `shivam`.
+  * Verified zero secret keys or tokens leaked across endpoints (`assert "gsk_" not in body`).
+  * Non-admin users attempting admin access receive `401 Unauthorized` and an access-restricted lock screen.
 * **Penetration Security (`test_security.py`):**
   * Parameterized SQL Injection payloads (`' OR 1=1`, `UNION SELECT`, `DROP TABLE`).
   * Directory traversal resistance (`../../../../etc/passwd`, encoded `%2F`).
   * XSS polyglot safe storage and rendering.
   * Oversized payload body protection (422 payload limit).
-  * HTTP Security Headers verification (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection: 1; mode=block`).
+  * HTTP Security Headers verification (`X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection: 1; mode=block`, `Permissions-Policy`, `Strict-Transport-Security`).
 * **Authentication & Curriculum (`test_auth_and_curriculum.py`):**
   * PBKDF2-SHA256 password salting and token issuance.
   * Permanent role lock enforcement (`403 Forbidden` on role mutation).
@@ -291,18 +327,29 @@ pytest backend/ -v
   * 5 MEQ readiness scoring and threshold validation.
   * Phase 1 (with help) and Phase 2 (without help) problem evaluations.
   * Google Sheet CSV ledger consistency.
-* **End-to-End Lifecycle (`test_e2e_lifecycle.py`):**
-  * Complete lifecycle test simulating a student registering, locking a career track, studying the manual, passing the quiz, unlocking the dashboard, solving problems, and checking the admin export.
+* **End-to-End Lifecycle (`test_e2e_lifecycle.py` & `test_simulation_agents.py`):**
+  * Complete user journeys across multiple simulated agent candidates.
+  * Real-time star ranking calculation (1 solved question = 1 ⭐ Point).
 
 ```
-============================== 33 passed in 2.01s ==============================
+============================== 36 passed in 2.10s ==============================
 ```
+
+---
+
+## 🔒 Security Hardening & Zero Secret Exposure
+
+* **No API Keys in Client Code**: Zero hardcoded keys in `frontend/app.js` or `docs/app.js`. All evaluation requests proxy through secured backend routes.
+* **Environment Isolation**: Production secrets and API keys are stored exclusively in `.env` (git-ignored) or runtime environment variables.
+* **Strict Parameterization**: All database access uses SQLite parameterized queries with zero dynamic string interpolation.
+* **Content Security**: Modern HTTP response headers prevent clickjacking, MIME-sniffing, and cross-site scripting.
 
 ---
 
 ## 📄 License & Attribution
 
-Developed for practical engineering training and technical workplace readiness.  
+Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for more information.
+
 * **Platform:** Praxis Workplace Simulation Platform  
 * **Repository:** [shi-vam53/my_projectt](https://github.com/shi-vam53/my_projectt)  
 * **Live Demo:** [https://shi-vam53.github.io/my_projectt/](https://shi-vam53.github.io/my_projectt/)

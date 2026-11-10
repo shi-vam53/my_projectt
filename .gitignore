@@ -1,5 +1,33 @@
+# Environment & Secret Configurations
 .env
 *.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.cert
+
+# Database & Runtime State
+*.sqlite3
+*.db
+worksim.sqlite3
+registered_users_ledger.csv
+
+# Python caches & build artifacts
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
 .pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Operating System & IDE artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
+*.log
