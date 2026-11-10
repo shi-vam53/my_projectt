@@ -1146,7 +1146,10 @@ function switchView(viewName) {
   if (viewName === 'tracks') renderTracksView();
   if (viewName === 'handbook') updateHandbookForUserRole();
   if (viewName === 'quiz') loadQuizQuestions();
-  if (viewName === 'problems') loadProblemsBank();
+  if (viewName === 'problems') {
+    openProblemsCatalog();
+    loadProblemsBank();
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -5620,11 +5623,8 @@ async function loadProblemsBank() {
     const res = await fetch('/api/problems', { headers });
     if (res.ok) {
       state.problemsList = await res.json();
-      renderProblemsList(state.problemsFilter);
+      renderProblemsList(state.problemsFilter || 'all');
       state.activeProblemId = state.activeProblemId || (state.problemsList[0] ? state.problemsList[0].id : null);
-      if (state.user && state.user.quiz_passed && state.currentView === 'problems') {
-        openProblemInWorkspace(state.activeProblemId);
-      }
       updateProblemsSolvedCounter();
       return;
     }
@@ -5641,11 +5641,8 @@ async function loadProblemsBank() {
       score: savedProgress[p.id] ? savedProgress[p.id].score : 0,
       feedback: savedProgress[p.id] ? savedProgress[p.id].feedback : null
     }));
-    renderProblemsList(state.problemsFilter);
+    renderProblemsList(state.problemsFilter || 'all');
     state.activeProblemId = state.activeProblemId || (state.problemsList[0] ? state.problemsList[0].id : null);
-    if (state.user && state.user.quiz_passed && state.currentView === 'problems') {
-      openProblemInWorkspace(state.activeProblemId);
-    }
     updateProblemsSolvedCounter();
   }
 }
