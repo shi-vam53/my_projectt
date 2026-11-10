@@ -1147,7 +1147,7 @@ function switchView(viewName) {
   if (viewName === 'handbook') updateHandbookForUserRole();
   if (viewName === 'quiz') loadQuizQuestions();
   if (viewName === 'problems') {
-    openProblemsCatalog();
+    openProblemsCatalog(state.problemsFilter || 'all');
     loadProblemsBank();
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5502,8 +5502,7 @@ async function renderDashboardView() {
         cardIncBasic.onclick = () => {
           state.problemsFilter = 'basic';
           switchView('problems');
-          openProblemsCatalog();
-          renderProblemsCatalog('basic');
+          openProblemsCatalog('basic');
         };
       }
 
@@ -5512,8 +5511,7 @@ async function renderDashboardView() {
         cardIncInter.onclick = () => {
           state.problemsFilter = 'inter';
           switchView('problems');
-          openProblemsCatalog();
-          renderProblemsCatalog('inter');
+          openProblemsCatalog('inter');
         };
       }
 
@@ -5522,8 +5520,7 @@ async function renderDashboardView() {
         cardIncAll.onclick = () => {
           state.problemsFilter = 'unsolved';
           switchView('problems');
-          openProblemsCatalog();
-          renderProblemsCatalog('unsolved');
+          openProblemsCatalog('unsolved');
         };
       }
 
@@ -5710,12 +5707,13 @@ function openProblemInWorkspace(problemId) {
   renderProblemDetail(problemId);
 }
 
-function openProblemsCatalog() {
+function openProblemsCatalog(filter = null) {
   const catalogContainer = document.getElementById('problems-catalog-container');
   const detailContainer = document.getElementById('problem-detail-container');
   if (catalogContainer) catalogContainer.style.display = 'block';
   if (detailContainer) detailContainer.style.display = 'none';
-  renderProblemsCatalog(currentProbFilter);
+  const targetFilter = filter || state.problemsFilter || currentProbFilter || 'all';
+  renderProblemsCatalog(targetFilter);
 }
 
 function renderProblemsCatalog(filter = 'all') {
