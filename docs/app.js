@@ -5615,11 +5615,27 @@ async function renderDashboardView() {
 // ----------------------------------------------------------------------------
 
 async function loadProblemsBank() {
+  const uname = (state.user ? state.user.username : 'guest').toLowerCase();
+  const userProgKey = 'praxis_offline_problem_progress_' + uname;
+  const savedProgress = JSON.parse(safeStorage.getItem(userProgKey) || safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+
   try {
     const headers = state.token ? { 'Authorization': `Bearer ${state.token}` } : {};
     const res = await fetch('/api/problems', { headers });
     if (res.ok) {
-      state.problemsList = await res.json();
+      const fetched = await res.json();
+      state.problemsList = fetched.map(p => {
+        const localProg = savedProgress[p.id] || {};
+        const localSolvedCode = safeStorage.getItem('praxis_solved_solution_' + p.id + '_' + uname) || safeStorage.getItem('praxis_solved_solution_' + p.id) || localProg.solution || null;
+        return {
+          ...p,
+          status: p.status !== 'pending' ? p.status : (localProg.status || 'pending'),
+          score: p.score || localProg.score || 0,
+          solution: p.solution || localSolvedCode || null,
+          saved_solution: p.solution || localSolvedCode || null,
+          feedback: p.feedback || localProg.feedback || null
+        };
+      });
       renderProblemsList(state.problemsFilter || 'all');
       state.activeProblemId = state.activeProblemId || (state.problemsList[0] ? state.problemsList[0].id : null);
       updateProblemsSolvedCounter();
@@ -5630,14 +5646,18 @@ async function loadProblemsBank() {
   }
 
   if (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS) {
-    const userProgKey = 'praxis_offline_problem_progress_' + (state.user ? state.user.username : 'guest').toLowerCase();
-    const savedProgress = JSON.parse(safeStorage.getItem(userProgKey) || safeStorage.getItem('praxis_offline_problem_progress') || '{}');
-    state.problemsList = window.PRAXIS_OFFLINE_DATA.PROBLEMS.map(p => ({
-      ...p,
-      status: savedProgress[p.id] ? savedProgress[p.id].status : 'pending',
-      score: savedProgress[p.id] ? savedProgress[p.id].score : 0,
-      feedback: savedProgress[p.id] ? savedProgress[p.id].feedback : null
-    }));
+    state.problemsList = window.PRAXIS_OFFLINE_DATA.PROBLEMS.map(p => {
+      const localProg = savedProgress[p.id] || {};
+      const localSolvedCode = safeStorage.getItem('praxis_solved_solution_' + p.id + '_' + uname) || safeStorage.getItem('praxis_solved_solution_' + p.id) || localProg.solution || null;
+      return {
+        ...p,
+        status: localProg.status || 'pending',
+        score: localProg.score || 0,
+        feedback: localProg.feedback || null,
+        solution: localSolvedCode || null,
+        saved_solution: localSolvedCode || null
+      };
+    });
     renderProblemsList(state.problemsFilter || 'all');
     state.activeProblemId = state.activeProblemId || (state.problemsList[0] ? state.problemsList[0].id : null);
     updateProblemsSolvedCounter();
@@ -5965,6 +5985,30 @@ function renderProblemDetail(problemId) {
   const prevProblem = currentIndex > 0 ? state.problemsList[currentIndex - 1] : null;
   const nextProblem = currentIndex >= 0 && currentIndex < state.problemsList.length - 1 ? state.problemsList[currentIndex + 1] : null;
 
+  const uname = (state.user ? state.user.username : 'guest').toLowerCase();
+  const userProgKey = 'praxis_offline_problem_progress_' + uname;
+  const userProgress = JSON.parse(safeStorage.getItem(userProgKey) || safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+  const progEntry = userProgress[problem.id] || {};
+
+  const solvedCode = problem.saved_solution || problem.solution || progEntry.solution || safeStorage.getItem('praxis_solved_solution_' + problem.id + '_' + uname) || safeStorage.getItem('praxis_solved_solution_' + problem.id) || null;
+  const draftKey = 'praxis_draft_prob_' + problem.id;
+  const savedDraft = safeStorage.getItem(draftKey);
+
+  const isSolved = problem.status === 'completed' || progEntry.status === 'completed' || !!solvedCode;
+  const acceptedScore = problem.score || progEntry.score || 100;
+  const acceptedFeedback = problem.feedback || progEntry.feedback || 'Production solution passed verification and criteria.';
+
+  let initialCode = problem.starter_template || '';
+  let statusChipHtml = '';
+
+  if (solvedCode) {
+    initialCode = solvedCode;
+    statusChipHtml = '<span id="problem-solved-chip" class="badge badge-emerald" style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">✓ Your Solved Solution</span>';
+  } else if (savedDraft) {
+    initialCode = savedDraft;
+    statusChipHtml = '<span id="problem-draft-chip" class="badge badge-indigo" style="font-size: 0.68rem; padding: 2px 8px;">Draft Restored</span>';
+  }
+
   container.innerHTML = `
     <!-- In-Question Navigation Toolbar (Prev / Next / Jump Select / Browse All) -->
     <div class="problem-nav-toolbar">
@@ -6044,15 +6088,16 @@ function renderProblemDetail(problemId) {
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>Production Solution & Code Editor</span>
           <span class="badge badge-indigo" style="font-size: 0.68rem; padding: 1px 6px;">Syntax Assisted</span>
-          <span id="problem-draft-chip" class="badge badge-emerald" style="display: none; font-size: 0.68rem; padding: 1px 6px;">Draft Restored</span>
+          ${statusChipHtml}
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-ghost btn-sm" id="btn-reset-prob-template" style="color: #94a3b8; font-size: 0.72rem;">Reset Template</button>
+          ${solvedCode ? `<button type="button" class="btn btn-ghost btn-sm" id="btn-reload-solved-code" style="color: #10b981; font-size: 0.72rem; font-weight: 700;" title="Reload your accepted solution into the editor">🔄 Reload My Solution</button>` : ''}
+          <button type="button" class="btn btn-ghost btn-sm" id="btn-reset-prob-template" style="color: #94a3b8; font-size: 0.72rem;">Reset Template</button>
         </div>
       </div>
       <div class="code-editor-wrapper">
         <div class="code-editor-gutter" id="code-editor-gutter">1</div>
-        <textarea class="problem-code-textarea" id="problem-solution-input" spellcheck="false" placeholder="Write your production diagnosis, code fix, or configuration update here...">${escapeHtml(problem.starter_template || '')}</textarea>
+        <textarea class="problem-code-textarea" id="problem-solution-input" spellcheck="false" placeholder="Write your production diagnosis, code fix, or configuration update here...">${escapeHtml(initialCode)}</textarea>
       </div>
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
         <span style="font-size: 0.75rem; color: #64748b;" id="editor-line-col-status">Lines: 1 | Tab inserts 2 spaces</span>
@@ -6103,11 +6148,10 @@ function renderProblemDetail(problemId) {
   const gutterEl = document.getElementById('code-editor-gutter');
   const statusEl = document.getElementById('editor-line-col-status');
   const draftChip = document.getElementById('problem-draft-chip');
-  const draftKey = 'praxis_draft_prob_' + problem.id;
+  const solvedChip = document.getElementById('problem-solved-chip');
 
-  // Restore saved draft if exists
-  const savedDraft = safeStorage.getItem(draftKey);
-  if (savedDraft && inputEl) {
+  // Restore saved draft if exists and not already displaying accepted solution
+  if (!solvedCode && savedDraft && inputEl) {
     inputEl.value = savedDraft;
     if (draftChip) draftChip.style.display = 'inline-block';
   }
@@ -6148,14 +6192,64 @@ function renderProblemDetail(problemId) {
     syncLineNumbers();
   }
 
-  document.getElementById('btn-reset-prob-template').addEventListener('click', () => {
-    if (inputEl) {
-      inputEl.value = problem.starter_template || '';
-      safeStorage.removeItem(draftKey);
-      if (draftChip) draftChip.style.display = 'none';
-      syncLineNumbers();
+  const reloadSolvedBtn = document.getElementById('btn-reload-solved-code');
+  if (reloadSolvedBtn && solvedCode) {
+    reloadSolvedBtn.addEventListener('click', () => {
+      if (inputEl) {
+        inputEl.value = solvedCode;
+        safeStorage.removeItem(draftKey);
+        syncLineNumbers();
+        showToast('Your accepted solution code has been restored in the editor.', 'success');
+      }
+    });
+  }
+
+  const resetBtn = document.getElementById('btn-reset-prob-template');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      if (inputEl) {
+        inputEl.value = problem.starter_template || '';
+        safeStorage.removeItem(draftKey);
+        if (draftChip) draftChip.style.display = 'none';
+        syncLineNumbers();
+        showToast('Editor reset to starter template. Your accepted solution is preserved in history.', 'info');
+      }
+    });
+  }
+
+  // Pre-render evaluation result if already solved
+  const evalCard = document.getElementById('problem-eval-result');
+  if (evalCard && isSolved) {
+    const isDark = document.body.classList.contains('dark-mode');
+    evalCard.style.display = 'flex';
+    evalCard.style.background = isDark ? 'rgba(16, 185, 129, 0.15)' : '#f0fdf4';
+    evalCard.style.borderColor = isDark ? 'rgba(16, 185, 129, 0.4)' : '#bbf7d0';
+    evalCard.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <strong style="color: ${isDark ? '#6ee7b7' : '#166534'}; font-size: 1rem;">
+          ✓ Previously Solved & Recorded
+        </strong>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <span class="badge badge-emerald">${acceptedScore} / 100</span>
+          <span class="badge badge-indigo" style="font-size: 0.68rem; padding: 2px 6px;">Staff SRE & Systems Architect Verified</span>
+        </div>
+      </div>
+      <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.4; margin-top: 0.35rem;">${escapeHtml(acceptedFeedback)}</p>
+      ${nextProblem ? `
+        <div style="display: flex; justify-content: flex-end; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed ${isDark ? 'rgba(16, 185, 129, 0.3)' : '#bbf7d0'};">
+          <button class="btn btn-primary btn-sm" id="btn-eval-next-prob">
+            Proceed to Next Question (${nextProblem.id.toUpperCase()}) ➔
+          </button>
+        </div>
+      ` : ''}
+    `;
+    const evalNextBtn = document.getElementById('btn-eval-next-prob');
+    if (evalNextBtn && nextProblem) {
+      evalNextBtn.addEventListener('click', () => {
+        openProblemInWorkspace(nextProblem.id);
+      });
     }
-  });
+  }
 
   const precheckBtn = document.getElementById('btn-precheck-problem');
   if (precheckBtn) {
@@ -6241,11 +6335,34 @@ async function submitProblemSolution(problemId) {
       }
 
       const prob = state.problemsList.find(p => p.id === problemId);
+      const submittedCode = input.value.trim();
       if (prob) {
         prob.status = data.status;
         prob.score = data.score;
+        prob.feedback = data.feedback;
+        if (data.passed) {
+          prob.solution = submittedCode;
+          prob.saved_solution = submittedCode;
+        }
       }
       if (data.passed) {
+        const uname = (state.user ? state.user.username : 'guest').toLowerCase();
+        safeStorage.setItem('praxis_solved_solution_' + problemId + '_' + uname, submittedCode);
+        safeStorage.setItem('praxis_solved_solution_' + problemId, submittedCode);
+        safeStorage.removeItem('praxis_draft_prob_' + problemId);
+        const userProgKey = 'praxis_offline_problem_progress_' + uname;
+        const savedProgress = JSON.parse(safeStorage.getItem(userProgKey) || safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+        savedProgress[problemId] = {
+          problem_id: problemId,
+          status: 'completed',
+          score: data.score,
+          passed: true,
+          feedback: data.feedback,
+          solution: submittedCode
+        };
+        safeStorage.setItem(userProgKey, JSON.stringify(savedProgress));
+        safeStorage.setItem('praxis_offline_problem_progress', JSON.stringify(savedProgress));
+
         const solvedCount = (state.problemsList || []).filter(p => p.status === 'completed').length;
         if (state.user) {
           state.user.solved_count = solvedCount;
@@ -6371,7 +6488,10 @@ async function submitProblemSolution(problemId) {
       }
     }
 
+    const uname = (state.user ? state.user.username : 'guest').toLowerCase();
     if (passed) {
+      safeStorage.setItem('praxis_solved_solution_' + problemId + '_' + uname, rawVal);
+      safeStorage.setItem('praxis_solved_solution_' + problemId, rawVal);
       safeStorage.removeItem('praxis_draft_prob_' + problemId);
     }
 
@@ -6379,6 +6499,11 @@ async function submitProblemSolution(problemId) {
     if (prob) {
       prob.status = evalData.status;
       prob.score = evalData.score;
+      prob.feedback = evalData.feedback;
+      if (passed) {
+        prob.solution = rawVal;
+        prob.saved_solution = rawVal;
+      }
     }
     if (passed) {
       const solvedCount = (state.problemsList || []).filter(p => p.status === 'completed').length;

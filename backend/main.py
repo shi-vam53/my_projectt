@@ -573,13 +573,15 @@ class SubmissionStore:
         connection = self._connect()
         try:
             rows = connection.execute(
-                "SELECT problem_id, status, score, updated_at FROM user_progress WHERE user_id = ?",
+                "SELECT problem_id, status, score, solution, feedback, updated_at FROM user_progress WHERE user_id = ?",
                 (user_id,),
             ).fetchall()
             return {
                 row["problem_id"]: {
                     "status": row["status"],
                     "score": row["score"],
+                    "solution": row["solution"],
+                    "feedback": row["feedback"],
                     "updated_at": row["updated_at"],
                 }
                 for row in rows
@@ -1180,6 +1182,8 @@ def create_app(
                 "starter_template": prob["starter_template"],
                 "status": prog.get("status", "pending"),
                 "score": prog.get("score", 0),
+                "solution": prog.get("solution"),
+                "feedback": prog.get("feedback"),
             }
             items.append(item)
         return items
@@ -1209,6 +1213,8 @@ def create_app(
             "starter_template": match["starter_template"],
             "status": prog.get("status", "pending"),
             "score": prog.get("score", 0),
+            "solution": prog.get("solution"),
+            "feedback": prog.get("feedback"),
         }
 
     @application.post("/api/problems/{problem_id}/submit", tags=["problems"])

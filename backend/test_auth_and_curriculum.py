@@ -151,6 +151,19 @@ def test_problems_listing_and_submission(client):
     assert sub_data["passed"] is True
     assert sub_data["status"] == "completed"
 
+    # Verify problem detail and list preserve the user's submitted solution
+    detail_res = client.get("/api/problems/prob-01", headers={"Authorization": f"Bearer {token}"})
+    assert detail_res.status_code == 200
+    detail_data = detail_res.json()
+    assert detail_data["status"] == "completed"
+    assert detail_data["solution"] == sol
+    assert detail_data["score"] >= 75
+
+    list_res = client.get("/api/problems", headers={"Authorization": f"Bearer {token}"})
+    p1 = next(p for p in list_res.json() if p["id"] == "prob-01")
+    assert p1["status"] == "completed"
+    assert p1["solution"] == sol
+
 
 def test_admin_users_csv_export_matches_google_sheet_columns(client):
     client.post(
