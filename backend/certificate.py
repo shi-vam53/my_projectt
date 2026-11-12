@@ -117,7 +117,7 @@ def generate_certificate_pdf(
     c.drawRightString(
         width - 45,
         45,
-        f"Issued: {date_str} | Online Verification: https://shi-vam53.github.io/my_projectt/",
+        f"Issued: {date_str} | Online Verification: https://shi-vam53.github.io/praxis/",
     )
 
     c.save()

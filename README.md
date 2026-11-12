@@ -1,7 +1,7 @@
 # Praxis | Practical Workplace Engineering Simulation Platform
 
-[![Live on GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-22c55e?style=for-the-badge&logo=github)](https://shi-vam53.github.io/my_projectt/)
-[![CI Pipeline](https://img.shields.io/badge/CI%20Pipeline-Passing-success?style=for-the-badge&logo=githubactions)](https://github.com/shi-vam53/my_projectt/actions)
+[![Live on GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-22c55e?style=for-the-badge&logo=github)](https://shi-vam53.github.io/praxis/)
+[![CI Pipeline](https://img.shields.io/badge/CI%20Pipeline-Passing-success?style=for-the-badge&logo=githubactions)](https://github.com/shi-vam53/praxis/actions)
 [![Dual-LLM Engine](https://img.shields.io/badge/Dual--LLM-OpenAI%20120B%20%2B%20Qwen%2027B-6366f1?style=for-the-badge&logo=openai)](https://groq.com)
 [![Python 3.13](https://img.shields.io/badge/Python-3.13-3b82f6?style=for-the-badge&logo=python)](https://fastapi.tiangolo.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
@@ -37,7 +37,7 @@
 9. Learners complete structured 5-field engineering handoff reports and receive **automated rubric-based evaluations** with scores, strengths, and targeted improvement notes.
 10. The platform is **live on GitHub Pages** with instant browser execution (`localStorage`), and connects to a **FastAPI + SQLite backend** with automatic Google Sheet registration synchronization.
 
-🌐 **Live Website URL:** [https://shi-vam53.github.io/my_projectt/](https://shi-vam53.github.io/my_projectt/)
+🌐 **Live Website URL:** [https://shi-vam53.github.io/praxis/](https://shi-vam53.github.io/praxis/)
 
 ---
 
@@ -140,7 +140,7 @@ The problems are structured into a progressive two-phase learning model:
 Learners access and progress through the problem bank following a guided workflow:
 
 1. **Create an Account or Sign In:**  
-   Open the platform at [https://shi-vam53.github.io/my_projectt/](https://shi-vam53.github.io/my_projectt/) and register or sign in with your email.
+   Open the platform at [https://shi-vam53.github.io/praxis/](https://shi-vam53.github.io/praxis/) and register or sign in with your email.
 2. **Confirm Career Track:**  
    Choose your desired specialization (*Software Developer*, *Cloud Engineer*, or *Data Analyst*). Your chosen track is permanently locked to your profile to simulate team squad ownership.
 3. **Review Handbook & Complete Readiness Assessment:**  
@@ -223,7 +223,7 @@ Praxis is engineered with dual-mode resilience:
 ## 🛠️ Repository Directory Structure
 
 ```
-my_projectt/
+praxis/
 ├── docs/                      # GitHub Pages static production distribution
 │   ├── index.html             # Single-page application entry point
 │   ├── styles.css             # Production stylesheet with CSS variables
@@ -266,8 +266,8 @@ my_projectt/
 
 ### 2. Clone Repository
 ```bash
-git clone https://github.com/shi-vam53/my_projectt.git
-cd my_projectt
+git clone https://github.com/shi-vam53/praxis.git
+cd praxis
 ```
 
 ### 3. Configure Environment Variables
@@ -351,5 +351,5 @@ pytest backend/ -v
 Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for more information.
 
 * **Platform:** Praxis Workplace Simulation Platform  
-* **Repository:** [shi-vam53/my_projectt](https://github.com/shi-vam53/my_projectt)  
-* **Live Demo:** [https://shi-vam53.github.io/my_projectt/](https://shi-vam53.github.io/my_projectt/)
+* **Repository:** [shi-vam53/praxis](https://github.com/shi-vam53/praxis)  
+* **Live Demo:** [https://shi-vam53.github.io/praxis/](https://shi-vam53.github.io/praxis/)
