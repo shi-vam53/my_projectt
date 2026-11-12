@@ -3499,44 +3499,49 @@ function renderProfileView() {
     }
   }
 
-  // Solved problems count from offline storage or state
+  // Solved problems count from offline storage or state (checking both active user and global)
   let solvedProblemsCount = 0;
   let basicSolved = 0;
   let interSolved = 0;
   try {
-    const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
-    const solvedList = Object.values(probProgress).filter(p => p.status === 'completed');
+    const activeUsername = state.user ? state.user.username : null;
+    let probProgress = {};
+    if (activeUsername) {
+      try {
+        probProgress = JSON.parse(safeStorage.getItem(`praxis_offline_problem_progress_${activeUsername}`) || '{}');
+      } catch (e) {}
+    }
+    if (Object.keys(probProgress).length === 0) {
+      try {
+        probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
+      } catch (e) {}
+    }
+
+    const catalog = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS) || state.problemsList || [];
+    const solvedList = Object.entries(probProgress).filter(([pid, p]) => p.status === 'completed' || p.status === 'passed' || (p.score && p.score >= 70));
     solvedProblemsCount = solvedList.length;
-    basicSolved = solvedList.filter(p => p.difficulty === 'Basic').length;
-    interSolved = solvedList.filter(p => p.difficulty === 'Intermediate').length;
+
+    solvedList.forEach(([pid, p]) => {
+      const prob = catalog.find(item => item.id === pid) || {};
+      const numMatch = pid.match(/\d+/);
+      const probNum = numMatch ? parseInt(numMatch[0], 10) : 1;
+      const diff = prob.difficulty || p.difficulty || (probNum <= 20 ? 'Basic' : 'Intermediate');
+      if (diff === 'Basic') {
+        basicSolved++;
+      } else {
+        interSolved++;
+      }
+    });
   } catch (e) {}
 
   const totalActivities = completedMissions.length + solvedProblemsCount;
-  const compCountEl = document.getElementById('pstat-completed');
-  const avgScoreEl = document.getElementById('pstat-avg-score');
-  const readinessEl = document.getElementById('pstat-readiness');
-  const problemsStatEl = document.getElementById('pstat-problems');
-
-  if (compCountEl) compCountEl.textContent = completedMissions.length;
-  if (problemsStatEl) problemsStatEl.textContent = `${solvedProblemsCount}/40`;
-
-  if (totalActivities > 0) {
-    const missionScoreSum = completedMissions.reduce((acc, s) => acc + (s.score || s.overall_score || 0), 0);
-    const probScoreSum = solvedProblemsCount * 100;
-    const avg = Math.round((missionScoreSum + probScoreSum) / totalActivities);
-    if (avgScoreEl) avgScoreEl.textContent = `${avg} / 100`;
-    if (readinessEl) readinessEl.textContent = avg >= 80 ? 'Production Ready' : 'In Calibration';
-  } else {
-    if (avgScoreEl) avgScoreEl.textContent = '--';
-    if (readinessEl) readinessEl.textContent = 'In Training';
-  }
 
   // Learner Identity Details in Profile View
   const profileAvatar = document.getElementById('profile-main-avatar');
   const profileName = document.getElementById('profile-main-name');
   const profileRoleBadge = document.getElementById('profile-main-role-badge');
   const profileUsername = document.getElementById('profile-main-username');
-  const profileTrackDisplay = document.getElementById('profile-main-track-display');
+  const profileTagline = document.getElementById('profile-main-tagline');
 
   if (state.user) {
     const initials = (state.user.full_name || state.user.username || 'U')
@@ -3545,158 +3550,229 @@ function renderProfileView() {
       .slice(0, 2)
       .join('')
       .toUpperCase();
-    if (profileAvatar) profileAvatar.textContent = initials;
+    if (profileAvatar) profileAvatar.textContent = initials || '👨‍💻';
     if (profileName) profileName.textContent = state.user.full_name || state.user.username;
     if (profileUsername) profileUsername.textContent = '@' + (state.user.username || 'learner');
 
     const roleName = getRoleDisplayName(state.user.role);
     if (profileRoleBadge) profileRoleBadge.textContent = state.user.role_locked ? `🔒 ${roleName} (Permanent Track)` : 'Unassigned Track';
-    if (profileTrackDisplay) profileTrackDisplay.textContent = roleName;
+    if (profileTagline) profileTagline.textContent = state.user.headline || 'Active Candidate practicing real production incidents, telemetry triage, and code fixes.';
   } else {
     if (profileAvatar) profileAvatar.textContent = 'G';
     if (profileName) profileName.textContent = 'Guest Learner';
     if (profileUsername) profileUsername.textContent = '@guest';
     if (profileRoleBadge) profileRoleBadge.textContent = 'Sign In Required';
-    if (profileTrackDisplay) profileTrackDisplay.textContent = 'Unassigned';
+    if (profileTagline) profileTagline.textContent = 'Sign in to record and verify your engineering milestones.';
   }
 
-  // 40 Problem Bank Progress breakdown
-  const pct = Math.round((solvedProblemsCount / 40) * 100);
-  const probPctEl = document.getElementById('profile-problems-pct');
-  const probBarEl = document.getElementById('profile-problems-progress-bar');
-  const basicEl = document.getElementById('profile-basic-solved');
-  const interEl = document.getElementById('profile-inter-solved');
+  // Solved Questions Milestone Display (Requirement 5)
+  const pct = Math.min(100, Math.round((solvedProblemsCount / 40) * 100));
+  const solvedBigCountEl = document.getElementById('profile-solved-big-count');
+  const solvedBadgeEl = document.getElementById('profile-solved-badge');
+  const pointsPillEl = document.getElementById('profile-points-pill');
+  const solvedProgressFillEl = document.getElementById('profile-solved-progress-fill');
+  const basicCountEl = document.getElementById('profile-basic-count');
+  const interCountEl = document.getElementById('profile-inter-count');
 
-  if (probPctEl) probPctEl.textContent = `${pct}% (${solvedProblemsCount} of 40)`;
-  if (probBarEl) probBarEl.style.width = `${pct}%`;
-  if (basicEl) basicEl.textContent = `${basicSolved} / 20 Solved`;
-  if (interEl) interEl.textContent = `${interSolved} / 20 Solved`;
+  if (solvedBigCountEl) solvedBigCountEl.textContent = solvedProblemsCount;
+  if (solvedBadgeEl) solvedBadgeEl.textContent = `${solvedProblemsCount}/40 Solved`;
+  if (pointsPillEl) pointsPillEl.textContent = `⭐ ${solvedProblemsCount} Stars`;
+  if (solvedProgressFillEl) solvedProgressFillEl.style.width = `${pct}%`;
+  if (basicCountEl) basicCountEl.textContent = `${basicSolved} / 20`;
+  if (interCountEl) interCountEl.textContent = `${interSolved} / 20`;
 
+  // Basic Contact Details Summary Display
+  const dispPhone = document.getElementById('display-profile-phone');
+  const dispEmail = document.getElementById('display-profile-email');
+  const dispLocation = document.getElementById('display-profile-location');
+
+  if (dispPhone) dispPhone.textContent = (state.user && state.user.phone) ? state.user.phone : 'Not provided';
+  if (dispEmail) dispEmail.textContent = (state.user && state.user.email) ? state.user.email : (state.user && state.user.username ? `${state.user.username}@praxis.dev` : 'Not provided');
+  if (dispLocation) dispLocation.textContent = (state.user && state.user.location) ? state.user.location : 'Not provided';
+
+  // Pre-fill Edit Profile Form inputs
+  const editName = document.getElementById('edit-profile-fullname');
+  const editPhone = document.getElementById('edit-profile-phone');
+  const editEmail = document.getElementById('edit-profile-email');
+  const editLocation = document.getElementById('edit-profile-location');
+  const editHeadline = document.getElementById('edit-profile-headline');
+  const editGithub = document.getElementById('edit-profile-github');
+
+  if (state.user) {
+    if (editName && !editName.dataset.userEdited) editName.value = state.user.full_name || state.user.username || '';
+    if (editPhone && !editPhone.dataset.userEdited) editPhone.value = state.user.phone || '';
+    if (editEmail && !editEmail.dataset.userEdited) editEmail.value = state.user.email || '';
+    if (editLocation && !editLocation.dataset.userEdited) editLocation.value = state.user.location || '';
+    if (editHeadline && !editHeadline.dataset.userEdited) editHeadline.value = state.user.headline || '';
+    if (editGithub && !editGithub.dataset.userEdited) editGithub.value = state.user.github_url || '';
+  }
+
+  // Track manual edits so re-renders don't overwrite user typing
+  [editName, editPhone, editEmail, editLocation, editHeadline, editGithub].forEach(input => {
+    if (input && !input.dataset.bound) {
+      input.dataset.bound = 'true';
+      input.addEventListener('input', () => { input.dataset.userEdited = 'true'; });
+    }
+  });
+
+  // Save Profile Handler (Requirement 5)
+  const saveProfileHandler = () => {
+    if (!state.user) {
+      showToast('Please sign in to update your profile.', 'warning');
+      return;
+    }
+    const newName = (document.getElementById('edit-profile-fullname')?.value || '').trim();
+    const newPhone = (document.getElementById('edit-profile-phone')?.value || '').trim();
+    const newEmail = (document.getElementById('edit-profile-email')?.value || '').trim();
+    const newLoc = (document.getElementById('edit-profile-location')?.value || '').trim();
+    const newHeadline = (document.getElementById('edit-profile-headline')?.value || '').trim();
+    const newGithub = (document.getElementById('edit-profile-github')?.value || '').trim();
+
+    state.user.full_name = newName || state.user.username;
+    state.user.phone = newPhone;
+    state.user.email = newEmail;
+    state.user.location = newLoc;
+    state.user.headline = newHeadline;
+    state.user.github_url = newGithub;
+
+    // Reset userEdited flags
+    [editName, editPhone, editEmail, editLocation, editHeadline, editGithub].forEach(input => {
+      if (input) delete input.dataset.userEdited;
+    });
+
+    safeStorage.setItem('praxis_active_user', JSON.stringify(state.user));
+    safeStorage.setItem('praxis_offline_user', JSON.stringify(state.user));
+
+    try {
+      const usersDb = JSON.parse(safeStorage.getItem('praxis_users_db') || '{}');
+      if (usersDb[state.user.username]) {
+        usersDb[state.user.username].full_name = state.user.full_name;
+        usersDb[state.user.username].phone = newPhone;
+        usersDb[state.user.username].email = newEmail;
+        usersDb[state.user.username].location = newLoc;
+        usersDb[state.user.username].headline = newHeadline;
+        usersDb[state.user.username].github_url = newGithub;
+        safeStorage.setItem('praxis_users_db', JSON.stringify(usersDb));
+      }
+    } catch (e) {}
+
+    try {
+      if (typeof supabaseUpdateUser === 'function') {
+        supabaseUpdateUser(state.user.username, {
+          full_name: state.user.full_name,
+          phone: newPhone,
+          email: newEmail,
+          location: newLoc,
+          headline: newHeadline,
+          github_url: newGithub
+        });
+      }
+    } catch (e) {}
+
+    updateUserDisplay();
+    renderProfileView();
+
+    const statusEl = document.getElementById('profile-save-status');
+    if (statusEl) {
+      statusEl.style.display = 'inline';
+      setTimeout(() => { if (statusEl) statusEl.style.display = 'none'; }, 3500);
+    }
+    showToast('Profile and settings updated successfully!', 'success');
+  };
+
+  const saveBtnTop = document.getElementById('btn-save-profile-details');
+  const saveBtnBottom = document.getElementById('btn-save-profile-bottom');
+  if (saveBtnTop) saveBtnTop.onclick = saveProfileHandler;
+  if (saveBtnBottom) saveBtnBottom.onclick = saveProfileHandler;
+
+  // Jump to problems button
   const jumpProblemsBtn = document.getElementById('profile-jump-problems-btn');
   if (jumpProblemsBtn) {
     jumpProblemsBtn.onclick = () => switchView('problems');
   }
 
+  // Logout button
   const profileLogoutBtn = document.getElementById('btn-profile-logout');
   if (profileLogoutBtn) {
     profileLogoutBtn.onclick = handleLogoutAction;
   }
 
+  // Upper-Right Theme Toggle button
+  const profThemeBtn = document.getElementById('profile-theme-toggle-btn');
+  if (profThemeBtn) {
+    profThemeBtn.onclick = () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
+      updateThemeIcon();
+      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
+    };
+  }
+
   updateThemeIcon();
 
-  // Official Certificate of Completion Banner
-  const certBanner = document.getElementById('profile-certificate-banner');
-  if (certBanner) {
-    const learnerName = state.user ? (state.user.full_name || state.user.username) : 'Learner Practitioner';
-    const roleKey = state.user ? (state.user.role || 'software-developer') : 'software-developer';
-    const roleTitle = getRoleDisplayName(roleKey);
-    const certId = `PX-CERT-${(state.user && state.user.user_id ? state.user.user_id : 'DEMO').substring(0, 8).toUpperCase()}`;
-
-    certBanner.innerHTML = `
-      <div class="cert-banner-card">
-        <div class="cert-banner-left">
-          <div class="cert-seal-icon">🏆</div>
-          <div>
-            <div style="font-size: 0.72rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em;">Verified Credential</div>
-            <h3 style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; margin: 0.15rem 0;">Praxis Certificate of Workplace Readiness</h3>
-            <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0;">Recipient: <strong>${escapeHtml(learnerName)}</strong> • Track: <span style="color: #6ee7b7;">${escapeHtml(roleTitle)}</span> (${certId})</p>
-          </div>
-        </div>
-        <div style="display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap;">
-          <a href="/api/certificate/download?learner_name=${encodeURIComponent(learnerName)}&role=${encodeURIComponent(roleKey)}" 
-             id="btn-download-cert-pdf" 
-             download="Praxis_Certificate_${learnerName.replace(/\s+/g, '_')}.pdf" 
-             class="btn btn-primary" 
-             style="background: #d97706; border-color: #b45309; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Download PDF Certificate
-          </a>
-        </div>
-      </div>
-    `;
-
-    const certDlBtn = document.getElementById('btn-download-cert-pdf');
-    if (certDlBtn) {
-      certDlBtn.addEventListener('click', async (e) => {
-        try {
-          const res = await fetch(certDlBtn.getAttribute('href'), { method: 'HEAD' });
-          if (res.ok) return; // Allow normal browser download if backend is alive
-        } catch (err) {}
-        e.preventDefault();
-        printClientCertificate(learnerName, roleTitle, certId);
-      });
-    }
-  }
-
-  // Competencies list
-  const compList = document.getElementById('profile-competencies-list');
-  if (compList) {
-    const coreCompetencies = [
-      'Sev-1 Incident Triage & War Room Escalation',
-      'Telemetry & APM Analysis (p99/p95 latency percentiles)',
-      'Root Cause Analysis with Fact vs Assumption Discipline',
-      'Operational Runbook Execution & Zero-Downtime Rollbacks',
-      'API Idempotency & Database Unique Constraints',
-      'Asynchronous Event Emitter Memory Leak Cleanup',
-      'SQL Parameterization & Defense in Depth',
-      'Cohort Retention Funnel Drop-off Analysis',
-      'Chi-Square Sample Ratio Mismatch (SRM) Detection'
-    ];
-
-    compList.innerHTML = coreCompetencies.map((comp, idx) => `
-      <div class="comp-item">
-        <span class="comp-check">${idx < (totalActivities + 2) ? '✓' : '○'}</span>
-        <span class="comp-text">${escapeHtml(comp)}</span>
-      </div>
-    `).join('');
-  }
-
-  // History list
+  // Completed History list: Solved Problems & Simulations
   const historyList = document.getElementById('profile-history-list');
   if (historyList) {
-    if (totalActivities === 0) {
-      historyList.innerHTML = `<p class="text-muted" style="padding: 1rem 0;">No completed missions or problems yet. Solve problems or launch any mission from the catalog to build your verified record.</p>`;
+    let historyItems = [];
+
+    // Get solved problems
+    try {
+      const activeUsername = state.user ? state.user.username : null;
+      let probProgress = {};
+      if (activeUsername) {
+        try { probProgress = JSON.parse(safeStorage.getItem(`praxis_offline_problem_progress_${activeUsername}`) || '{}'); } catch (e) {}
+      }
+      if (Object.keys(probProgress).length === 0) {
+        try { probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}'); } catch (e) {}
+      }
+
+      const catalog = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS) || state.problemsList || [];
+
+      Object.entries(probProgress).forEach(([pid, pdata]) => {
+        if (pdata.status === 'completed' || pdata.status === 'passed' || (pdata.score && pdata.score >= 70)) {
+          const prob = catalog.find(p => p.id === pid) || { title: pid.toUpperCase(), difficulty: 'Production Problem' };
+          historyItems.push({
+            type: 'problem',
+            id: pid,
+            title: prob.title,
+            difficulty: prob.difficulty || 'Production Problem',
+            score: pdata.score || 100,
+            status: '✓ Solved'
+          });
+        }
+      });
+    } catch (e) {}
+
+    // Get completed missions
+    completedMissions.forEach(s => {
+      const m = MISSIONS_DATA[s.mission_id] || { title: s.mission_id };
+      historyItems.push({
+        type: 'mission',
+        id: s.mission_id,
+        title: m.title,
+        difficulty: 'Mission Simulation',
+        score: s.score || s.overall_score || 0,
+        status: s.reviewer_status || s.approval_status || 'Evaluated'
+      });
+    });
+
+    if (historyItems.length === 0) {
+      historyList.innerHTML = `<div style="padding: 2rem 1rem; text-align: center; color: var(--text-muted); background: var(--bg-secondary); border-radius: 8px; border: 1px dashed var(--border-color);"><p style="margin: 0 0 0.5rem 0; font-weight: 600;">No solved questions or missions yet.</p><p style="margin: 0; font-size: 0.82rem;">Head over to the Production Problem Bank and solve your first incident to build your record.</p></div>`;
     } else {
-      let historyHtml = '';
-      completedMissions.forEach(s => {
-        const m = MISSIONS_DATA[s.mission_id] || { title: s.mission_id };
-        historyHtml += `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
-            <div>
-              <strong>${escapeHtml(m.title)}</strong>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">${s.created_at || ''} (Mission Simulation)</div>
-            </div>
-            <div style="text-align: right;">
-              <span class="badge badge-emerald">${s.score || s.overall_score || 0}/100</span>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">${escapeHtml(s.reviewer_status || s.approval_status || 'Evaluated')}</div>
+      historyList.innerHTML = historyItems.map(item => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0; border-bottom: 1px solid var(--border-subtle); gap: 1rem;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 0.92rem;">${escapeHtml(item.title)}</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+              ${escapeHtml(item.difficulty)} • <span style="color: #10b981; font-weight: 600;">${escapeHtml(item.status)}</span>
             </div>
           </div>
-        `;
-      });
-
-      // Add solved problems
-      try {
-        const probProgress = JSON.parse(safeStorage.getItem('praxis_offline_problem_progress') || '{}');
-        Object.entries(probProgress).forEach(([pid, pdata]) => {
-          if (pdata.status === 'completed') {
-            const prob = (window.PRAXIS_OFFLINE_DATA && window.PRAXIS_OFFLINE_DATA.PROBLEMS ? window.PRAXIS_OFFLINE_DATA.PROBLEMS.find(p => p.id === pid) : null) || { title: pid.toUpperCase() };
-            historyHtml += `
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle);">
-                <div>
-                  <strong>${escapeHtml(prob.title)}</strong>
-                  <div style="font-size: 0.75rem; color: var(--text-muted);">Production Problem (${pid.toUpperCase()})</div>
-                </div>
-                <div style="text-align: right;">
-                  <span class="badge badge-indigo">${pdata.score || 100}/100</span>
-                  <div style="font-size: 0.75rem; color: #16a34a; margin-top: 0.2rem;">✓ Solved</div>
-                </div>
-              </div>
-            `;
-          }
-        });
-      } catch (e) {}
-
-      historyList.innerHTML = historyHtml;
+          <div style="text-align: right; flex-shrink: 0;">
+            <span class="badge ${item.score >= 80 ? 'badge-emerald' : 'badge-indigo'}" style="font-weight: 800; font-size: 0.8rem; padding: 3px 10px;">${item.score}/100</span>
+          </div>
+        </div>
+      `).join('');
     }
   }
 }
@@ -6556,6 +6632,17 @@ function initTheme() {
     });
   }
 
+  const profThemeBtn = document.getElementById('profile-theme-toggle-btn');
+  if (profThemeBtn) {
+    profThemeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
+      updateThemeIcon();
+      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
+    });
+  }
+
   const lightChoice = document.getElementById('theme-choice-light');
   const darkChoice = document.getElementById('theme-choice-dark');
   if (lightChoice) {
@@ -6586,6 +6673,11 @@ function updateThemeIcon() {
   const popLabel = document.getElementById('popover-theme-label');
   if (popIcon) popIcon.textContent = isDark ? '☀️' : '🌙';
   if (popLabel) popLabel.textContent = isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme';
+
+  const profThemeIcon = document.getElementById('profile-theme-icon');
+  const profThemeLabel = document.getElementById('profile-theme-label');
+  if (profThemeIcon) profThemeIcon.textContent = isDark ? '☀️' : '🌙';
+  if (profThemeLabel) profThemeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
 
   const lightChoice = document.getElementById('theme-choice-light');
   const darkChoice = document.getElementById('theme-choice-dark');

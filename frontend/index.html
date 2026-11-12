@@ -1516,165 +1516,164 @@
 
         <!-- VIEW 5: Learner Profile & App Settings Activity -->
         <section class="view-section" id="view-profile" style="display: none;">
-          <div class="view-header">
-            <div class="view-badge badge-emerald">Account & App Settings</div>
-            <h1 class="view-title">Learner Profile & Application Settings</h1>
-            <p class="view-description">
-              Manage your engineering simulation credentials, inspect verified progress across the 40-problem curriculum, and configure your appearance and account preferences.
-            </p>
+          <div class="view-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+            <div>
+              <h1 class="view-title" style="margin-bottom: 0.35rem;">Profile & Account Settings</h1>
+              <p class="view-description" style="margin: 0; color: var(--text-secondary); max-width: 620px;">
+                Manage your profile identity, contact details, account preferences, and view your verified question solving milestones.
+              </p>
+            </div>
+            <!-- Theme Toggle Button properly aligned in the right upper section -->
+            <div class="profile-header-actions" style="display: flex; align-items: center; gap: 12px;">
+              <button type="button" class="btn btn-outline" id="profile-theme-toggle-btn" title="Toggle Light / Dark Theme" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
+                <span id="profile-theme-icon">🌙</span>
+                <span id="profile-theme-label">Dark Mode</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Official Certificate of Completion Banner -->
-          <div id="profile-certificate-banner"></div>
-
-          <div class="profile-layout">
-            <div class="profile-left-col">
+          <div class="profile-layout" style="display: grid; grid-template-columns: 340px 1fr; gap: 2rem; align-items: start;">
+            <!-- Left Column: Identity, Solved Milestones & Session -->
+            <div class="profile-left-col" style="display: flex; flex-direction: column; gap: 1.5rem;">
               <!-- Learner Identity Card -->
-              <div class="profile-card card">
-                <div class="profile-avatar" id="profile-main-avatar">👨‍💻</div>
-                <h2 class="profile-name" id="profile-main-name">Learner Practitioner</h2>
-                <div class="profile-role-badge" id="profile-main-role-badge">🔒 Cloud Engineer (Permanent Track)</div>
-                <p class="profile-tagline" id="profile-main-tagline">Active Candidate practicing real production incidents, telemetry triage, and code fixes.</p>
+              <div class="profile-card card" style="padding: 1.75rem; text-align: center;">
+                <div class="profile-avatar" id="profile-main-avatar" style="width: 72px; height: 72px; margin: 0 auto 0.75rem auto; border-radius: 50%; background: linear-gradient(135deg, #4f46e5, #06b6d4); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 800; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">👨‍💻</div>
+                <h2 class="profile-name" id="profile-main-name" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.25rem;">Learner Practitioner</h2>
+                <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.5rem;" id="profile-main-username">@learner</div>
+                <div class="profile-role-badge" id="profile-main-role-badge" style="margin-bottom: 0.5rem;">🔒 Cloud Engineer (Permanent Track)</div>
+                <p class="profile-tagline" id="profile-main-tagline" style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">Active Candidate practicing real production incidents, telemetry triage, and code fixes.</p>
 
-                <div class="profile-stats-grid">
-                  <div class="pstat-item">
-                    <div class="pstat-num" id="pstat-problems">0/40</div>
-                    <div class="pstat-label">Problems Solved</div>
+                <!-- Questions Solved Milestone Section (Requirement 5) -->
+                <div class="profile-solved-widget" style="padding: 1.25rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px; text-align: left;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Questions Solved</span>
+                    <span class="badge badge-emerald" id="profile-solved-badge" style="font-size: 0.72rem; padding: 2px 8px; font-weight: 700;">0/40 Solved</span>
                   </div>
-                  <div class="pstat-item">
-                    <div class="pstat-num" id="pstat-completed">0</div>
-                    <div class="pstat-label">Missions Solved</div>
+                  <div style="display: flex; align-items: baseline; gap: 6px; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.75rem; font-weight: 800; color: var(--primary);" id="profile-solved-big-count">0</span>
+                    <span style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">/ 40 Solved</span>
+                    <span style="margin-left: auto; font-size: 0.82rem; font-weight: 700; color: #f59e0b;" id="profile-points-pill">⭐ 0 Stars</span>
                   </div>
-                  <div class="pstat-item">
-                    <div class="pstat-num" id="pstat-avg-score">--</div>
-                    <div class="pstat-label">Avg Rubric Score</div>
+                  <div style="width: 100%; height: 8px; background: var(--border-color); border-radius: 999px; overflow: hidden; margin-bottom: 0.75rem;">
+                    <div id="profile-solved-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #4f46e5, #10b981); border-radius: 999px; transition: width 0.3s ease;"></div>
                   </div>
-                  <div class="pstat-item">
-                    <div class="pstat-num" id="pstat-readiness">In Training</div>
-                    <div class="pstat-label">Workplace Readiness</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem;">
+                    <div style="background: var(--bg-card); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                      <div style="color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; font-weight: 700;">Phase 1: Basic</div>
+                      <strong style="color: var(--text-primary); font-size: 0.92rem;" id="profile-basic-count">0 / 20</strong>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                      <div style="color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; font-weight: 700;">Phase 2: Inter</div>
+                      <strong style="color: var(--text-primary); font-size: 0.92rem;" id="profile-inter-count">0 / 20</strong>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Account Identity Details -->
-                <div class="profile-identity-details" style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.82rem; display: flex; flex-direction: column; gap: 8px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Account Handle:</span>
-                    <strong style="color: var(--text-primary);" id="profile-main-username">@learner</strong>
+                <!-- Basic Details Summary View -->
+                <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.82rem; display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted);">Phone Number:</span>
+                    <span style="color: var(--text-primary); font-weight: 600;" id="display-profile-phone">Not provided</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Account Status:</span>
-                    <span class="badge badge-emerald" style="padding: 2px 8px; font-size: 0.72rem;">Verified Candidate</span>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted);">Email Address:</span>
+                    <span style="color: var(--text-primary); font-weight: 600;" id="display-profile-email">Not provided</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Assigned Track:</span>
-                    <strong style="color: var(--primary);" id="profile-main-track-display">Cloud Engineer & SRE</strong>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--text-muted);">Location:</span>
+                    <span style="color: var(--text-primary); font-weight: 600;" id="display-profile-location">Not provided</span>
                   </div>
-                </div>
-              </div>
-
-              <!-- Application Settings Card: Theme & Appearance -->
-              <div class="settings-card card" style="margin-top: 1.5rem;">
-                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
-                  <span>🎨</span> App Appearance & Theme
-                </h3>
-                <p class="card-subtitle">Choose your preferred visual presentation style for the simulation workspace:</p>
-
-                <div class="theme-selection-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1rem;">
-                  <button type="button" class="theme-choice-btn" id="theme-choice-light" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: #f9f7f1; color: #1e293b; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 600; font-size: 0.84rem; transition: all 0.2s;">
-                    <span style="font-size: 1.4rem;">☀️</span>
-                    <span>Warm Cream Light</span>
-                    <span style="font-size: 0.7rem; color: #64748b; font-weight: normal;">Soft contrast, easy on eyes</span>
-                  </button>
-
-                  <button type="button" class="theme-choice-btn" id="theme-choice-dark" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: #0f172a; color: #f8fafc; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; font-weight: 600; font-size: 0.84rem; transition: all 0.2s;">
-                    <span style="font-size: 1.4rem;">🌙</span>
-                    <span>Midnight Dark</span>
-                    <span style="font-size: 0.7rem; color: #94a3b8; font-weight: normal;">Sleek dark engineering IDE</span>
-                  </button>
                 </div>
               </div>
 
-              <!-- Account Actions & Session Management -->
-              <div class="danger-zone-card card" style="margin-top: 1.5rem;">
-                <h3 class="card-title" style="display: flex; align-items: center; gap: 8px;">
-                  <span>⚙️</span> Session & Data Management
+              <!-- Session & Data Actions Card -->
+              <div class="card" style="padding: 1.5rem;">
+                <h3 class="card-title" style="margin: 0 0 0.5rem 0; font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                  <span>⚙️</span> Session Management
                 </h3>
-                <p class="card-subtitle">Export records, manage local browser workspace, or end your session:</p>
-
-                <div class="profile-actions" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 10px;">
-                  <button class="btn btn-outline btn-block" id="btn-export-transcript">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Export Verified Transcript (Markdown)
+                <p class="card-subtitle" style="margin-bottom: 1rem; font-size: 0.8rem;">Export records, manage local workspace drafts, or end session:</p>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <button class="btn btn-outline btn-block" id="btn-export-transcript" style="font-size: 0.82rem;">
+                    Export Verified Transcript (.md)
                   </button>
-                  <button class="btn btn-sidebar-outline btn-block" id="btn-reset-progress">
+                  <button class="btn btn-sidebar-outline btn-block" id="btn-reset-progress" style="font-size: 0.82rem;">
                     Clear Local Drafts
                   </button>
-                  <button class="btn btn-danger btn-block" id="btn-profile-logout" style="background: #ef4444; color: white; border: none; padding: 10px 14px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0.5rem;">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                      <polyline points="16 17 21 12 16 7"></polyline>
-                      <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
+                  <button class="btn btn-danger btn-block" id="btn-profile-logout" style="background: #ef4444; color: white; border: none; padding: 10px 14px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 0.25rem; font-size: 0.82rem;">
                     Log Out of Praxis Account
                   </button>
                 </div>
               </div>
             </div>
 
-            <div class="profile-right-col">
-              <!-- Curriculum Progress Summary Card -->
-              <div class="curriculum-summary-card card">
-                <div class="card-header-flex">
+            <!-- Right Column: Edit Profile & Personal Details Form + Solved Activity -->
+            <div class="profile-right-col" style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <!-- Edit Profile & Settings Card (Requirement 5) -->
+              <div class="card" style="padding: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 0.75rem;">
                   <div>
-                    <h3 class="card-title">Production Problem Bank Progress (40 Real Issues)</h3>
-                    <p class="card-subtitle">Progress tracking across 20 Basic (with SOP Help) and 20 Intermediate (Standalone) problems.</p>
+                    <h3 class="card-title" style="margin: 0; font-size: 1.15rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                      <span>✏️</span> Edit Profile & Personal Details
+                    </h3>
+                    <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-secondary);">
+                      Update your name, phone number, and engineering background details.
+                    </p>
                   </div>
-                  <button class="btn btn-primary btn-sm" id="profile-jump-problems-btn">
-                    Go to Problems ➔
+                  <button type="button" class="btn btn-primary btn-sm" id="btn-save-profile-details" style="font-size: 0.82rem; font-weight: 700; padding: 8px 18px;">
+                    Save Profile Changes
                   </button>
                 </div>
 
-                <div style="margin: 1rem 0;">
-                  <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">
-                    <span>Overall Problem Bank Completion</span>
-                    <span id="profile-problems-pct">0% (0 of 40)</span>
-                  </div>
-                  <div style="width: 100%; height: 10px; background: var(--bg-hover); border-radius: 999px; overflow: hidden; border: 1px solid var(--border-color);">
-                    <div id="profile-problems-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #059669); border-radius: 999px; transition: width 0.3s;"></div>
-                  </div>
-                </div>
+                <form id="edit-profile-form" onsubmit="return false;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                    <div class="form-group">
+                      <label for="edit-profile-fullname" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">Full Name</label>
+                      <input type="text" id="edit-profile-fullname" class="field-input" placeholder="e.g. Shivam" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 1rem;">
-                  <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Phase 1: Basic (with SOP Help)</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;" id="profile-basic-solved">0 / 20 Solved</div>
-                    <div style="font-size: 0.75rem; color: #10b981; margin-top: 2px;">Includes step-by-step resolution SOP</div>
+                    <div class="form-group">
+                      <label for="edit-profile-phone" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">Phone Number</label>
+                      <input type="tel" id="edit-profile-phone" class="field-input" placeholder="e.g. +91 98765 43210" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="edit-profile-email" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">Email Address</label>
+                      <input type="email" id="edit-profile-email" class="field-input" placeholder="e.g. shivam@example.com" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="edit-profile-location" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">Location / Timezone</label>
+                      <input type="text" id="edit-profile-location" class="field-input" placeholder="e.g. Mohali, Punjab (IST)" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                      <label for="edit-profile-headline" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">Professional Headline / Bio</label>
+                      <input type="text" id="edit-profile-headline" class="field-input" placeholder="e.g. Cloud & Systems SRE | Production Incident Triage" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                      <label for="edit-profile-github" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">GitHub / Portfolio URL</label>
+                      <input type="url" id="edit-profile-github" class="field-input" placeholder="e.g. https://github.com/shi-vam53" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.88rem;">
+                    </div>
                   </div>
-                  <div style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);">
-                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Phase 2: Intermediate (Standalone)</div>
-                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;" id="profile-inter-solved">0 / 20 Solved</div>
-                    <div style="font-size: 0.75rem; color: #f59e0b; margin-top: 2px;">Independent engineering investigation</div>
+
+                  <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <span id="profile-save-status" style="font-size: 0.82rem; color: #10b981; font-weight: 700; display: none;">✓ Profile details successfully updated!</span>
+                    <button type="button" class="btn btn-primary" id="btn-save-profile-bottom" style="margin-left: auto; font-size: 0.85rem; font-weight: 700; padding: 10px 22px;">
+                      Save Profile Changes
+                    </button>
                   </div>
-                </div>
+                </form>
               </div>
 
-              <!-- Competency Skills Card -->
-              <div class="skills-card card" style="margin-top: 1.5rem;">
-                <h3 class="card-title">Demonstrated Workplace Competencies</h3>
-                <p class="card-subtitle">Validated through multi-dimensional rubric evaluations:</p>
-
-                <div class="competencies-checklist" id="profile-competencies-list">
-                  <!-- Dynamic competencies checklist -->
+              <!-- Completed Simulation History Card -->
+              <div class="card" style="padding: 1.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                  <h3 class="card-title" style="margin: 0; font-size: 1.1rem; font-weight: 800;">Completed Questions & Incidents</h3>
+                  <button type="button" class="btn btn-outline btn-sm" id="profile-jump-problems-btn" style="font-size: 0.78rem;">
+                    Browse All Questions ➔
+                  </button>
                 </div>
-              </div>
-
-              <!-- Completed Missions History -->
-              <div class="history-card card" style="margin-top: 1.5rem;">
-                <h3 class="card-title">Completed Simulation History</h3>
                 <div class="history-list" id="profile-history-list">
                   <!-- Populated dynamically -->
                 </div>

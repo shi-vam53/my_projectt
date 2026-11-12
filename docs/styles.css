@@ -3027,13 +3027,15 @@ kbd {
 /* Profile / Transcript View */
 .profile-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 340px 1fr;
+  gap: 2rem;
+  align-items: start;
 }
 
 @media (max-width: 900px) {
   .profile-layout {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }
 
