@@ -144,9 +144,12 @@ def test_submission_validation_scoring_persistence_and_retrieval(client):
     assert len(all_subs.json()) >= 1
     assert all_subs.json()[0]["submission_id"] == submission["submission_id"]
 
-    # Test reviewer update
+    # Test reviewer update (requires administrator authorization)
+    admin_login = client.post("/api/admin/login", json={"username": "shivam", "password": "shivam"})
+    admin_token = admin_login.json()["token"]
     review_res = client.patch(
         f"/api/submissions/{submission['submission_id']}/review",
+        headers={"Authorization": f"Bearer {admin_token}"},
         json={"status": "approved", "notes": "Verified by Senior SRE: Exemplary runbook adherence."},
     )
     assert review_res.status_code == 200

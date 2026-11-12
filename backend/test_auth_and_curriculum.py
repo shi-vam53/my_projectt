@@ -170,7 +170,9 @@ def test_admin_users_csv_export_matches_google_sheet_columns(client):
         "/api/auth/register",
         json={"username": "sheetuser", "password": "password123", "full_name": "Sheet Sync User"},
     )
-    res = client.get("/api/admin/users/csv")
+    admin_login = client.post("/api/admin/login", json={"username": "shivam", "password": "shivam"})
+    admin_token = admin_login.json()["token"]
+    res = client.get("/api/admin/users/csv", headers={"Authorization": f"Bearer {admin_token}"})
     assert res.status_code == 200
     assert "text/csv" in res.headers.get("content-type", "")
     content = res.text
@@ -179,7 +181,9 @@ def test_admin_users_csv_export_matches_google_sheet_columns(client):
 
 
 def test_google_sheet_info_endpoint(client):
-    res = client.get("/api/admin/google-sheet")
+    admin_login = client.post("/api/admin/login", json={"username": "shivam", "password": "shivam"})
+    admin_token = admin_login.json()["token"]
+    res = client.get("/api/admin/google-sheet", headers={"Authorization": f"Bearer {admin_token}"})
     assert res.status_code == 200
     data = res.json()
     assert "sheet_id" in data

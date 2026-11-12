@@ -176,3 +176,65 @@ def test_http_security_headers_present(client):
     assert res.headers.get("X-Frame-Options") == "SAMEORIGIN"
     assert res.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
     assert res.headers.get("X-XSS-Protection") == "1; mode=block"
+    assert "Content-Security-Policy" in res.headers
+
+
+# ==============================================================================
+# 6. ACCESS CONTROL & SENSITIVE ENDPOINT GATING
+# ==============================================================================
+
+def test_admin_csv_export_unauthorized_access_blocked(client):
+    """Verify anonymous and regular user requests to /api/admin/users/csv are rejected."""
+    # 1. Anonymous request -> 401/403
+    res_anon = client.get("/api/admin/users/csv")
+    assert res_anon.status_code in {401, 403}
+
+    # 2. Regular candidate user -> 403
+    reg = client.post("/api/auth/register", json={"username": "test_candidate", "password": "password123", "full_name": "Test Candidate"})
+    cand_token = reg.json()["token"]
+    res_cand = client.get("/api/admin/users/csv", headers={"Authorization": f"Bearer {cand_token}"})
+    assert res_cand.status_code == 403
+
+    # 3. Verified Admin user -> 200
+    admin_login = client.post("/api/admin/login", json={"username": "shivam", "password": "shivam"})
+    admin_token = admin_login.json()["token"]
+    res_admin = client.get("/api/admin/users/csv", headers={"Authorization": f"Bearer {admin_token}"})
+    assert res_admin.status_code == 200
+
+
+def test_submission_review_requires_admin_authorization(client):
+    """Verify unauthorized users cannot approve or alter candidate reviews."""
+    answers = _valid_cloud_answers()
+    sub_res = client.post(
+        "/api/submissions",
+        json={"mission_id": "cloud-sre-01", "answers": answers},
+    )
+    sub_id = sub_res.json()["submission_id"]
+
+    # Anonymous attempt to approve submission -> 401
+    anon_patch = client.patch(
+        f"/api/submissions/{sub_id}/review",
+        json={"status": "approved", "notes": "Hacked review"},
+    )
+    assert anon_patch.status_code == 401
+
+    # Candidate attempt to approve submission -> 403
+    reg = client.post("/api/auth/register", json={"username": "cand_reviewer", "password": "password123", "full_name": "Candidate Reviewer"})
+    cand_token = reg.json()["token"]
+    cand_patch = client.patch(
+        f"/api/submissions/{sub_id}/review",
+        headers={"Authorization": f"Bearer {cand_token}"},
+        json={"status": "approved", "notes": "Hacked review"},
+    )
+    assert cand_patch.status_code == 403
+
+    # Admin attempt -> 200
+    admin_login = client.post("/api/admin/login", json={"username": "shivam", "password": "shivam"})
+    admin_token = admin_login.json()["token"]
+    admin_patch = client.patch(
+        f"/api/submissions/{sub_id}/review",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"status": "approved", "notes": "Legitimate admin review"},
+    )
+    assert admin_patch.status_code == 200
+    assert admin_patch.json()["reviewer_status"] == "approved"

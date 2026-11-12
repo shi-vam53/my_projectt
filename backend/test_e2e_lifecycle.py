@@ -144,7 +144,9 @@ def test_complete_user_journey_and_quality_audit(client):
     assert p21_sub.json()["status"] == "completed"
 
     # Step 10: Verify Google Sheet Ledger Export
-    csv_resp = client.get("/api/admin/users/csv")
+    admin_login = client.post("/api/admin/login", json={"username": "shivam", "password": "shivam"})
+    admin_token = admin_login.json()["token"]
+    csv_resp = client.get("/api/admin/users/csv", headers={"Authorization": f"Bearer {admin_token}"})
     assert csv_resp.status_code == 200
     csv_text = csv_resp.text
     assert "User ID,Username,Full Name,Career Track,Role Locked,Readiness Quiz Status,Quiz Score,Registered At (UTC),Platform" in csv_text

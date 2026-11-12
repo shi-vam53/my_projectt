@@ -10,7 +10,7 @@ accounts are persisted in SQLite (override the path with WORKSIM_DB_PATH).
 from __future__ import annotations
 
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import hashlib
 import json
 import os
@@ -283,10 +283,15 @@ class SubmissionStore:
                 CREATE TABLE IF NOT EXISTS sessions (
                     token TEXT PRIMARY KEY,
                     user_id TEXT NOT NULL,
-                    created_at TEXT NOT NULL
+                    created_at TEXT NOT NULL,
+                    expires_at TEXT
                 )
                 """
             )
+            try:
+                connection.execute("ALTER TABLE sessions ADD COLUMN expires_at TEXT")
+            except Exception:
+                pass
             connection.execute(
                 """
                 CREATE TABLE IF NOT EXISTS user_progress (
@@ -306,8 +311,9 @@ class SubmissionStore:
             except Exception:
                 pass
 
-            # Pre-seed or ensure platform administrator: shivam / shivam
-            admin_pwd_hash, admin_pwd_salt = _hash_password("shivam")
+            # Pre-seed or ensure platform administrator: shivam
+            admin_initial_pwd = os.environ.get("ADMIN_INITIAL_PASSWORD", "shivam")
+            admin_pwd_hash, admin_pwd_salt = _hash_password(admin_initial_pwd)
             now = _now_utc()
             row_admin = connection.execute("SELECT user_id FROM users WHERE username = 'shivam'").fetchone()
             if row_admin is None:
@@ -317,14 +323,6 @@ class SubmissionStore:
                     VALUES (?, 'shivam', 'shivam', ?, ?, 'Platform Administrator', 1, 1, 100, 1, ?)
                     """,
                     (str(uuid4()), admin_pwd_hash, admin_pwd_salt, now),
-                )
-            else:
-                connection.execute(
-                    """
-                    UPDATE users SET password_hash = ?, password_salt = ?, is_admin = 1, full_name = 'shivam'
-                    WHERE username = 'shivam'
-                    """,
-                    (admin_pwd_hash, admin_pwd_salt),
                 )
             connection.commit()
         finally:
@@ -341,6 +339,7 @@ class SubmissionStore:
         user_id = str(uuid4())
         pwd_hash, pwd_salt = _hash_password(password)
         now = _now_utc()
+        expires_at = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
 
         connection = self._connect()
         try:
@@ -353,8 +352,8 @@ class SubmissionStore:
             )
             token = secrets.token_hex(24)
             connection.execute(
-                "INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)",
-                (token, user_id, now),
+                "INSERT INTO sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+                (token, user_id, now, expires_at),
             )
             connection.commit()
         except sqlite3.IntegrityError:
@@ -363,7 +362,7 @@ class SubmissionStore:
             connection.close()
 
         try:
-            sync_users_to_workspace_file(self.database_path, PROJECT_ROOT / "frontend" / "assets" / "Praxis_Registered_Users.csv")
+            sync_users_to_workspace_file(self.database_path, PROJECT_ROOT / "backend" / "registered_users_ledger.csv")
         except Exception:
             pass
 
@@ -397,9 +396,11 @@ class SubmissionStore:
                 raise ValueError("Invalid username or password.")
 
             token = secrets.token_hex(24)
+            now = _now_utc()
+            expires_at = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
             connection.execute(
-                "INSERT INTO sessions (token, user_id, created_at) VALUES (?, ?, ?)",
-                (token, row["user_id"], _now_utc()),
+                "INSERT INTO sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+                (token, row["user_id"], now, expires_at),
             )
             connection.commit()
 
@@ -426,7 +427,7 @@ class SubmissionStore:
         try:
             row = connection.execute(
                 """
-                SELECT u.* FROM users u
+                SELECT u.*, s.expires_at FROM users u
                 JOIN sessions s ON u.user_id = s.user_id
                 WHERE s.token = ?
                 """,
@@ -434,6 +435,11 @@ class SubmissionStore:
             ).fetchone()
             if row is None:
                 return None
+            if "expires_at" in row.keys() and row["expires_at"]:
+                if row["expires_at"] < _now_utc():
+                    connection.execute("DELETE FROM sessions WHERE token = ?", (token,))
+                    connection.commit()
+                    return None
             is_adm = bool(row["is_admin"]) if "is_admin" in row.keys() else (row["username"] == "shivam")
             return {
                 "user_id": row["user_id"],
@@ -563,10 +569,6 @@ class SubmissionStore:
         ledger_file = self.database_path.parent / "registered_users_ledger.csv"
         csv_content = self.export_users_csv()
         ledger_file.write_text(csv_content, encoding="utf-8")
-        try:
-            sync_users_to_workspace_file(self.database_path, PROJECT_ROOT / "frontend" / "assets" / "Praxis_Registered_Users.csv")
-        except Exception:
-            pass
         return ledger_file
 
     def get_user_progress(self, user_id: str) -> dict[str, dict[str, Any]]:
@@ -802,11 +804,20 @@ def create_app(
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data:; "
+            "connect-src 'self' https://api.groq.com https://*.supabase.co https://*.github.io; "
+            "frame-ancestors 'self';"
+        )
         return response
 
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|.*\.e2b\.app|shi-vam53\.github\.io)(:\d+)?",
         allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
         allow_headers=["*"],
     )
@@ -838,8 +849,15 @@ def create_app(
     GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1KxTxJ4cb8ZA3YB7j0_YNIUumB7qPbCs4kbTQ1cm-xr0/edit?usp=drivesdk"
 
     @application.get("/api/admin/users/csv", tags=["admin"])
-    def get_registered_users_csv():
+    def get_registered_users_csv(
+        authorization: str | None = Header(default=None),
+        admin_key: str | None = Query(default=None),
+    ):
         from fastapi.responses import Response
+        user = _resolve_user(authorization) if authorization else None
+        if not user or not user.get("is_admin"):
+            if admin_key != os.environ.get("ADMIN_SECRET_KEY", "praxis-admin-secret-2026"):
+                raise HTTPException(status_code=403, detail="Administrator privileges required.")
         csv_text = store.export_users_csv()
         return Response(
             content=csv_text,
@@ -848,7 +866,14 @@ def create_app(
         )
 
     @application.get("/api/admin/google-sheet", tags=["admin"])
-    def get_google_sheet_info() -> dict[str, Any]:
+    def get_google_sheet_info(
+        authorization: str | None = Header(default=None),
+        admin_key: str | None = Query(default=None),
+    ) -> dict[str, Any]:
+        user = _resolve_user(authorization) if authorization else None
+        if not user or not user.get("is_admin"):
+            if admin_key != os.environ.get("ADMIN_SECRET_KEY", "praxis-admin-secret-2026"):
+                raise HTTPException(status_code=403, detail="Administrator privileges required.")
         csv_text = store.export_users_csv()
         lines = [line for line in csv_text.strip().split("\n") if line.strip()]
         total_users = max(0, len(lines) - 1)
@@ -868,17 +893,20 @@ def create_app(
         client_ip = request.client.host if request.client else "127.0.0.1"
         _check_rate_limit(client_ip)
         uname = payload.username.strip().casefold()
-        if uname != "shivam" or payload.password != "shivam":
-            raise HTTPException(
-                status_code=401,
-                detail="Access restricted. Invalid administrator credentials for 'shivam'."
-            )
         try:
-            user, token = store.authenticate_user("shivam", "shivam")
+            user, token = store.authenticate_user(uname, payload.password)
+            if not user.get("is_admin"):
+                raise HTTPException(
+                    status_code=401,
+                    detail=f"Access restricted. Invalid administrator credentials for '{uname}'."
+                )
             user["is_admin"] = True
             return {"user": user, "token": token, "is_admin": True, "message": "Admin session unlocked."}
         except ValueError as exc:
-            raise HTTPException(status_code=401, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=401,
+                detail=f"Access restricted. Invalid administrator credentials for '{uname}'."
+            ) from exc
 
     # --------------------------------------------------------------------------
     # AUTHENTICATION & ROLE LOCKING
@@ -1074,8 +1102,11 @@ def create_app(
         learner_name: str | None = Query(default=None),
         role: str | None = Query(default=None),
     ):
-        user = _resolve_user(authorization) if authorization else None
-        name = learner_name or (user.get("full_name") if user else None) or (user.get("username") if user else "Engineering Practitioner")
+        user = _require_user(authorization)
+        raw_name = (learner_name or user.get("full_name") or user.get("username") or "Engineering Practitioner").strip()
+        clean_name = re.sub(r"[^A-Za-z0-9 .\-_]", "", raw_name)[:60].strip() or "Practitioner"
+        safe_filename = clean_name.replace(" ", "_")
+
         user_role = role or (user.get("role") if user else None) or "Software Developer"
         role_display = {
             "software-developer": "Software Developer & Systems Specialist",
@@ -1091,12 +1122,12 @@ def create_app(
 
         assets_dir = PROJECT_ROOT / "frontend" / "assets"
         cert_path = assets_dir / f"Praxis_Certificate_{cert_id}.pdf"
-        generate_certificate_pdf(cert_path, name, role_display, cert_id, today_str)
+        generate_certificate_pdf(cert_path, clean_name, role_display, cert_id, today_str)
 
         return FileResponse(
             cert_path,
             media_type="application/pdf",
-            filename=f"Praxis_Certificate_{name.replace(' ', '_')}.pdf",
+            filename=f"Praxis_Certificate_{safe_filename}.pdf",
         )
 
     # --------------------------------------------------------------------------
@@ -1376,9 +1407,16 @@ def create_app(
         return submission
 
     @application.patch("/api/submissions/{submission_id}/review", tags=["submissions"])
-    def review_submission(submission_id: str, payload: ReviewRequest) -> dict[str, Any]:
+    def review_submission(
+        submission_id: str,
+        payload: ReviewRequest,
+        authorization: str | None = Header(default=None),
+    ) -> dict[str, Any]:
         if not re.fullmatch(r"^[A-Za-z0-9-]{1,64}$", submission_id):
             raise HTTPException(status_code=400, detail="Invalid submission ID format")
+        user = _require_user(authorization)
+        if not user.get("is_admin"):
+            raise HTTPException(status_code=403, detail="Administrator privileges required to review submissions.")
         updated = store.update_review(submission_id, payload.status, payload.notes)
         if updated is None:
             raise HTTPException(status_code=404, detail=f"Submission '{submission_id}' was not found")

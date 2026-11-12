@@ -75,7 +75,6 @@ async function supabaseCreateUser(userObj) {
       body: JSON.stringify({
         username: userObj.username.toLowerCase(),
         full_name: userObj.full_name,
-        password_hash: userObj.password,
         role: userObj.role || null,
         role_locked: Boolean(userObj.role_locked),
         quiz_passed: Boolean(userObj.quiz_passed),
@@ -4939,7 +4938,8 @@ function bindHandbookSearch() {
         const val = node.nodeValue;
         if (regex.test(val)) {
           const wrapper = document.createElement('span');
-          wrapper.innerHTML = val.replace(regex, '<mark class="search-highlight">$1</mark>');
+          const safeVal = escapeHtml(val);
+          wrapper.innerHTML = safeVal.replace(regex, '<mark class="search-highlight">$1</mark>');
           node.parentNode.replaceChild(wrapper, node);
         }
       } else if (node.nodeType === 1 && !['SCRIPT', 'STYLE', 'BUTTON', 'A', 'MARK'].includes(node.nodeName)) {
