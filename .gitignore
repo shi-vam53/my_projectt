@@ -31,3 +31,4 @@ Thumbs.db
 .idea/
 node_modules/
 *.log
+git_push_auto.sh
