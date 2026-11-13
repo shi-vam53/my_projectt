@@ -3698,14 +3698,9 @@ function renderProfileView() {
 
   // Upper-Right Theme Toggle button
   const profThemeBtn = document.getElementById('profile-theme-toggle-btn');
-  if (profThemeBtn) {
-    profThemeBtn.onclick = () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
-      updateThemeIcon();
-      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
-    };
+  if (profThemeBtn && !profThemeBtn.dataset.bound) {
+    profThemeBtn.dataset.bound = 'true';
+    profThemeBtn.addEventListener('click', toggleThemeAction);
   }
 
   updateThemeIcon();
@@ -6612,6 +6607,14 @@ async function submitProblemSolution(problemId) {
 // SUITE ENHANCEMENTS: THEME, MOBILE DRAWER, HOTKEYS, PWA, ADMIN FILTERS
 // ============================================================================
 
+function toggleThemeAction() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
+  updateThemeIcon();
+  showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
+}
+
 function initTheme() {
   const savedTheme = safeStorage.getItem('praxis_theme') || 'light';
   if (savedTheme === 'dark') {
@@ -6622,30 +6625,21 @@ function initTheme() {
   updateThemeIcon();
 
   const themeBtn = document.getElementById('theme-toggle-btn');
-  if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
-      updateThemeIcon();
-      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
-    });
+  if (themeBtn && !themeBtn.dataset.bound) {
+    themeBtn.dataset.bound = 'true';
+    themeBtn.addEventListener('click', toggleThemeAction);
   }
 
   const profThemeBtn = document.getElementById('profile-theme-toggle-btn');
-  if (profThemeBtn) {
-    profThemeBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      const isDark = document.body.classList.contains('dark-mode');
-      safeStorage.setItem('praxis_theme', isDark ? 'dark' : 'light');
-      updateThemeIcon();
-      showToast(isDark ? 'Dark theme enabled' : 'Warm cream light theme enabled', 'info');
-    });
+  if (profThemeBtn && !profThemeBtn.dataset.bound) {
+    profThemeBtn.dataset.bound = 'true';
+    profThemeBtn.addEventListener('click', toggleThemeAction);
   }
 
   const lightChoice = document.getElementById('theme-choice-light');
   const darkChoice = document.getElementById('theme-choice-dark');
-  if (lightChoice) {
+  if (lightChoice && !lightChoice.dataset.bound) {
+    lightChoice.dataset.bound = 'true';
     lightChoice.addEventListener('click', () => {
       document.body.classList.remove('dark-mode');
       safeStorage.setItem('praxis_theme', 'light');
@@ -6653,7 +6647,8 @@ function initTheme() {
       showToast('Warm cream light theme enabled', 'info');
     });
   }
-  if (darkChoice) {
+  if (darkChoice && !darkChoice.dataset.bound) {
+    darkChoice.dataset.bound = 'true';
     darkChoice.addEventListener('click', () => {
       document.body.classList.add('dark-mode');
       safeStorage.setItem('praxis_theme', 'dark');
@@ -6676,8 +6671,22 @@ function updateThemeIcon() {
 
   const profThemeIcon = document.getElementById('profile-theme-icon');
   const profThemeLabel = document.getElementById('profile-theme-label');
+  const profThemePill = document.getElementById('profile-theme-pill');
+  const profThemeKnob = document.getElementById('profile-theme-knob');
+  const profThemeBtn = document.getElementById('profile-theme-toggle-btn');
+
   if (profThemeIcon) profThemeIcon.textContent = isDark ? '☀️' : '🌙';
   if (profThemeLabel) profThemeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  if (profThemePill) {
+    profThemePill.style.background = isDark ? '#4f46e5' : '#cbd5e1';
+  }
+  if (profThemeKnob) {
+    profThemeKnob.style.transform = isDark ? 'translateX(16px)' : 'translateX(0px)';
+  }
+  if (profThemeBtn) {
+    profThemeBtn.setAttribute('aria-checked', isDark ? 'true' : 'false');
+    profThemeBtn.title = isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme';
+  }
 
   const lightChoice = document.getElementById('theme-choice-light');
   const darkChoice = document.getElementById('theme-choice-dark');

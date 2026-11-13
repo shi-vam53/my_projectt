@@ -1542,9 +1542,12 @@
             </div>
             <!-- Theme Toggle Button properly aligned in the right upper section -->
             <div class="profile-header-actions" style="display: flex; align-items: center; gap: 12px;">
-              <button type="button" class="btn btn-outline" id="profile-theme-toggle-btn" title="Toggle Light / Dark Theme" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
-                <span id="profile-theme-icon">🌙</span>
-                <span id="profile-theme-label">Dark Mode</span>
+              <button type="button" class="theme-toggle-switch-btn" id="profile-theme-toggle-btn" title="Toggle Light / Dark Theme" aria-label="Toggle Theme" style="display: inline-flex; align-items: center; gap: 10px; font-weight: 700; padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; cursor: pointer; border: 1.5px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); transition: all 0.2s ease; box-shadow: var(--shadow-sm);">
+                <span id="profile-theme-icon" style="font-size: 1rem;">🌙</span>
+                <span id="profile-theme-label" style="font-weight: 700;">Dark Mode</span>
+                <span class="toggle-pill-indicator" id="profile-theme-pill" style="display: inline-block; width: 34px; height: 18px; background: #cbd5e1; border-radius: 999px; position: relative; transition: background 0.25s ease; flex-shrink: 0;">
+                  <span class="toggle-pill-knob" id="profile-theme-knob" style="display: block; width: 14px; height: 14px; background: #ffffff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.25s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></span>
+                </span>
               </button>
             </div>
           </div>
